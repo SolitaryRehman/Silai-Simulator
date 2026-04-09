@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://clcuxd2yvkt63"]
+
+[ext_resource type="PackedScene" uid="uid://b7iiymcbbjopo" path="res://Assets/Models/Damaged Wall/damaged_wall.glb" id="1_rm3pa"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rm3pa"]
+size = Vector3(19.992188, 8.148376, 2.3129883)
+
+[node name="damaged_wall" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_rm3pa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.007995367, 2.3841858e-07, -0.00436759)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9461975, 0.028564453)
+shape = SubResource("BoxShape3D_rm3pa")

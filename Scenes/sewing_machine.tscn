@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bv0ubxe0fk8iu"]
+
+[ext_resource type="PackedScene" uid="uid://igux220s3m1w" path="res://Assets/Models/Sewing Machine/vintage_sewing_machine.glb" id="1_fxr13"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_by7c8"]
+radius = 0.61083984
+height = 1.9465332
+
+[node name="sewing_machine" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_fxr13")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.037231468, 0.30685857, -0.22733322)
+shape = SubResource("CapsuleShape3D_by7c8")
