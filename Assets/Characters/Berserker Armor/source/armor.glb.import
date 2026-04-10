@@ -17,7 +17,7 @@ nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 nodes/apply_root_scale=true
-nodes/root_scale=1.5
+nodes/root_scale=1.0
 nodes/import_as_skeleton_bones=false
 nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
@@ -37,6 +37,14 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={}
+_subresources={
+"nodes": {
+"PATH:Guts_E_Berserker_ARM/Skeleton3D": {
+"retarget/bone_map": Object(BoneMap,"resource_local_to_scene":false,"resource_name":"","profile":Object(SkeletonProfileHumanoid,"resource_local_to_scene":false,"resource_name":"","root_bone":&"Root","scale_base_bone":&"Hips","group_size":4,"bone_size":56,"script":null)
+,"bonemap":null,"bone_map/Root":&"jnt_000","bone_map/Hips":&"bip_pelvis","bone_map/Spine":&"bip_spine_0","bone_map/Chest":&"bip_spine_1","bone_map/UpperChest":&"bip_spine_2","bone_map/Neck":&"bip_neck","bone_map/Head":&"bip_head","bone_map/LeftEye":&"Eye_L","bone_map/RightEye":&"","bone_map/Jaw":&"Jaw","bone_map/LeftShoulder":&"bip_collar_L","bone_map/LeftUpperArm":&"bip_upperArm_L","bone_map/LeftLowerArm":&"bip_lowerArm_L","bone_map/LeftHand":&"bip_hand_L","bone_map/LeftThumbMetacarpal":&"ValveBiped.Bip01_L_Finger0","bone_map/LeftThumbProximal":&"ValveBiped.Bip01_L_Finger01","bone_map/LeftThumbDistal":&"ValveBiped.Bip01_L_Finger02","bone_map/LeftIndexProximal":&"ValveBiped.Bip01_L_Finger1","bone_map/LeftIndexIntermediate":&"ValveBiped.Bip01_L_Finger11","bone_map/LeftIndexDistal":&"ValveBiped.Bip01_L_Finger12","bone_map/LeftMiddleProximal":&"ValveBiped.Bip01_L_Finger2","bone_map/LeftMiddleIntermediate":&"ValveBiped.Bip01_L_Finger21","bone_map/LeftMiddleDistal":&"ValveBiped.Bip01_L_Finger22","bone_map/LeftRingProximal":&"ValveBiped.Bip01_L_Finger3","bone_map/LeftRingIntermediate":&"ValveBiped.Bip01_L_Finger31","bone_map/LeftRingDistal":&"ValveBiped.Bip01_L_Finger32","bone_map/LeftLittleProximal":&"ValveBiped.Bip01_L_Finger4","bone_map/LeftLittleIntermediate":&"ValveBiped.Bip01_L_Finger41","bone_map/LeftLittleDistal":&"ValveBiped.Bip01_L_Finger42","bone_map/RightShoulder":&"bip_collar_R","bone_map/RightUpperArm":&"bip_upperArm_R","bone_map/RightLowerArm":&"bip_lowerArm_R","bone_map/RightHand":&"bip_hand_R","bone_map/RightThumbMetacarpal":&"ValveBiped.Bip01_R_Finger0","bone_map/RightThumbProximal":&"ValveBiped.Bip01_R_Finger01","bone_map/RightThumbDistal":&"ValveBiped.Bip01_R_Finger02","bone_map/RightIndexProximal":&"ValveBiped.Bip01_R_Finger1","bone_map/RightIndexIntermediate":&"ValveBiped.Bip01_R_Finger11","bone_map/RightIndexDistal":&"ValveBiped.Bip01_R_Finger12","bone_map/RightMiddleProximal":&"ValveBiped.Bip01_R_Finger2","bone_map/RightMiddleIntermediate":&"ValveBiped.Bip01_R_Finger21","bone_map/RightMiddleDistal":&"ValveBiped.Bip01_R_Finger22","bone_map/RightRingProximal":&"ValveBiped.Bip01_R_Finger3","bone_map/RightRingIntermediate":&"ValveBiped.Bip01_R_Finger31","bone_map/RightRingDistal":&"ValveBiped.Bip01_R_Finger32","bone_map/RightLittleProximal":&"ValveBiped.Bip01_R_Finger4","bone_map/RightLittleIntermediate":&"ValveBiped.Bip01_R_Finger41","bone_map/RightLittleDistal":&"ValveBiped.Bip01_R_Finger42","bone_map/LeftUpperLeg":&"bip_hip_L","bone_map/LeftLowerLeg":&"bip_knee_L","bone_map/LeftFoot":&"bip_foot_L","bone_map/LeftToes":&"bip_toe_L","bone_map/RightUpperLeg":&"bip_hip_R","bone_map/RightLowerLeg":&"bip_knee_R","bone_map/RightFoot":&"bip_foot_R","bone_map/RightToes":&"bip_toe_R","script":null)
+
+}
+}
+}
 gltf/naming_version=2
 gltf/embedded_image_handling=1
