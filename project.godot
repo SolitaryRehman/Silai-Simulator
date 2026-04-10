@@ -15,6 +15,10 @@ run/main_scene="uid://cuhff3io32mmo"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[filesystem]
+
+import/blender/enabled=false
+
 [input]
 
 move_up={

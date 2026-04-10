@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cuhff3io32mmo"]
+[gd_scene load_steps=10 format=3 uid="uid://cuhff3io32mmo"]
 
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="1_jjgbg"]
 [ext_resource type="Texture2D" uid="uid://bcj0cmx1edswr" path="res://Assets/Backgrounds/background_pure_sky_1k.exr" id="1_kry3j"]
@@ -19,12 +19,18 @@ background_energy_multiplier = 0.7
 sky = SubResource("Sky_jjgbg")
 ambient_light_sky_contribution = 0.56
 tonemap_mode = 2
+ssao_enabled = true
 glow_enabled = true
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_kry3j"]
+auto_exposure_enabled = true
+auto_exposure_speed = 5.0
 
 [node name="Main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_bo1nx")
+camera_attributes = SubResource("CameraAttributesPractical_kry3j")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
@@ -211,16 +217,22 @@ operation = 2
 inner_radius = 0.3
 outer_radius = 0.6
 
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.080322266, 4.9623504, -0.009307859)
+size = Vector3(0.16845703, 1, 0.47747803)
+metadata/_edit_lock_ = true
+
 [node name="ProtoController" parent="." instance=ExtResource("1_jjgbg")]
 transform = Transform3D(0.028532326, 0, 0.9995929, 0, 1, 0, -0.9995929, 0, 0.028532326, 27.6, 0.5, 0.09999943)
 
 [node name="berserker_armor" parent="." instance=ExtResource("2_bo1nx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.22787, 0.5054374, -8.107486)
+transform = Transform3D(-0.99265635, 0, -0.12096857, 0, 1, 0, 0.12096857, 0, -0.99265635, 27.22787, 0.5054374, -8.107486)
 
 [node name="sewing_machine" parent="." instance=ExtResource("3_8gbba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.585695, 0.6658566, 10.800327)
 
 [node name="Node3D" type="Node3D" parent="."]
+metadata/_edit_lock_ = true
 
 [node name="damaged_wall" parent="Node3D" instance=ExtResource("4_jjvhh")]
 transform = Transform3D(-0.5, 0, -4.371139e-08, 0, 0.5, 0, 4.371139e-08, 0, -0.5, 5.0427175, 0.5276644, -12.131444)

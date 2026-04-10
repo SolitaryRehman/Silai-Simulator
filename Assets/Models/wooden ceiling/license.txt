@@ -1,0 +1,11 @@
+Model Information:
+* title:	Classic Modular Walls Ceiling (fixed)
+* source:	https://sketchfab.com/3d-models/classic-modular-walls-ceiling-fixed-88e03bd4f5ab4320b9b06d4811fa1466
+* author:	slls666 (https://sketchfab.com/slls666)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Classic Modular Walls Ceiling (fixed)" (https://sketchfab.com/3d-models/classic-modular-walls-ceiling-fixed-88e03bd4f5ab4320b9b06d4811fa1466) by slls666 (https://sketchfab.com/slls666) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

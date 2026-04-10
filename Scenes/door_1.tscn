@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://cp1idox80gijh"]
+
+[ext_resource type="PackedScene" uid="uid://75cuc6gcwv3k" path="res://Assets/Models/Door/door_wooden_door_metal.glb" id="1_itd8s"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_njbgo"]
+size = Vector3(1.3564453, 2.4450684, 0.17297363)
+
+[node name="door_1" type="StaticBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.010192871)
+shape = SubResource("BoxShape3D_njbgo")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_itd8s")]
