@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dovf2o0jnkq4m"]
+
+[ext_resource type="PackedScene" uid="uid://cpqod88mslst5" path="res://Assets/Models/Wooden Floor/wooden_floor.glb" id="1_fu7au"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sqyk8"]
+size = Vector3(3.5135498, 0.06542969, 3.010559)
+
+[node name="wooden_floor_1" type="StaticBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2567749, 0, 1.4949646)
+shape = SubResource("BoxShape3D_sqyk8")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_fu7au")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
