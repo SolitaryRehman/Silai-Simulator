@@ -3,19 +3,19 @@
 [ext_resource type="PackedScene" uid="uid://lhla1lraejnd" path="res://Assets/Models/Tailor Shop/Desk/desk_2/desk_2.glb" id="1_x2rfj"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gpa0l"]
-size = Vector3(1.7742004, 2.395996, 4.0511475)
+size = Vector3(1.7742004, 2.395996, 5.304016)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5lbu"]
-size = Vector3(1.7742004, 2.3325195, 2.863617)
+size = Vector3(1.7742004, 2.3325195, 4.2511444)
 
 [node name="L_shape_desk" type="StaticBody3D"]
 
 [node name="Sketchfab_Scene" parent="." instance=ExtResource("1_x2rfj")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.021316528, -0.69799805, -0.74884033)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.021316528, -0.69799805, -0.122406006)
 shape = SubResource("BoxShape3D_gpa0l")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.9482088, -0.66625977, 1.653306)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.2544451, -0.66625977, 1.653306)
 shape = SubResource("BoxShape3D_i5lbu")

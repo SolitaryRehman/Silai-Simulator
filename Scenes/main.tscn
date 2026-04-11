@@ -1,10 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://cuhff3io32mmo"]
+[gd_scene load_steps=9 format=3 uid="uid://cuhff3io32mmo"]
 
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="1_jjgbg"]
 [ext_resource type="Texture2D" uid="uid://bcj0cmx1edswr" path="res://Assets/Backgrounds/background_pure_sky_1k.exr" id="1_kry3j"]
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="2_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://bv0ubxe0fk8iu" path="res://Scenes/sewing_machine.tscn" id="3_8gbba"]
-[ext_resource type="PackedScene" uid="uid://clcuxd2yvkt63" path="res://Scenes/damaged_wall.tscn" id="4_jjvhh"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_21xkr"]
 panorama = ExtResource("1_kry3j")
@@ -230,27 +229,3 @@ transform = Transform3D(-0.99265635, 0, -0.12096857, 0, 1, 0, 0.12096857, 0, -0.
 
 [node name="sewing_machine" parent="." instance=ExtResource("3_8gbba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.585695, 0.6658566, 10.800327)
-
-[node name="Node3D" type="Node3D" parent="."]
-metadata/_edit_lock_ = true
-
-[node name="damaged_wall" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(-0.5, 0, -4.371139e-08, 0, 0.5, 0, 4.371139e-08, 0, -0.5, 5.0427175, 0.5276644, -12.131444)
-
-[node name="damaged_wall2" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -4.694695, 0.5276644, -12.131444)
-
-[node name="damaged_wall3" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(6.556708e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, 6.556708e-08, -9.931033, 0.5276644, -7.688566)
-
-[node name="damaged_wall4" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(6.556708e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, 6.556708e-08, -9.931032, 0.5276644, 2.0248952)
-
-[node name="damaged_wall5" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(-2.185569e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.185569e-08, -9.931031, 0.5276644, 6.616732)
-
-[node name="damaged_wall6" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(-0.5, 0, -4.3711385e-08, 0, 0.5, 0, 4.3711385e-08, 0, -0.5, -4.578922, 0.5276644, 11.055962)
-
-[node name="damaged_wall7" parent="Node3D" instance=ExtResource("4_jjvhh")]
-transform = Transform3D(0.5, 0, -3.5527137e-15, 0, 0.5, 0, 3.5527137e-15, 0, 0.5, 5.1639724, 0.5276644, 11.055961)

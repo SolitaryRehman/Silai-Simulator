@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://i5k7akdwav0g"]
+[gd_scene load_steps=40 format=3 uid="uid://i5k7akdwav0g"]
 
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
@@ -16,6 +16,26 @@
 [ext_resource type="PackedScene" uid="uid://buaymrsvgvroq" path="res://Scenes/clothes_rack_2.tscn" id="14_mjtuy"]
 [ext_resource type="PackedScene" uid="uid://bigu3usihbuo" path="res://Scenes/manequin.tscn" id="15_cuuv1"]
 [ext_resource type="PackedScene" uid="uid://dlq4n0u3k6wlq" path="res://Scenes/clock.tscn" id="16_yl1pv"]
+[ext_resource type="PackedScene" uid="uid://bcuovmq5t7mh5" path="res://Scenes/flower_vase.tscn" id="17_yl1pv"]
+[ext_resource type="PackedScene" uid="uid://cuwdbn5kudwcu" path="res://Scenes/plant_pot_1.tscn" id="18_m13ki"]
+[ext_resource type="PackedScene" uid="uid://dpijwam2er7yr" path="res://Scenes/plant_pot_2.tscn" id="19_3mbjb"]
+[ext_resource type="PackedScene" uid="uid://bregha27uwxe6" path="res://Assets/Models/Tailor Shop/Plants/flower pot 2/flower_vase.glb" id="20_hvvn1"]
+[ext_resource type="PackedScene" uid="uid://d36txg6fq4dbn" path="res://Assets/Models/Tailor Shop/Plants/flower  2/flower_bouquet.glb" id="21_1bx8h"]
+[ext_resource type="PackedScene" uid="uid://7rngcln3ug5" path="res://Assets/Models/Tailor Shop/Mirrors/small mirror/table_mirror.glb" id="21_k7yfq"]
+[ext_resource type="PackedScene" uid="uid://dkjukv2xgo72g" path="res://Assets/Models/Tailor Shop/Measuring Tape/tape_measure_lowpoly.glb" id="22_6rctg"]
+[ext_resource type="PackedScene" uid="uid://djq8h5n0r7lk0" path="res://Assets/Models/Tailor Shop/Carpets/texture carpet/old_persian_carpet_14_mb.glb" id="23_1shhe"]
+[ext_resource type="PackedScene" uid="uid://bjowo54qbi6sk" path="res://Assets/Models/Tailor Shop/Carpets/white carpet/carpet.glb" id="24_n1qjt"]
+[ext_resource type="PackedScene" uid="uid://ouk3lstv37hy" path="res://Assets/Models/Tailor Shop/Pencil Cup/pencil_cup_and_pencils.glb" id="25_6rctg"]
+[ext_resource type="PackedScene" uid="uid://b5sv1cvbuso2c" path="res://Assets/Models/Tailor Shop/Scissor/scissor.glb" id="26_1shhe"]
+[ext_resource type="PackedScene" uid="uid://havu2s38ea2s" path="res://Assets/Models/Tailor Shop/Book/book_open.glb" id="26_xv2t3"]
+[ext_resource type="PackedScene" uid="uid://bqgu3o0k17byw" path="res://Assets/Models/Tailor Shop/Hangers/wall hanger/wall_hanger.glb" id="27_xv2t3"]
+[ext_resource type="PackedScene" uid="uid://dtxomjyfj3ubi" path="res://Scenes/pants_on_hanger.tscn" id="28_0icju"]
+[ext_resource type="PackedScene" uid="uid://dsyarm6oacer4" path="res://Assets/Models/Tailor Shop/Hangers/empty hanger/hanger.glb" id="29_ihrg5"]
+[ext_resource type="PackedScene" uid="uid://bnijgcd24lxy5" path="res://Scenes/shirt_on_hanger.tscn" id="30_ig322"]
+[ext_resource type="PackedScene" uid="uid://bv0ubxe0fk8iu" path="res://Scenes/sewing_machine.tscn" id="31_0icju"]
+[ext_resource type="PackedScene" uid="uid://citw061fjkos5" path="res://Assets/Models/Tailor Shop/Yarn/blue/yarn_ball.glb" id="31_gugvk"]
+[ext_resource type="PackedScene" uid="uid://bqerwahfv8dng" path="res://Assets/Models/Tailor Shop/Yarn/pink/dont_know_the_name_lets_call_it_yarn.glb" id="32_t7de3"]
+[ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_io27d"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -39,7 +59,7 @@ transform = Transform3D(-0.29153702, 0, -0.95655954, 0, 1, 0, 0.95655954, 0, -0.
 environment = SubResource("Environment_k6jq0")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+transform = Transform3D(0.99393415, 0.0952431, -0.054988667, 2.7805944e-08, 0.49999994, 0.86602545, 0.109977275, -0.86077225, 0.496967, 0, 0, 0)
 shadow_enabled = true
 
 [node name="floor" type="Node3D" parent="."]
@@ -212,37 +232,125 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.130629, 1.2115593, -0.05267
 [node name="door_2" parent="door" instance=ExtResource("5_k6jq0")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.8146577, 1.2115593, -0.05267996)
 
-[node name="collision-able items" type="Node3D" parent="."]
+[node name="large items" type="Node3D" parent="."]
 
-[node name="office_chair" parent="collision-able items" instance=ExtResource("6_ymrm4")]
+[node name="office_chair" parent="large items" instance=ExtResource("6_ymrm4")]
 transform = Transform3D(-1.2, 0, -1.8119498e-07, 0, 1.2, 0, 1.8119498e-07, 0, -1.2, 11.129939, 0, 13.063606)
 
-[node name="office_desk" parent="collision-able items" instance=ExtResource("6_3ps1r")]
-transform = Transform3D(-0.6, 0, -9.059749e-08, 0, 0.6, 0, 9.059749e-08, 0, -0.6, 10.556442, 0, 12.904387)
+[node name="office_desk" parent="large items" instance=ExtResource("6_3ps1r")]
+transform = Transform3D(-0.6, 0, -9.059749e-08, 0, 0.6, 0, 9.059749e-08, 0, -0.6, 10.556442, 0.044761896, 12.904387)
 
-[node name="L_shape_desk" parent="collision-able items" instance=ExtResource("8_s8dlv")]
+[node name="L_shape_desk" parent="large items" instance=ExtResource("8_s8dlv")]
 transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
 
-[node name="L_shape_sofa" parent="collision-able items" instance=ExtResource("9_tyrku")]
+[node name="L_shape_sofa" parent="large items" instance=ExtResource("9_tyrku")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 30, 0.03, 1.6575255)
 
-[node name="twin_sofas" parent="collision-able items" instance=ExtResource("10_5xp22")]
+[node name="twin_sofas" parent="large items" instance=ExtResource("10_5xp22")]
 transform = Transform3D(-1.5298986e-07, 0, -3.5, 0, 3.5, 0, 3.5, 0, -1.5298986e-07, 13.769704, 0, 6.082258)
 
-[node name="full_mirror" parent="collision-able items" instance=ExtResource("11_ow1eo")]
+[node name="full_mirror" parent="large items" instance=ExtResource("11_ow1eo")]
 transform = Transform3D(-0.85, 0, -7.430936e-08, 0, 0.85, 0, 7.430936e-08, 0, -0.85, 7.1117373, 0, 14.73836)
 
-[node name="clothes_wardrobe" parent="collision-able items" instance=ExtResource("12_k6pkm")]
+[node name="clothes_wardrobe" parent="large items" instance=ExtResource("12_k6pkm")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, 1.1839153, 0, 4.643481)
 
-[node name="clothes_rack_1" parent="collision-able items" instance=ExtResource("13_3568l")]
+[node name="clothes_rack_1" parent="large items" instance=ExtResource("13_3568l")]
 transform = Transform3D(-7.430936e-08, 0, 1.7, 0, 1.7, 0, -1.7, 0, -7.430936e-08, 0.6422135, 0.8742883, 4.4872265)
 
-[node name="clothes_rack_2" parent="collision-able items" instance=ExtResource("14_mjtuy")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 6.2253838, 0.13037696, 7.087207)
+[node name="clothes_rack_2" parent="large items" instance=ExtResource("14_mjtuy")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.6790528, 0.13037696, 0.8610735)
 
-[node name="manequin" parent="collision-able items" instance=ExtResource("15_cuuv1")]
+[node name="manequin" parent="large items" instance=ExtResource("15_cuuv1")]
 transform = Transform3D(7.1549286e-09, 0, -0.6, 0, 0.6, 0, 0.6, 0, 7.1549286e-09, 14.810399, 1.1329551, 5.332082)
 
-[node name="clock" parent="collision-able items" instance=ExtResource("16_yl1pv")]
+[node name="clock" parent="large items" instance=ExtResource("16_yl1pv")]
 transform = Transform3D(1.7196169e-15, 3.934025e-08, -0.9, 0.9, -3.934025e-08, 0, -3.934025e-08, -0.9, -3.934025e-08, 9.625885, 2.600851, 14.896148)
+
+[node name="flower_vase" parent="large items" instance=ExtResource("17_yl1pv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.670034, 0.11232641, 11.841402)
+
+[node name="plant_pot_1" parent="large items" instance=ExtResource("18_m13ki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45607394, 0, 0.2715596)
+
+[node name="plant_pot_2" parent="large items" instance=ExtResource("19_3mbjb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.627746, 0.053847253, 14.274409)
+
+[node name="small items" type="Node3D" parent="."]
+
+[node name="flower_vase_2" parent="small items" instance=ExtResource("20_hvvn1")]
+transform = Transform3D(0.15, 0, 0, 0, 0.15, 0, 0, 0, 0.15, 12.010468, 1.3393917, 12.1974325)
+
+[node name="Sketchfab_Scene" parent="small items/flower_vase_2" instance=ExtResource("21_1bx8h")]
+transform = Transform3D(-7.4999986, 0, -6.556707e-07, 0, 7.4999986, 0, 6.556707e-07, 0, -7.4999986, 0, 0.32571697, 0)
+
+[node name="wall_hanger" parent="small items" instance=ExtResource("27_xv2t3")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 5.3185997, 2.3209267, -0.07480295)
+
+[node name="pants_on_hanger" parent="small items/wall_hanger" instance=ExtResource("28_0icju")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4786911, -0.41653872, 0.08001491)
+
+[node name="empty_hanger" parent="small items/wall_hanger" instance=ExtResource("29_ihrg5")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 1.3576021, -0.4703741, 0.07199307)
+
+[node name="shirt_on_hanger" parent="small items/wall_hanger" instance=ExtResource("30_ig322")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.3430452, -0.2783041, 0.09021446)
+
+[node name="small_mirror" parent="small items" instance=ExtResource("21_k7yfq")]
+transform = Transform3D(-1.2256712, 0, 1.0284604, 0, 1.6000004, 0, -1.0284603, 0, -1.2256713, 1.487412, 1.5598911, 14.691135)
+
+[node name="measuring_tape" parent="small items" instance=ExtResource("22_6rctg")]
+transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2.6628428, -0.40800226, 13.724336)
+
+[node name="texture_carpet" parent="small items" instance=ExtResource("23_1shhe")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 10.476811, 0.05794251, 11.49122)
+
+[node name="white_carpet" parent="small items" instance=ExtResource("24_n1qjt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.745056, 0.05794251, 0.37770987)
+
+[node name="pencil_cup" parent="small items" instance=ExtResource("25_6rctg")]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 11.827949, 1.1839373, 11.595464)
+
+[node name="scissor" parent="small items" instance=ExtResource("26_1shhe")]
+transform = Transform3D(-8.7422775e-10, -0.02, 8.7422775e-10, 0, -8.7422775e-10, -0.02, 0.02, -8.7422775e-10, 3.821371e-17, 3.9122257, 1.5598911, 14.23235)
+
+[node name="book" parent="small items" instance=ExtResource("26_xv2t3")]
+transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, 9.331478, 1.2264317, 12.164662)
+
+[node name="yarns" type="Node3D" parent="small items"]
+
+[node name="blue_yarn" parent="small items/yarns" instance=ExtResource("31_gugvk")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.36232334, 1.6311431, 12.172019)
+
+[node name="blue_yarn2" parent="small items/yarns" instance=ExtResource("31_gugvk")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.1664939, 0.25825223, 13.764303)
+
+[node name="blue_yarn3" parent="small items/yarns" instance=ExtResource("31_gugvk")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.392669, 0.4504064, 14.035751)
+
+[node name="blue_yarn4" parent="small items/yarns" instance=ExtResource("31_gugvk")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.4537114, 0.4504064, 13.766289)
+
+[node name="pink_yarn" parent="small items/yarns" instance=ExtResource("32_t7de3")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0.30740607, 1.6298207, 11.982904)
+
+[node name="pink_yarn2" parent="small items/yarns" instance=ExtResource("32_t7de3")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.1295207, 0.51548505, 13.740877)
+
+[node name="pink_yarn3" parent="small items/yarns" instance=ExtResource("32_t7de3")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.4529659, 0.6488769, 14.03533)
+
+[node name="rainbow_yarn" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.3648249, 0.25134432, 13.747249)
+
+[node name="rainbow_yarn2" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.2667098, 0.59401727, 13.843742)
+
+[node name="rainbow_yarn3" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.209741, 0.38905263, 13.9858885)
+
+[node name="rainbow_yarn4" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.3727841, 0.20747149, 13.9858885)
+
+[node name="sewing_machine" parent="." instance=ExtResource("31_0icju")]
+transform = Transform3D(-3.278354e-08, 0, 0.75, 0, 0.75, 0, -0.75, 0, -3.278354e-08, 0.96921015, 1.4569116, 12.803354)
