@@ -442,6 +442,7 @@ skeleton = NodePath("")
 [node name="Mesh3" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/G_00101_2/_001_1/_E_model_202189153110408214_1"]
 
 [node name="Mesh3_JianE_Mtl_202189153193298__Plastic_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/G_00101_2/_001_1/_E_model_202189153110408214_1/Mesh3"]
+transform = Transform3D(1.0000001, 1.7255065e-33, 0, 1.7255065e-33, 1.0000001, 0, 0, 0, 1, 0.65241355, -2.7042348, 0.18444657)
 mesh = SubResource("ArrayMesh_r8ipi")
 skeleton = NodePath("")
 
@@ -450,6 +451,7 @@ skeleton = NodePath("")
 [node name="Mesh4" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/G_00101_2/_001_1/_E_model_202189153110408213_1"]
 
 [node name="Mesh4_M_0_1____4_dy_1_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/G_00101_2/_001_1/_E_model_202189153110408213_1/Mesh4"]
+transform = Transform3D(1.0000001, 1.7255065e-33, 0, 1.7255065e-33, 1.0000001, 0, 0, 0, 1, 0.65241355, -2.9797013, 0.18444657)
 mesh = SubResource("ArrayMesh_bmgxb")
 skeleton = NodePath("")
 
@@ -460,6 +462,7 @@ skeleton = NodePath("")
 [node name="Mesh5" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11247"]
 
 [node name="Mesh5_M_0018_____Plastic_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11247/Mesh5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_ucg20")
 skeleton = NodePath("")
 
@@ -472,10 +475,12 @@ skeleton = NodePath("")
 [node name="Mesh6" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11250"]
 
 [node name="Mesh6_pages_2_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11250/Mesh6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_v7cgk")
 skeleton = NodePath("")
 
 [node name="Mesh6_Cover_13_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11250/Mesh6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_8nbta")
 skeleton = NodePath("")
 
@@ -484,10 +489,12 @@ skeleton = NodePath("")
 [node name="Mesh7" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11251"]
 
 [node name="Mesh7_Cover_1_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11251/Mesh7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_wndew")
 skeleton = NodePath("")
 
 [node name="Mesh7_pages_3_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11248/sj11249/sj11251/Mesh7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_j4r33")
 skeleton = NodePath("")
 
@@ -496,6 +503,7 @@ skeleton = NodePath("")
 [node name="Mesh8" type="Node3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11245"]
 
 [node name="Mesh8_Material__2147461291asdasd_0" type="MeshInstance3D" parent="Sketchfab_Scene/Sketchfab_model/fauteuil_fbx/RootNode/Model/Group1/AAAFDSGFD1/sj11245/Mesh8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8626451e-08, -2.8432696, 0)
 mesh = SubResource("ArrayMesh_efns1")
 skeleton = NodePath("")
 
@@ -508,9 +516,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.33934072, 0.16873059, -0.27
 shape = SubResource("CylinderShape3D_golk1")
 
 [node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1640652, 0.19911402, -0.21419206)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1706616, 0.17519724, -0.2123476)
 shape = SubResource("CylinderShape3D_golk1")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.73347664, 0.18383068, -0.24970241)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.73347664, 0.15680888, -0.24970241)
 shape = SubResource("CylinderShape3D_xo7cx")

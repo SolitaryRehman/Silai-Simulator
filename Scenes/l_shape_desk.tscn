@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cwv8qjuredw4t"]
+[gd_scene load_steps=4 format=3 uid="uid://cwv8qjuredw4t"]
 
 [ext_resource type="PackedScene" uid="uid://lhla1lraejnd" path="res://Assets/Models/Tailor Shop/Desk/desk_2/desk_2.glb" id="1_x2rfj"]
 
@@ -7,9 +7,6 @@ size = Vector3(1.7742004, 2.395996, 4.0511475)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5lbu"]
 size = Vector3(1.7742004, 2.3325195, 2.863617)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ittt0"]
-size = Vector3(1.8345337, 2.0494385, 1)
 
 [node name="L_shape_desk" type="StaticBody3D"]
 
@@ -22,7 +19,3 @@ shape = SubResource("BoxShape3D_gpa0l")
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.9482088, -0.66625977, 1.653306)
 shape = SubResource("BoxShape3D_i5lbu")
-
-[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
-transform = Transform3D(0.74798346, 0, 0.6637173, 0, 1, 0, -0.6637173, 0, 0.74798346, -0.1503452, -0.86524737, 1.5204513)
-shape = SubResource("BoxShape3D_ittt0")

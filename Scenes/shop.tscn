@@ -1,10 +1,21 @@
-[gd_scene load_steps=9 format=3 uid="uid://i5k7akdwav0g"]
+[gd_scene load_steps=20 format=3 uid="uid://i5k7akdwav0g"]
 
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="3_io27d"]
 [ext_resource type="PackedScene" uid="uid://bjsokr4gllj0e" path="res://Scenes/ceiling_1.tscn" id="4_fdj0q"]
 [ext_resource type="PackedScene" uid="uid://cp1idox80gijh" path="res://Scenes/door_1.tscn" id="5_k6jq0"]
+[ext_resource type="PackedScene" uid="uid://b1uy0vr202fcm" path="res://Scenes/office_desk.tscn" id="6_3ps1r"]
+[ext_resource type="PackedScene" uid="uid://dglyunmb58kds" path="res://Scenes/office_chair.tscn" id="6_ymrm4"]
+[ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="8_s8dlv"]
+[ext_resource type="PackedScene" uid="uid://cdn7jwk5f25vp" path="res://Scenes/l_shape_sofa.tscn" id="9_tyrku"]
+[ext_resource type="PackedScene" uid="uid://c62cvjo7wslbu" path="res://Scenes/twin_sofas.tscn" id="10_5xp22"]
+[ext_resource type="PackedScene" uid="uid://bcvdhigeih4lb" path="res://Scenes/full_mirror.tscn" id="11_ow1eo"]
+[ext_resource type="PackedScene" uid="uid://cgqcrpy0eoaes" path="res://Scenes/clothes_wardrobe.tscn" id="12_k6pkm"]
+[ext_resource type="PackedScene" uid="uid://dy8q3u712mc1v" path="res://Scenes/clothes_rack_1.tscn" id="13_3568l"]
+[ext_resource type="PackedScene" uid="uid://buaymrsvgvroq" path="res://Scenes/clothes_rack_2.tscn" id="14_mjtuy"]
+[ext_resource type="PackedScene" uid="uid://bigu3usihbuo" path="res://Scenes/manequin.tscn" id="15_cuuv1"]
+[ext_resource type="PackedScene" uid="uid://dlq4n0u3k6wlq" path="res://Scenes/clock.tscn" id="16_yl1pv"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_io27d"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -22,7 +33,7 @@ glow_enabled = true
 [node name="shop" type="Node3D"]
 
 [node name="ProtoController" parent="." instance=ExtResource("3_io27d")]
-transform = Transform3D(-0.29153702, 0, -0.95655954, 0, 1, 0, 0.95655954, 0, -0.29153702, 2.4018083, 0, 3.4602795)
+transform = Transform3D(-0.29153702, 0, -0.95655954, 0, 1, 0, 0.95655954, 0, -0.29153702, 4.316893, 0, 6.1398354)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_k6jq0")
@@ -192,7 +203,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.475647, -0.16726089, 1.707
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.699263, -0.16726089, 1.7075943)
 
 [node name="door" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9425316, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3613234, 0, 0)
 metadata/_edit_lock_ = true
 
 [node name="door_1" parent="door" instance=ExtResource("5_k6jq0")]
@@ -200,3 +211,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.130629, 1.2115593, -0.05267
 
 [node name="door_2" parent="door" instance=ExtResource("5_k6jq0")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.8146577, 1.2115593, -0.05267996)
+
+[node name="collision-able items" type="Node3D" parent="."]
+
+[node name="office_chair" parent="collision-able items" instance=ExtResource("6_ymrm4")]
+transform = Transform3D(-1.2, 0, -1.8119498e-07, 0, 1.2, 0, 1.8119498e-07, 0, -1.2, 11.129939, 0, 13.063606)
+
+[node name="office_desk" parent="collision-able items" instance=ExtResource("6_3ps1r")]
+transform = Transform3D(-0.6, 0, -9.059749e-08, 0, 0.6, 0, 9.059749e-08, 0, -0.6, 10.556442, 0, 12.904387)
+
+[node name="L_shape_desk" parent="collision-able items" instance=ExtResource("8_s8dlv")]
+transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
+
+[node name="L_shape_sofa" parent="collision-able items" instance=ExtResource("9_tyrku")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 30, 0.03, 1.6575255)
+
+[node name="twin_sofas" parent="collision-able items" instance=ExtResource("10_5xp22")]
+transform = Transform3D(-1.5298986e-07, 0, -3.5, 0, 3.5, 0, 3.5, 0, -1.5298986e-07, 13.769704, 0, 6.082258)
+
+[node name="full_mirror" parent="collision-able items" instance=ExtResource("11_ow1eo")]
+transform = Transform3D(-0.85, 0, -7.430936e-08, 0, 0.85, 0, 7.430936e-08, 0, -0.85, 7.1117373, 0, 14.73836)
+
+[node name="clothes_wardrobe" parent="collision-able items" instance=ExtResource("12_k6pkm")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, 1.1839153, 0, 4.643481)
+
+[node name="clothes_rack_1" parent="collision-able items" instance=ExtResource("13_3568l")]
+transform = Transform3D(-7.430936e-08, 0, 1.7, 0, 1.7, 0, -1.7, 0, -7.430936e-08, 0.6422135, 0.8742883, 4.4872265)
+
+[node name="clothes_rack_2" parent="collision-able items" instance=ExtResource("14_mjtuy")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 6.2253838, 0.13037696, 7.087207)
+
+[node name="manequin" parent="collision-able items" instance=ExtResource("15_cuuv1")]
+transform = Transform3D(7.1549286e-09, 0, -0.6, 0, 0.6, 0, 0.6, 0, 7.1549286e-09, 14.810399, 1.1329551, 5.332082)
+
+[node name="clock" parent="collision-able items" instance=ExtResource("16_yl1pv")]
+transform = Transform3D(1.7196169e-15, 3.934025e-08, -0.9, 0.9, -3.934025e-08, 0, -3.934025e-08, -0.9, -3.934025e-08, 9.625885, 2.600851, 14.896148)
