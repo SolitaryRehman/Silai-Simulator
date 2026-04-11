@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://cdn7jwk5f25vp"]
+
+[ext_resource type="PackedScene" uid="uid://c5ba7x6v5wnyc" path="res://Assets/Models/Tailor Shop/Sofa/L shape sofa/sofa_48.glb" id="1_b8vl0"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xydxk"]
+size = Vector3(2.9023438, 0.75671387, 1.0164185)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7ls58"]
+size = Vector3(1.0261841, 0.78396606, 2.4877014)
+
+[node name="L_shape_sofa" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_b8vl0")]
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.451172, 0.3729086, -0.84190345)
+shape = SubResource("BoxShape3D_xydxk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.902907, 0.39616394, 0.7438507)
+shape = SubResource("BoxShape3D_7ls58")

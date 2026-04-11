@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dpijwam2er7yr"]
+
+[ext_resource type="PackedScene" uid="uid://coimmdkg8n4hn" path="res://Assets/Models/Tailor Shop/Plants/plant pot 2/house_plant.glb" id="1_b0qra"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_8u6qd"]
+height = 1.5463867
+radius = 0.3305664
+
+[node name="plant_pot_2" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_b0qra")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.054760695, 0.7819824, 0)
+shape = SubResource("CylinderShape3D_8u6qd")

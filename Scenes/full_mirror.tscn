@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bcvdhigeih4lb"]
+
+[ext_resource type="PackedScene" uid="uid://bq8kpcsfy1xjk" path="res://Assets/Models/Tailor Shop/Mirrors/full mirror/victorian_full_length_mirror.glb" id="1_v8c1y"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m3rf5"]
+size = Vector3(1.4744568, 3.8537445, 0.30371094)
+
+[node name="full_mirror" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_v8c1y")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.70274353, 1.9378433, 0)
+shape = SubResource("BoxShape3D_m3rf5")

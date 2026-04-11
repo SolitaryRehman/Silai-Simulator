@@ -32,6 +32,7 @@ transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545
 shadow_enabled = true
 
 [node name="floor" type="Node3D" parent="."]
+metadata/_edit_lock_ = true
 
 [node name="wooden_floor_1" parent="floor" instance=ExtResource("1_2shtd")]
 
@@ -112,6 +113,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9884374, 0, 0)
 
 [node name="wooden_floor_3" parent="floor" instance=ExtResource("1_2shtd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.992611, 0, 0)
+metadata/_edit_lock_ = true
 
 [node name="wooden_floor_4" parent="floor" instance=ExtResource("1_2shtd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.986372, 0, 0)
@@ -123,6 +125,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.973434, 0, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.955918, 0, 0)
 
 [node name="wall" type="Node3D" parent="."]
+metadata/_edit_lock_ = true
 
 [node name="wall_1" parent="wall" instance=ExtResource("1_a0mxf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7595215, 0, 0)
@@ -150,6 +153,7 @@ transform = Transform3D(-4.3711385e-08, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, 
 
 [node name="ceiling" type="Node3D" parent="."]
 visible = false
+metadata/_edit_lock_ = true
 
 [node name="ceiling_1" parent="ceiling" instance=ExtResource("4_fdj0q")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.264353, -0.16726089, 1.7075943)
@@ -189,6 +193,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.699263, -0.16726089, 1.707
 
 [node name="door" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9425316, 0, 0)
+metadata/_edit_lock_ = true
 
 [node name="door_1" parent="door" instance=ExtResource("5_k6jq0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.130629, 1.2115593, -0.052679956)

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bcuovmq5t7mh5"]
+
+[ext_resource type="PackedScene" uid="uid://s8i4lr06vntk" path="res://Assets/Models/Tailor Shop/Plants/flower vase 1/flowers_with_the_vase.glb" id="1_d7jbl"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_k3223"]
+height = 1.0544434
+radius = 0.26171875
+
+[node name="flower_vase" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_d7jbl")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5238037, 0)
+shape = SubResource("CylinderShape3D_k3223")

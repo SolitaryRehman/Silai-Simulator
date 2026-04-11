@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bigu3usihbuo"]
+
+[ext_resource type="PackedScene" uid="uid://3wi12mxjnwnb" path="res://Assets/Models/Tailor Shop/Manequin/manequin_statue.glb" id="1_lbryt"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dw2d7"]
+height = 3.5448914
+
+[node name="manequin" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_lbryt")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.032699585, 0)
+shape = SubResource("CylinderShape3D_dw2d7")

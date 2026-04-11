@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1uy0vr202fcm"]
+
+[ext_resource type="PackedScene" uid="uid://bpt0ka2f7pc50" path="res://Assets/Models/Tailor Shop/Desk/desk_1/office_desk___6mb.glb" id="1_65hi6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7febs"]
+size = Vector3(5.54776, 2.0317383, 2.298767)
+
+[node name="office_desk" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_65hi6")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0781765, 0.9369645, 1.7568104)
+shape = SubResource("BoxShape3D_7febs")

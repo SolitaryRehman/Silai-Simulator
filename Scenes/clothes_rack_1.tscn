@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dy8q3u712mc1v"]
+
+[ext_resource type="PackedScene" uid="uid://ckrc8k1xse10b" path="res://Assets/Models/Tailor Shop/Clothes Rack/Rack 1/wardrobe_with_vinatge_clothes.glb" id="1_sjqfw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_07w8f"]
+size = Vector3(1.4257813, 1.0267944, 0.5629883)
+
+[node name="clothes_rack_1" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_sjqfw")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.018707275, 0.026367188)
+shape = SubResource("BoxShape3D_07w8f")

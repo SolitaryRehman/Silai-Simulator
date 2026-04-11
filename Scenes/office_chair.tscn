@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dglyunmb58kds"]
+
+[ext_resource type="PackedScene" uid="uid://b336khb8risqw" path="res://Assets/Models/Tailor Shop/Chairs/office chair/chairmans_chair__20mb.glb" id="1_f674f"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_86g6b"]
+height = 1.3492432
+radius = 0.49169922
+
+[node name="office_chair" type="StaticBody3D"]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_f674f")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.017094702, 0.6694031, -0.007148981)
+shape = SubResource("CylinderShape3D_86g6b")
