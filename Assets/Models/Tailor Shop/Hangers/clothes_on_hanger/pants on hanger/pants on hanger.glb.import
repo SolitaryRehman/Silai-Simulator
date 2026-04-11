@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c63jrkc2jow6r"
-path="res://.godot/imported/manequin_statue.glb-79433f1291901b954ff50faeb9b979a7.scn"
+uid="uid://dd153j1x0fow5"
+path="res://.godot/imported/pants on hanger.glb-f655b5aeeb62238bee7b068af0723eda.scn"
 
 [deps]
 
-source_file="res://Assets/Models/Tailor Shop/Hangers/clothes_on_hanger/pants on hanger/manequin_statue.glb"
-dest_files=["res://.godot/imported/manequin_statue.glb-79433f1291901b954ff50faeb9b979a7.scn"]
+source_file="res://Assets/Models/Tailor Shop/Hangers/clothes_on_hanger/pants on hanger/pants on hanger.glb"
+dest_files=["res://.godot/imported/pants on hanger.glb-f655b5aeeb62238bee7b068af0723eda.scn"]
 
 [params]
 
@@ -17,7 +17,7 @@ nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 nodes/apply_root_scale=true
-nodes/root_scale=1.0
+nodes/root_scale=0.25
 nodes/import_as_skeleton_bones=false
 nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
