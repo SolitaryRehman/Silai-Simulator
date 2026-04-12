@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://cp6bhbca0e88k"]
+
+[ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="1_nssrw"]
+[ext_resource type="Script" uid="uid://vqwep8sckqot" path="res://Scripts/cutting_table.gd" id="1_xklhj"]
+[ext_resource type="PackedScene" uid="uid://lhla1lraejnd" path="res://Assets/Models/Tailor Shop/Desk/desk_2/desk_2.glb" id="2_xklhj"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hhnd4"]
+size = Vector3(2.1048737, 2.395996, 5.304016)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ehqne"]
+size = Vector3(1.7742004, 2.3325195, 4.2511444)
+
+[node name="Cutting_Table" type="Area3D"]
+script = ExtResource("1_xklhj")
+
+[node name="L_shape_desk" parent="." instance=ExtResource("1_nssrw")]
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("2_xklhj")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18665314, -0.69799805, -0.122406006)
+shape = SubResource("BoxShape3D_hhnd4")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.2544451, -0.66625977, 1.653306)
+shape = SubResource("BoxShape3D_ehqne")
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -0.7159281, 0.7611041, -1.0507003)
+billboard = 1
+text = "Press E to Cut
+"

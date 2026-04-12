@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://i5k7akdwav0g"]
+[gd_scene load_steps=41 format=3 uid="uid://i5k7akdwav0g"]
 
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://cp1idox80gijh" path="res://Scenes/door_1.tscn" id="5_k6jq0"]
 [ext_resource type="PackedScene" uid="uid://b1uy0vr202fcm" path="res://Scenes/office_desk.tscn" id="6_3ps1r"]
 [ext_resource type="PackedScene" uid="uid://dglyunmb58kds" path="res://Scenes/office_chair.tscn" id="6_ymrm4"]
-[ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="8_s8dlv"]
 [ext_resource type="PackedScene" uid="uid://cdn7jwk5f25vp" path="res://Scenes/l_shape_sofa.tscn" id="9_tyrku"]
 [ext_resource type="PackedScene" uid="uid://c62cvjo7wslbu" path="res://Scenes/twin_sofas.tscn" id="10_5xp22"]
 [ext_resource type="PackedScene" uid="uid://bcvdhigeih4lb" path="res://Scenes/full_mirror.tscn" id="11_ow1eo"]
@@ -36,6 +35,8 @@
 [ext_resource type="PackedScene" uid="uid://citw061fjkos5" path="res://Assets/Models/Tailor Shop/Yarn/blue/yarn_ball.glb" id="31_gugvk"]
 [ext_resource type="PackedScene" uid="uid://bqerwahfv8dng" path="res://Assets/Models/Tailor Shop/Yarn/pink/dont_know_the_name_lets_call_it_yarn.glb" id="32_t7de3"]
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
+[ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
+[ext_resource type="PackedScene" uid="uid://djpxnp766duxi" path="res://Scenes/cutting_minigame.tscn" id="37_1bx8h"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_io27d"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -54,6 +55,15 @@ glow_enabled = true
 
 [node name="ProtoController" parent="." instance=ExtResource("3_io27d")]
 transform = Transform3D(-0.29153702, 0, -0.95655954, 0, 1, 0, 0.95655954, 0, -0.29153702, 4.316893, 0, 6.1398354)
+can_move = true
+has_gravity = true
+can_jump = true
+look_speed = 0.002
+base_speed = 7.0
+jump_velocity = 4.5
+sprint_speed = 10.0
+freefly_speed = 25.0
+input_sprint = "sprint"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_k6jq0")
@@ -233,15 +243,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.130629, 1.2115593, -0.05267
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.8146577, 1.2115593, -0.05267996)
 
 [node name="large items" type="Node3D" parent="."]
+metadata/_edit_lock_ = true
 
 [node name="office_chair" parent="large items" instance=ExtResource("6_ymrm4")]
 transform = Transform3D(-1.2, 0, -1.8119498e-07, 0, 1.2, 0, 1.8119498e-07, 0, -1.2, 11.129939, 0, 13.063606)
 
 [node name="office_desk" parent="large items" instance=ExtResource("6_3ps1r")]
 transform = Transform3D(-0.6, 0, -9.059749e-08, 0, 0.6, 0, 9.059749e-08, 0, -0.6, 10.556442, 0.044761896, 12.904387)
-
-[node name="L_shape_desk" parent="large items" instance=ExtResource("8_s8dlv")]
-transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
 
 [node name="L_shape_sofa" parent="large items" instance=ExtResource("9_tyrku")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 30, 0.03, 1.6575255)
@@ -264,6 +272,9 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.6790528, 0.13037696, 
 [node name="manequin" parent="large items" instance=ExtResource("15_cuuv1")]
 transform = Transform3D(7.1549286e-09, 0, -0.6, 0, 0.6, 0, 0.6, 0, 7.1549286e-09, 14.810399, 1.1329551, 5.332082)
 
+[node name="manequin2" parent="large items" instance=ExtResource("15_cuuv1")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 4.3671927, 1.1329551, 0.2855569)
+
 [node name="clock" parent="large items" instance=ExtResource("16_yl1pv")]
 transform = Transform3D(1.7196169e-15, 3.934025e-08, -0.9, 0.9, -3.934025e-08, 0, -3.934025e-08, -0.9, -3.934025e-08, 9.625885, 2.600851, 14.896148)
 
@@ -277,6 +288,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45607394, 0, 0.2715596)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.627746, 0.053847253, 14.274409)
 
 [node name="small items" type="Node3D" parent="."]
+metadata/_edit_lock_ = true
 
 [node name="flower_vase_2" parent="small items" instance=ExtResource("20_hvvn1")]
 transform = Transform3D(0.15, 0, 0, 0, 0.15, 0, 0, 0, 0.15, 12.010468, 1.3393917, 12.1974325)
@@ -306,7 +318,7 @@ transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2.66
 transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 10.476811, 0.05794251, 11.49122)
 
 [node name="white_carpet" parent="small items" instance=ExtResource("24_n1qjt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.745056, 0.05794251, 0.37770987)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.745056, 0.05794251, 0.40631795)
 
 [node name="pencil_cup" parent="small items" instance=ExtResource("25_6rctg")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 11.827949, 1.1839373, 11.595464)
@@ -354,3 +366,8 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.3727841, 0.20747149, 
 
 [node name="sewing_machine" parent="." instance=ExtResource("31_0icju")]
 transform = Transform3D(-3.278354e-08, 0, 0.75, 0, 0.75, 0, -0.75, 0, -3.278354e-08, 0.96921015, 1.4569116, 12.803354)
+
+[node name="Cutting_Table" parent="." instance=ExtResource("36_hvvn1")]
+transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
+
+[node name="CuttingMinigame" parent="." instance=ExtResource("37_1bx8h")]
