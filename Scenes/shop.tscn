@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://i5k7akdwav0g"]
+[gd_scene load_steps=40 format=3 uid="uid://i5k7akdwav0g"]
 
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
@@ -36,14 +36,11 @@
 [ext_resource type="PackedScene" uid="uid://bqerwahfv8dng" path="res://Assets/Models/Tailor Shop/Yarn/pink/dont_know_the_name_lets_call_it_yarn.glb" id="32_t7de3"]
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
-[ext_resource type="PackedScene" uid="uid://djpxnp766duxi" path="res://Scenes/cutting_minigame.tscn" id="37_1bx8h"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_io27d"]
-sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
-ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
 [sub_resource type="Sky" id="Sky_fdj0q"]
-sky_material = SubResource("ProceduralSkyMaterial_io27d")
+sky_material = SubResource("ProceduralSkyMaterial_hvvn1")
 
 [sub_resource type="Environment" id="Environment_k6jq0"]
 background_mode = 2
@@ -309,10 +306,10 @@ transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 1.3576021, -0.4703741, 
 transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.3430452, -0.2783041, 0.09021446)
 
 [node name="small_mirror" parent="small items" instance=ExtResource("21_k7yfq")]
-transform = Transform3D(-1.2256712, 0, 1.0284604, 0, 1.6000004, 0, -1.0284603, 0, -1.2256713, 1.487412, 1.5598911, 14.691135)
+transform = Transform3D(-1.0724622, 0, 0.8999027, 0, 1.4, 0, -0.8999027, 0, -1.0724622, 0.6370215, 1.2289151, 14.411799)
 
 [node name="measuring_tape" parent="small items" instance=ExtResource("22_6rctg")]
-transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2.6628428, -0.40800226, 13.724336)
+transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 2.6628428, -0.63571954, 13.882707)
 
 [node name="texture_carpet" parent="small items" instance=ExtResource("23_1shhe")]
 transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 10.476811, 0.05794251, 11.49122)
@@ -324,7 +321,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.745056, 0.05794251, 0.40631
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 11.827949, 1.1839373, 11.595464)
 
 [node name="scissor" parent="small items" instance=ExtResource("26_1shhe")]
-transform = Transform3D(-8.7422775e-10, -0.02, 8.7422775e-10, 0, -8.7422775e-10, -0.02, 0.02, -8.7422775e-10, 3.821371e-17, 3.9122257, 1.5598911, 14.23235)
+transform = Transform3D(-8.7422775e-10, -0.02, 8.7422775e-10, 0, -8.7422775e-10, -0.02, 0.02, -8.7422775e-10, 3.821371e-17, 3.1017506, 1.247455, 14.23235)
 
 [node name="book" parent="small items" instance=ExtResource("26_xv2t3")]
 transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, 9.331478, 1.2264317, 12.164662)
@@ -332,42 +329,40 @@ transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.371138
 [node name="yarns" type="Node3D" parent="small items"]
 
 [node name="blue_yarn" parent="small items/yarns" instance=ExtResource("31_gugvk")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.36232334, 1.6311431, 12.172019)
+transform = Transform3D(0.15, 0, 0, 0, 0.15, 0, 0, 0, 0.15, 0.2874948, 1.3058286, 12.804266)
 
 [node name="blue_yarn2" parent="small items/yarns" instance=ExtResource("31_gugvk")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.1664939, 0.25825223, 13.764303)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.99073744, 0.25825223, 13.946451)
 
 [node name="blue_yarn3" parent="small items/yarns" instance=ExtResource("31_gugvk")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.392669, 0.4504064, 14.035751)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.1116961, 0.6050277, 14.035751)
 
 [node name="blue_yarn4" parent="small items/yarns" instance=ExtResource("31_gugvk")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.4537114, 0.4504064, 13.766289)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.99679816, 0.4504064, 14.189325)
 
 [node name="pink_yarn" parent="small items/yarns" instance=ExtResource("32_t7de3")]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0.30740607, 1.6298207, 11.982904)
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0.2665934, 1.318597, 12.648155)
 
 [node name="pink_yarn2" parent="small items/yarns" instance=ExtResource("32_t7de3")]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.1295207, 0.51548505, 13.740877)
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0.995769, 0.51548505, 14.35075)
 
 [node name="pink_yarn3" parent="small items/yarns" instance=ExtResource("32_t7de3")]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.4529659, 0.6488769, 14.03533)
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.2123545, 0.46101362, 14.03533)
 
 [node name="rainbow_yarn" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.3648249, 0.25134432, 13.747249)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.9802433, 0.25134432, 14.16203)
 
 [node name="rainbow_yarn2" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.2667098, 0.59401727, 13.843742)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.96881163, 0.45021486, 14.072761)
 
 [node name="rainbow_yarn3" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.209741, 0.38905263, 13.9858885)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.209741, 0.38905263, 14.251162)
 
 [node name="rainbow_yarn4" parent="small items/yarns" instance=ExtResource("33_hvvn1")]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.3727841, 0.20747149, 13.9858885)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.2144687, 0.20747149, 13.9858885)
 
 [node name="sewing_machine" parent="." instance=ExtResource("31_0icju")]
-transform = Transform3D(-3.278354e-08, 0, 0.75, 0, 0.75, 0, -0.75, 0, -3.278354e-08, 0.96921015, 1.4569116, 12.803354)
+transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-08, 0.62555724, 1.1914588, 13.286693)
 
 [node name="Cutting_Table" parent="." instance=ExtResource("36_hvvn1")]
-transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
-
-[node name="CuttingMinigame" parent="." instance=ExtResource("37_1bx8h")]
+transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-08, 1.6652274, 1.1720003, 14.39215)
