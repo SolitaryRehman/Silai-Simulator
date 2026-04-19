@@ -115,18 +115,21 @@ text = "Press E to Cut
 [node name="table_camera" type="Camera3D" parent="."]
 transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, 0, 1.4250352, -0.80647504)
 
+[node name="sewing_camera" type="Camera3D" parent="."]
+transform = Transform3D(-1, 5.92866e-08, -6.4248276e-08, 0, 0.7349146, 0.67815965, 8.742278e-08, 0.67815965, -0.7349146, -1.8775923, 1.1619376, 0.75936794)
+
 [node name="fabric_plane" type="MeshInstance3D" parent="."]
 transform = Transform3D(-0.70067716, -1.949152e-08, 8.352722e-08, -8.352722e-08, -5.289965e-08, -0.70067716, 1.9491534e-08, -0.70067716, 5.2899644e-08, 0.10905421, 0.13941585, -0.797151)
 mesh = SubResource("ArrayMesh_7i7eu")
 skeleton = NodePath("")
 
 [node name="front_piece" type="MeshInstance3D" parent="."]
-transform = Transform3D(5.27526e-11, 3.9716852e-08, 0.9, 0.8913002, -0.12483586, 5.4567435e-09, 0.12483586, 0.8913002, -3.934025e-08, -0.17232275, 0.13594326, -1.1185591)
+transform = Transform3D(6.447589e-11, 4.8542823e-08, 1.1, 1.0893669, -0.15257718, 6.669353e-09, 0.15257718, 1.0893669, -4.8082526e-08, -0.17232275, 0.13594326, -1.1185591)
 mesh = SubResource("ArrayMesh_j4xrv")
 skeleton = NodePath("")
 
 [node name="back_piece" type="MeshInstance3D" parent="."]
-transform = Transform3D(5.4751035e-09, 3.895739e-08, -0.9, 0.89124125, -0.12525576, -1.3193021e-16, -0.12525576, -0.89124125, -3.934025e-08, 0.2744642, 0.13570079, -0.49673277)
+transform = Transform3D(6.6917942e-09, 4.761459e-08, -1.1, 1.0892949, -0.15309039, 1.0473882e-15, -0.15309039, -1.0892949, -4.8082526e-08, 0.2744642, 0.13570079, -0.49673277)
 mesh = SubResource("ArrayMesh_j4xrv")
 skeleton = NodePath("")
 

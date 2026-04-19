@@ -4,17 +4,22 @@ extends Area3D
 @onready var prompt_label: Label3D       = $PromptLabel
 @onready var fabric_mesh: MeshInstance3D = $fabric_plane
 @onready var table_camera: Camera3D      = $table_camera
+@onready var sewing_camera: Camera3D     = $sewing_camera
 @onready var front_piece: MeshInstance3D = $front_piece
 @onready var back_piece: MeshInstance3D  = $back_piece
 @onready var front_outline: Sprite3D     = $front_outline
 @onready var back_outline: Sprite3D      = $back_outline
-@onready var cut_ui: CanvasLayer = $cut_ui
-@onready var cut_button: Button = $cut_ui/cut_button
+@onready var cut_ui: CanvasLayer         = $cut_ui
+@onready var cut_button: Button          = $cut_ui/cut_button
 
 var player_ref: CharacterBody3D = null
+var _cut_done: bool = false   # tracks which action the button triggers
 
 var _table_cam_global_pos: Vector3
 var _table_cam_global_rot: Vector3
+
+var _sewing_cam_global_pos: Vector3   # save sewing cam target
+var _sewing_cam_global_rot: Vector3
 
 func _ready():
 	connect("body_entered", _on_body_entered)
@@ -23,8 +28,14 @@ func _ready():
 	# Save BEFORE anything moves the camera
 	_table_cam_global_pos = table_camera.global_position
 	_table_cam_global_rot = table_camera.rotation_degrees
+	
+	_sewing_cam_global_pos = sewing_camera.global_position   # ← save before anything moves
+	_sewing_cam_global_rot = sewing_camera.rotation_degrees
+
 
 	table_camera.current = false
+	sewing_camera.current  = false
+
 	front_piece.visible  = false
 	back_piece.visible   = false
 
@@ -37,9 +48,18 @@ func _ready():
 	# Hide UI until cutting starts
 	cut_ui.visible = false
 
-	cut_button.pressed.connect(_do_cut)
+	cut_button.pressed.connect(_on_cut_button_pressed)   # ← single handler, branches by state
 
 	print("CuttingTable ready!")
+
+
+# ── Button press dispatcher ────────────────────────────────────
+
+func _on_cut_button_pressed():
+	if _cut_done:
+		_go_to_sewing()
+	else:
+		_do_cut()
 
 
 func _setup_cut_button():
@@ -95,6 +115,7 @@ func _setup_cut_button():
 	cut_button.add_theme_color_override("font_pressed_color", Color(1.00, 1.00, 0.70, 1.0))
 
 
+
 func _process(_delta):
 	if player_ref == null:
 		return
@@ -111,7 +132,6 @@ func _process(_delta):
 			_start_cutting()
 		return
 
-	# Only ESC is keyboard-driven now — Cut is button only
 	if GameManager.current_state != GameManager.GameState.CUTTING:
 		return
 
@@ -136,7 +156,7 @@ func _start_cutting():
 
 
 func _do_cut():
-	cut_ui.visible = false   # hide button once cut is made
+	cut_ui.visible = false
 
 	fabric_mesh.visible   = false
 	front_outline.visible = false
@@ -172,16 +192,34 @@ func _animate_cut_split():
 
 func _on_cutting_complete():
 	GameManager.complete_cutting()
-	await _switch_to_player_camera()
-	player_ref.in_minigame = false
-	player_ref.can_move    = true
-	player_ref.can_jump    = true
-	player_ref.capture_mouse()
-	GameManager.current_state = GameManager.GameState.FREE_ROAM
+
+	# ── Show "Next" button instead of returning to player ──────
+	_cut_done = true
+	cut_button.text = "→   NEXT"
+	cut_ui.visible  = true
+
+
+# ── Move to sewing station ─────────────────────────────────────
+
+func _go_to_sewing():
+	cut_ui.visible = false
+	await _switch_to_sewing_camera()
+
+
+func _switch_to_sewing_camera():
+	# Tween the active table_camera to the sewing camera's saved world position
+	var t := create_tween().set_parallel(true)
+	t.tween_property(table_camera, "global_position",  _sewing_cam_global_pos, 0.6).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(table_camera, "rotation_degrees", _sewing_cam_global_rot, 0.6).set_ease(Tween.EASE_IN_OUT)
+	await t.finished
 
 
 func _on_cutting_cancelled():
-	cut_ui.visible = false   # hide button on cancel too
+	cut_ui.visible = false   # hide button on cancel 
+	
+	_cut_done = false                      # ← reset state for next visit
+	cut_button.text = "✂   CUT FABRIC"    # ← restore original label
+	
 	await _switch_to_player_camera()
 	player_ref.unlock_from_minigame()
 	if player_ref != null:
