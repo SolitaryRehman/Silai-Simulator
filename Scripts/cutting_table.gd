@@ -203,14 +203,30 @@ func _on_cutting_complete():
 
 func _go_to_sewing():
 	cut_ui.visible = false
-	await _switch_to_sewing_camera()
+	_switch_to_sewing_camera()        # no await — starts immediately
+	await _move_pieces_to_sewing()    # await this one so we know when everything is done
 
 
 func _switch_to_sewing_camera():
-	# Tween the active table_camera to the sewing camera's saved world position
 	var t := create_tween().set_parallel(true)
-	t.tween_property(table_camera, "global_position",  _sewing_cam_global_pos, 0.6).set_ease(Tween.EASE_IN_OUT)
-	t.tween_property(table_camera, "rotation_degrees", _sewing_cam_global_rot, 0.6).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(table_camera, "global_position",  _sewing_cam_global_pos, 0.7).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(table_camera, "rotation_degrees", _sewing_cam_global_rot, 0.7).set_ease(Tween.EASE_IN_OUT)
+	await t.finished
+
+
+func _move_pieces_to_sewing():
+	var sewing_pos := Vector3(0.66, 1.26, 13.8)
+
+	var front_target_rot := front_piece.rotation_degrees
+	front_target_rot.y   += 270.0
+	var back_target_rot  := back_piece.rotation_degrees
+	back_target_rot.y    += 270.0
+
+	var t := create_tween().set_parallel(true)
+	t.tween_property(front_piece, "global_position",  sewing_pos,       0.7).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(back_piece,  "global_position",  sewing_pos,       0.7).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(front_piece, "rotation_degrees", front_target_rot, 0.7).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(back_piece,  "rotation_degrees", back_target_rot,  0.7).set_ease(Tween.EASE_IN_OUT)
 	await t.finished
 
 

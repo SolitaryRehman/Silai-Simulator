@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=4 uid="uid://cp6bhbca0e88k"]
+[gd_scene format=4 uid="uid://cp6bhbca0e88k"]
 
 [ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="1_nssrw"]
 [ext_resource type="Script" uid="uid://vqwep8sckqot" path="res://Scripts/cutting_table.gd" id="1_xklhj"]
@@ -91,57 +91,57 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_iqjmc")
 
-[node name="Cutting_Table" type="Area3D"]
+[node name="Cutting_Table" type="Area3D" unique_id=1005178347]
 script = ExtResource("1_xklhj")
 
-[node name="L_shape_desk" parent="." instance=ExtResource("1_nssrw")]
+[node name="L_shape_desk" parent="." unique_id=1981939134 instance=ExtResource("1_nssrw")]
 
-[node name="Sketchfab_Scene" parent="." instance=ExtResource("2_xklhj")]
+[node name="Sketchfab_Scene" parent="." unique_id=1870967565 instance=ExtResource("2_xklhj")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1824448077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18665314, -0.69799805, -0.122406006)
 shape = SubResource("BoxShape3D_hhnd4")
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=2114959510]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.2544451, -0.66625977, 1.653306)
 shape = SubResource("BoxShape3D_ehqne")
 
-[node name="PromptLabel" type="Label3D" parent="."]
+[node name="PromptLabel" type="Label3D" parent="." unique_id=957712316]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -0.7159281, 0.7611041, -1.0507003)
 billboard = 1
 text = "Press E to Cut
 "
 
-[node name="table_camera" type="Camera3D" parent="."]
+[node name="table_camera" type="Camera3D" parent="." unique_id=1749531102]
 transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, 0, 1.4250352, -0.80647504)
 
-[node name="sewing_camera" type="Camera3D" parent="."]
+[node name="sewing_camera" type="Camera3D" parent="." unique_id=1183673346]
 transform = Transform3D(-1, 5.92866e-08, -6.4248276e-08, 0, 0.7349146, 0.67815965, 8.742278e-08, 0.67815965, -0.7349146, -1.8775923, 1.1619376, 0.75936794)
 
-[node name="fabric_plane" type="MeshInstance3D" parent="."]
+[node name="fabric_plane" type="MeshInstance3D" parent="." unique_id=1762895392]
 transform = Transform3D(-0.70067716, -1.949152e-08, 8.352722e-08, -8.352722e-08, -5.289965e-08, -0.70067716, 1.9491534e-08, -0.70067716, 5.2899644e-08, 0.10905421, 0.13941585, -0.797151)
 mesh = SubResource("ArrayMesh_7i7eu")
 skeleton = NodePath("")
 
-[node name="front_piece" type="MeshInstance3D" parent="."]
+[node name="front_piece" type="MeshInstance3D" parent="." unique_id=541807866]
 transform = Transform3D(6.447589e-11, 4.8542823e-08, 1.1, 1.0893669, -0.15257718, 6.669353e-09, 0.15257718, 1.0893669, -4.8082526e-08, -0.17232275, 0.13594326, -1.1185591)
 mesh = SubResource("ArrayMesh_j4xrv")
 skeleton = NodePath("")
 
-[node name="back_piece" type="MeshInstance3D" parent="."]
+[node name="back_piece" type="MeshInstance3D" parent="." unique_id=140054901]
 transform = Transform3D(6.6917942e-09, 4.761459e-08, -1.1, 1.0892949, -0.15309039, 1.0473882e-15, -0.15309039, -1.0892949, -4.8082526e-08, 0.2744642, 0.13570079, -0.49673277)
 mesh = SubResource("ArrayMesh_j4xrv")
 skeleton = NodePath("")
 
-[node name="front_outline" parent="." instance=ExtResource("6_in3w1")]
+[node name="front_outline" parent="." unique_id=1160353108 instance=ExtResource("6_in3w1")]
 transform = Transform3D(-3.934025e-09, 0.09, -3.934025e-09, 0, -3.934025e-09, -0.09, -0.09, -3.934025e-09, 1.719617e-16, -0.219159, 0.1428456, -1.1166666)
 
-[node name="back_outline" parent="." instance=ExtResource("6_in3w1")]
+[node name="back_outline" parent="." unique_id=877493683 instance=ExtResource("6_in3w1")]
 transform = Transform3D(-3.934025e-09, -0.09, 3.934025e-09, 0, -3.934025e-09, -0.09, 0.09, -3.934025e-09, 1.719617e-16, 0.33138633, 0.13848466, -0.48827577)
 
-[node name="cut_ui" type="CanvasLayer" parent="."]
+[node name="cut_ui" type="CanvasLayer" parent="." unique_id=1481032438]
 
-[node name="cut_button" type="Button" parent="cut_ui"]
+[node name="cut_button" type="Button" parent="cut_ui" unique_id=439539773]
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
