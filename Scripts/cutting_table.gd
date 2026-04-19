@@ -180,7 +180,7 @@ func _animate_cut_split():
 	t1.tween_property(back_piece,  "rotation_degrees:y",  90.0, 0.45).set_ease(Tween.EASE_IN_OUT)
 	await t1.finished
 
-	await get_tree().create_timer(0.65).timeout
+	await get_tree().create_timer(0.95).timeout
 
 	var t2 := create_tween().set_parallel(true)
 	t2.tween_property(front_piece, "position:z",  0.000, 0.25).set_ease(Tween.EASE_IN)
@@ -195,7 +195,7 @@ func _on_cutting_complete():
 
 	# ── Show "Next" button instead of returning to player ──────
 	_cut_done = true
-	cut_button.text = "→   NEXT"
+	cut_button.text = " NEXT → "
 	cut_ui.visible  = true
 
 
