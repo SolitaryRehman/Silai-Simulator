@@ -201,11 +201,43 @@ func _on_cutting_complete():
 
 # ── Move to sewing station ─────────────────────────────────────
 
-func _go_to_sewing():
+func _go_to_sewing() -> void:
 	cut_ui.visible = false
-	_switch_to_sewing_camera()        # no await — starts immediately
-	await _move_pieces_to_sewing()    # await this one so we know when everything is done
 
+	# Add pieces to a group so SewingMachine can find+shrink them
+	front_piece.add_to_group("sewing_pieces")
+	back_piece.add_to_group("sewing_pieces")
+
+	# Animate pieces to sewing station AND move camera simultaneously
+	_switch_to_sewing_camera()           # no await — fires in parallel
+	await _move_pieces_to_sewing()       # wait for pieces to arrive
+
+	# Hand off to the sewing machine
+	var sewing_machine: Node = get_tree().get_first_node_in_group("sewing_machine")
+	if sewing_machine == null:
+		push_error("CuttingTable: no node in group 'sewing_machine' found!")
+		return
+
+	var clothing_type: String = GameManager.current_order.get("type", "shirt")
+	sewing_machine.begin_sewing([front_piece, back_piece], clothing_type, table_camera)
+	sewing_machine.sewing_complete.connect(_on_sewing_complete, CONNECT_ONE_SHOT)
+
+
+func _on_sewing_complete() -> void:
+	# Reset cutting table state for next order
+	_cut_done = false
+	cut_button.text = "✂   CUT FABRIC"
+
+	front_piece.remove_from_group("sewing_pieces")
+	back_piece.remove_from_group("sewing_pieces")
+	front_piece.scale = Vector3.ONE   # restore if shrunk
+	back_piece.scale  = Vector3.ONE
+
+	await _switch_to_player_camera()
+	player_ref.unlock_from_minigame()
+	prompt_label.visible = true
+	GameManager.current_state = GameManager.GameState.FREE_ROAM
+	GameManager.complete_sewing()
 
 func _switch_to_sewing_camera():
 	var t := create_tween().set_parallel(true)
@@ -215,7 +247,7 @@ func _switch_to_sewing_camera():
 
 
 func _move_pieces_to_sewing():
-	var sewing_pos := Vector3(0.66, 1.26, 13.8)
+	var sewing_pos := Vector3(0.66, 1.28, 13.8)
 
 	var front_target_rot := front_piece.rotation_degrees
 	front_target_rot.y   += 270.0

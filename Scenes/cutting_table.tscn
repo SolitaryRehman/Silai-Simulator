@@ -108,6 +108,7 @@ shape = SubResource("BoxShape3D_ehqne")
 
 [node name="PromptLabel" type="Label3D" parent="." unique_id=957712316]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -0.7159281, 0.7611041, -1.0507003)
+visible = false
 billboard = 1
 text = "Press E to Cut
 "
@@ -127,6 +128,33 @@ skeleton = NodePath("")
 transform = Transform3D(6.447589e-11, 4.8542823e-08, 1.1, 1.0893669, -0.15257718, 6.669353e-09, 0.15257718, 1.0893669, -4.8082526e-08, -0.17232275, 0.13594326, -1.1185591)
 mesh = SubResource("ArrayMesh_j4xrv")
 skeleton = NodePath("")
+
+[node name="neck" type="Marker3D" parent="front_piece" unique_id=319771760 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, 0.00011116266, -0.008743763, 0.27493948)
+
+[node name="left_shoulder" type="Marker3D" parent="front_piece" unique_id=1328243032 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, -0.028396636, -0.18541682, 0.24777754)
+
+[node name="left_upper_sleeve" type="Marker3D" parent="front_piece" unique_id=364767420 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, -0.04526531, -0.338027, -0.0224915)
+
+[node name="left_lower_sleeve" type="Marker3D" parent="front_piece" unique_id=1121615308 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, -0.027761139, -0.21390522, -0.09441386)
+
+[node name="left_bottom" type="Marker3D" parent="front_piece" unique_id=185389407 groups=["seam_point"]]
+transform = Transform3D(5.3281653e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, -0.02704928, -0.18488824, -0.3534214)
+
+[node name="right_bottom" type="Marker3D" parent="front_piece" unique_id=1091265160 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, 0.032947622, 0.18731922, -0.357323)
+
+[node name="right_lower_sleeve" type="Marker3D" parent="front_piece" unique_id=1063889678 groups=["seam_point"]]
+transform = Transform3D(0.011348715, -4.042679e-09, -0.08102729, 0.08102729, -6.65637e-09, 0.011348715, -7.1527726e-09, -0.081818186, 3.0803187e-09, 0.034684688, 0.21222842, -0.09672953)
+
+[node name="right_upper_sleeve" type="Marker3D" parent="front_piece" unique_id=215130618 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, 0.057771735, 0.33654964, -0.020697728)
+
+[node name="right_shoulder" type="Marker3D" parent="front_piece" unique_id=1897251741 groups=["seam_point"]]
+transform = Transform3D(5.3282052e-11, 0.9003032, 0.12609683, 4.0118028e-08, -0.12609683, 0.9003032, 0.9090909, 5.511865e-09, -3.973762e-08, 0.026865058, 0.18196023, 0.2468614)
 
 [node name="back_piece" type="MeshInstance3D" parent="." unique_id=140054901]
 transform = Transform3D(6.6917942e-09, 4.761459e-08, -1.1, 1.0892949, -0.15309039, 1.0473882e-15, -0.15309039, -1.0892949, -4.8082526e-08, 0.2744642, 0.13570079, -0.49673277)

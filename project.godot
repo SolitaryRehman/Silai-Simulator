@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameManager="*res://Scripts/GameManager.gd"
+ClothingConfig="*uid://pn8gax6ng1qh"
 
 [filesystem]
 
@@ -30,6 +31,9 @@ import/blender/enabled=false
 [global_group]
 
 player=""
+sewing_machine=""
+sewing_pieces=""
+seam_point=""
 
 [input]
 
