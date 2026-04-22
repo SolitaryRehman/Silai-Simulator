@@ -2,7 +2,6 @@
 
 [ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="1_nssrw"]
 [ext_resource type="Script" uid="uid://vqwep8sckqot" path="res://Scripts/cutting_table.gd" id="1_xklhj"]
-[ext_resource type="PackedScene" uid="uid://lhla1lraejnd" path="res://Assets/Models/Tailor Shop/Desk/desk_2/desk_2.glb" id="2_xklhj"]
 [ext_resource type="Texture2D" uid="uid://c7lf4a63yq7o3" path="res://Assets/Models/Tailor Shop/Wardrobe/low-poly_psx_style_wardrobe_with_clothes_4.png" id="5_m1rg6"]
 [ext_resource type="PackedScene" uid="uid://xjmb25b50j14" path="res://Scenes/t_shirt_outline.tscn" id="6_in3w1"]
 
@@ -95,8 +94,6 @@ shadow_mesh = SubResource("ArrayMesh_iqjmc")
 script = ExtResource("1_xklhj")
 
 [node name="L_shape_desk" parent="." unique_id=1981939134 instance=ExtResource("1_nssrw")]
-
-[node name="Sketchfab_Scene" parent="." unique_id=1870967565 instance=ExtResource("2_xklhj")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1824448077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18665314, -0.69799805, -0.122406006)
