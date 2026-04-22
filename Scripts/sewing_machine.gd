@@ -57,7 +57,7 @@ func begin_sewing(pieces: Array, clothing_type: String, camera: Camera3D) -> voi
 
 	print("Seam markers found: ", _seam_markers.size())
 
-	_spawn_debug_seam_markers()
+	# _spawn_debug_seam_markers() # this function call to see the red and green points 
 	_refresh_ui()
 	sew_ui.visible  = true
 	hint_label.text = "Drag pieces — guide each seam edge to the needle"

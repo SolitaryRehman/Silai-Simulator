@@ -12,7 +12,7 @@ const TYPES := {
 
 		"display_name":        "T-Shirt",
 		"seam_marker_group":   "seam_point",   
-		"seam_radius":          0.15,
+		"seam_radius":          0.04,
 		"finished_scene":      "res://scenes/clothes/shirt_finished.tscn",
 	},
 }
