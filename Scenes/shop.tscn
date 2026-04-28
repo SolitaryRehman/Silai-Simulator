@@ -36,6 +36,7 @@
 [ext_resource type="PackedScene" uid="uid://bqerwahfv8dng" path="res://Assets/Models/Tailor Shop/Yarn/pink/dont_know_the_name_lets_call_it_yarn.glb" id="32_t7de3"]
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
+[ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
@@ -366,3 +367,6 @@ transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-
 
 [node name="Cutting_Table" parent="." unique_id=1841641713 instance=ExtResource("36_hvvn1")]
 transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-08, 1.6652274, 1.1720003, 14.39215)
+
+[node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
+transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.1957035, 0.0844644, 0.62354624)
