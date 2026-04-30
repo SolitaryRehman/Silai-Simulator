@@ -52,7 +52,7 @@ glow_enabled = true
 [node name="shop" type="Node3D" unique_id=1902384018]
 
 [node name="ProtoController" parent="." unique_id=384047026 instance=ExtResource("3_io27d")]
-transform = Transform3D(-0.29153702, 0, -0.95655954, 0, 1, 0, 0.95655954, 0, -0.29153702, 4.316893, 0, 6.1398354)
+transform = Transform3D(0.9985835, 0, 0.053207427, 0, 1, 0, -0.053207427, 0, 0.9985835, 9.455302, 0, 13.697959)
 can_move = true
 has_gravity = true
 can_jump = true

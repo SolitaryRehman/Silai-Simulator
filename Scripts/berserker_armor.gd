@@ -1,6 +1,5 @@
 extends CharacterBody3D
 
-
 @onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
 @onready var interaction_label: Label3D = $InteractionLabel
 @onready var order_ui: Panel = $CanvasLayer/OrderUI
@@ -18,23 +17,22 @@ extends CharacterBody3D
 # --- Order Data ---
 @export var customer_name: String = "Customer"
 @export var dresses: Array[Dictionary] = [
-	{"dress": "Shalwar Kameez", "fabric": "Cotton",  "color": "Navy Blue",   "measurements": "Chest: 38, Length: 42"},
-	{"dress": "Lehenga",        "fabric": "Silk",     "color": "Crimson Red", "measurements": "Waist: 30, Length: 44"},
+	{"dress": "T-Shirt", "fabric": "Cotton",  "color": "Navy Blue"},
+	{"dress": "Frock",        "fabric": "Silk",     "color": "Crimson Red"},
 ]
 @export var fabric_used: String = "4.5 meters"
 @export var xp_reward: int      = 120
 @export var coin_reward: int    = 350
 
 # --- Internal ---
-var _walking: bool    = true
-var _idle_done: bool  = false
-var _player: Node3D   = null
-
+var _walking: bool   = true
+var _idle_done: bool = false
+var _player: Node3D  = null
 
 
 func _ready() -> void:
 	interaction_label.visible = false
-	order_ui.visible       = false
+	order_ui.visible = false
 	animation_player.play(walk_anim)
 	_player = get_tree().get_first_node_in_group("player")
 
@@ -78,17 +76,15 @@ func _open_order_ui() -> void:
 		if i - 1 < dresses.size():
 			var d: Dictionary = dresses[i - 1]
 			slot.visible = true
-			slot.get_node("Number").text       = "%d." % i
-			slot.get_node("DressName").text    = d.get("dress",        "—")
-			slot.get_node("Fabric").text       = d.get("fabric",       "—")
-			slot.get_node("Color").text        = d.get("color",        "—")
-			slot.get_node("Measurements").text = d.get("measurements", "—")
+			slot.get_node("Number").text    = "%d." % i
+			slot.get_node("DressName").text = d.get("dress",   "—")
+			slot.get_node("Fabric").text    = d.get("fabric",  "—")
+			slot.get_node("Color").text     = d.get("color",   "—")
 		else:
 			slot.visible = false
 
-# CORRECT - full path including Footer
-	order_ui.get_node("Footer/FabricUsed").text = "Fabric: "  + fabric_used
-	order_ui.get_node("Footer/XpReward").text   = "XP: +"     + str(xp_reward)
-	order_ui.get_node("Footer/CoinReward").text = "Coins: "   + str(coin_reward)
+	order_ui.get_node("FabricUsed").text = fabric_used
+	order_ui.get_node("XPReward").text   = "XP: +"    + str(xp_reward)
+	order_ui.get_node("CoinReward").text = "Coins: "  + str(coin_reward)
 
 	order_ui.visible = true
