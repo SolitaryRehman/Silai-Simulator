@@ -20822,9 +20822,11 @@ mesh = SubResource("ArrayMesh_1vvvj")
 skin = SubResource("Skin_4yegl")
 
 [node name="InteractionLabel" type="Label3D" parent="." unique_id=1779848516]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6055657, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6712202, 0)
 billboard = 1
 text = "interact"
+font = ExtResource("12_18b7t")
+outline_size = 6
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=7037361]
 
@@ -20918,7 +20920,7 @@ theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
 
 [node name="Fabric" type="Label" parent="CanvasLayer/OrderUI/Slot1" unique_id=785127391]
-custom_minimum_size = Vector2(90, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
@@ -20949,7 +20951,7 @@ theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
 
 [node name="Fabric" type="Label" parent="CanvasLayer/OrderUI/Slot2" unique_id=1496028434]
-custom_minimum_size = Vector2(90, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
@@ -20980,7 +20982,7 @@ theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
 
 [node name="Fabric" type="Label" parent="CanvasLayer/OrderUI/Slot3" unique_id=129146545]
-custom_minimum_size = Vector2(90, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_18b7t")
 theme_override_font_sizes/font_size = 32
