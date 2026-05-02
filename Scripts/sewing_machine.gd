@@ -10,6 +10,9 @@ signal sewing_complete
 @onready var hint_label:     Label       = $sew_ui/hint_label
 @onready var finished_model: Node3D      = $finished_model
 
+
+var _store_button: Button
+
 # ── Runtime state ─────────────────────────────────────────────
 var _pieces:        Array      = []
 var _config:        Dictionary = {}
@@ -35,6 +38,7 @@ func _ready() -> void:
 	if finished_model:
 		finished_model.visible = false
 	_build_flash_material()
+	_build_store_button()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -230,13 +234,105 @@ func _finish_sewing() -> void:
 		if packed:
 			finished_model = packed.instantiate()
 			add_child(finished_model)
-			finished_model.global_position = needle_tip.global_position
 
 	if finished_model:
+		# ← NO position override — uses exactly where you placed it in the editor
 		finished_model.visible = true
 		finished_model.scale   = Vector3.ZERO
-		var t2 := create_tween()
-		t2.tween_property(finished_model, "scale", Vector3.ONE, 0.4).set_ease(Tween.EASE_OUT)
+
+		var t_in := create_tween()
+		t_in.tween_property(finished_model, "scale", Vector3(1.15, 1.15, 1.15), 0.30).set_ease(Tween.EASE_OUT)
+		await t_in.finished
+		var t_settle := create_tween()
+		t_settle.tween_property(finished_model, "scale", Vector3.ONE, 0.12).set_ease(Tween.EASE_IN_OUT)
+		await t_settle.finished
+
+	sew_ui.visible         = true
+	progress_bar.visible   = false
+	status_label.visible   = false
+	hint_label.visible     = false
+	_store_button.visible  = true
+
+	_store_button.modulate = Color(1, 1, 1, 0)
+	var t_btn := create_tween()
+	t_btn.tween_property(_store_button, "modulate", Color(1, 1, 1, 1), 0.35)
+
+func _build_store_button() -> void:
+	_store_button = Button.new()
+	sew_ui.add_child(_store_button)
+
+	# ── Position: mid-left ────────────────────────────────────
+	_store_button.anchor_left   = 0.0
+	_store_button.anchor_right  = 0.0
+	_store_button.anchor_top    = 0.5
+	_store_button.anchor_bottom = 0.5
+	_store_button.offset_left   = 20.0
+	_store_button.offset_right  = 220.0
+	_store_button.offset_top    = -40.0
+	_store_button.offset_bottom = 40.0
+
+	_store_button.text = "STORE"
+	_store_button.add_theme_font_size_override("font_size", 17)
+
+	# Normal — dark with gold border (matches your cut button style)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color           = Color(0.10, 0.09, 0.08, 0.95)
+	normal.border_color       = Color(0.85, 0.68, 0.30, 1.0)
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(6)
+	normal.set_content_margin_all(14)
+	normal.shadow_color       = Color(0.85, 0.68, 0.30, 0.25)
+	normal.shadow_size        = 8
+	_store_button.add_theme_stylebox_override("normal", normal)
+
+	# Hover
+	var hover := StyleBoxFlat.new()
+	hover.bg_color            = Color(0.85, 0.68, 0.30, 0.18)
+	hover.border_color        = Color(0.95, 0.80, 0.40, 1.0)
+	hover.set_border_width_all(2)
+	hover.set_corner_radius_all(6)
+	hover.set_content_margin_all(14)
+	hover.shadow_color        = Color(0.85, 0.68, 0.30, 0.45)
+	hover.shadow_size         = 12
+	_store_button.add_theme_stylebox_override("hover", hover)
+
+	# Pressed
+	var pressed := StyleBoxFlat.new()
+	pressed.bg_color          = Color(0.85, 0.68, 0.30, 0.35)
+	pressed.border_color      = Color(1.0, 0.92, 0.55, 1.0)
+	pressed.set_border_width_all(2)
+	pressed.set_corner_radius_all(6)
+	pressed.set_content_margin_all(14)
+	_store_button.add_theme_stylebox_override("pressed", pressed)
+
+	_store_button.add_theme_color_override("font_color",         Color(0.90, 0.75, 0.35, 1.0))
+	_store_button.add_theme_color_override("font_hover_color",   Color(1.00, 0.90, 0.50, 1.0))
+	_store_button.add_theme_color_override("font_pressed_color", Color(1.00, 1.00, 0.70, 1.0))
+
+	_store_button.visible = false
+	_store_button.pressed.connect(_on_store_pressed)
+
+func _on_store_pressed() -> void:
+	
+	# Fade out the store button
+	var t_btn := create_tween()
+	t_btn.tween_property(_store_button, "modulate", Color(1, 1, 1, 0), 0.2)
+	await t_btn.finished
+	_store_button.visible = false
+
+	# Shrink out the finished shirt
+	if finished_model and finished_model.visible:
+		var t_out := create_tween()
+		t_out.tween_property(finished_model, "scale", Vector3.ZERO, 0.30).set_ease(Tween.EASE_IN)
+		await t_out.finished
+		finished_model.visible = false
+		finished_model.scale   = Vector3.ONE   # reset for next use
+
+	# Restore UI widget visibility for next round
+	sew_ui.visible       = false
+	progress_bar.visible = true
+	status_label.visible = true
+	hint_label.visible   = true
 
 	emit_signal("sewing_complete")
 

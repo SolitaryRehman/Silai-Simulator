@@ -53,15 +53,6 @@ glow_enabled = true
 
 [node name="ProtoController" parent="." unique_id=384047026 instance=ExtResource("3_io27d")]
 transform = Transform3D(0.9985835, 0, 0.053207427, 0, 1, 0, -0.053207427, 0, 0.9985835, 9.455302, 0, 13.697959)
-can_move = true
-has_gravity = true
-can_jump = true
-look_speed = 0.002
-base_speed = 7.0
-jump_velocity = 4.5
-sprint_speed = 10.0
-freefly_speed = 25.0
-input_sprint = "sprint"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=728512845]
 environment = SubResource("Environment_k6jq0")

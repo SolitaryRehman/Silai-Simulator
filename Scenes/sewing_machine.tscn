@@ -21,7 +21,7 @@ shape = SubResource("CapsuleShape3D_by7c8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5885285, 0.15124455, -0.19416863)
 
 [node name="finished_model" parent="." unique_id=1750228760 instance=ExtResource("2_07mj2")]
-transform = Transform3D(2, 0, 0, 0, 1.8793852, 0.68404025, 0, -0.68404025, 1.8793852, -0.08976832, -1.3623182, 1.6181262)
+transform = Transform3D(2.3, 0, 0, 0, 2.161293, 0.78664625, 0, -0.78664625, 2.161293, -0.08976832, -0.6461688, 0.8567941)
 
 [node name="sew_ui" type="CanvasLayer" parent="." unique_id=711172054]
 

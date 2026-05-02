@@ -15,22 +15,13 @@ height = 1.8
 
 [node name="ProtoController" type="CharacterBody3D" unique_id=1551219379 groups=["player"]]
 script = ExtResource("1_ucva2")
-can_move = null
-has_gravity = null
-can_jump = null
 can_sprint = true
 can_freefly = true
-look_speed = null
-base_speed = null
-jump_velocity = null
-sprint_speed = null
-freefly_speed = null
 input_left = "move_left"
 input_right = "move_right"
 input_forward = "move_up"
 input_back = "move_down"
 input_jump = "jump"
-input_sprint = null
 input_freefly = "free_fly"
 
 [node name="Mesh" type="MeshInstance3D" parent="." unique_id=1797359653]
