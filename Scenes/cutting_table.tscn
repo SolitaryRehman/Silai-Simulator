@@ -2,8 +2,11 @@
 
 [ext_resource type="PackedScene" uid="uid://cwv8qjuredw4t" path="res://Scenes/l_shape_desk.tscn" id="1_nssrw"]
 [ext_resource type="Script" uid="uid://vqwep8sckqot" path="res://Scripts/cutting_table.gd" id="1_xklhj"]
+[ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="3_ehqne"]
 [ext_resource type="Texture2D" uid="uid://c7lf4a63yq7o3" path="res://Assets/Models/Tailor Shop/Wardrobe/low-poly_psx_style_wardrobe_with_clothes_4.png" id="5_m1rg6"]
 [ext_resource type="PackedScene" uid="uid://xjmb25b50j14" path="res://Scenes/t_shirt_outline.tscn" id="6_in3w1"]
+[ext_resource type="Texture2D" uid="uid://bdmgc4pr2nhgw" path="res://Assets/Images/Forward backward button/forward backword button.png" id="6_m1rg6"]
+[ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="7_in3w1"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hhnd4"]
 size = Vector3(2.1048737, 2.395996, 5.304016)
@@ -90,6 +93,36 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_iqjmc")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_in3w1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_j4xrv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4oet5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nk05s"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1pe74"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ixj5i"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jektj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k4u8u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g8oyv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hwfjo"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_sribc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7uf4u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_coxbn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tencv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_f0elh"]
+
 [node name="Cutting_Table" type="Area3D" unique_id=1005178347]
 script = ExtResource("1_xklhj")
 
@@ -105,10 +138,10 @@ shape = SubResource("BoxShape3D_ehqne")
 
 [node name="PromptLabel" type="Label3D" parent="." unique_id=957712316]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -0.7159281, 0.7611041, -1.0507003)
-visible = false
 billboard = 1
 text = "Press E to Cut
 "
+font = ExtResource("3_ehqne")
 
 [node name="table_camera" type="Camera3D" parent="." unique_id=1749531102]
 transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, 0, 1.4250352, -0.80647504)
@@ -166,14 +199,166 @@ transform = Transform3D(-3.934025e-09, -0.09, 3.934025e-09, 0, -3.934025e-09, -0
 
 [node name="cut_ui" type="CanvasLayer" parent="." unique_id=1481032438]
 
-[node name="cut_button" type="Button" parent="cut_ui" unique_id=439539773]
+[node name="DressImg" type="TextureRect" parent="cut_ui" unique_id=698633693]
+offset_left = 11.0
+offset_top = 101.0
+offset_right = 262.0
+offset_bottom = 256.0
+texture = ExtResource("6_m1rg6")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Button" type="Button" parent="cut_ui/DressImg" unique_id=960850488]
+layout_mode = 0
+offset_left = 199.0
+offset_top = 61.0
+offset_right = 231.0
+offset_bottom = 95.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_in3w1")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_j4xrv")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_4oet5")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_nk05s")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1pe74")
+
+[node name="Button2" type="Button" parent="cut_ui/DressImg" unique_id=642208724]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 61.0
+offset_right = 51.0
+offset_bottom = 96.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_ixj5i")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_jektj")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_k4u8u")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_g8oyv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hwfjo")
+
+[node name="Label" type="Label" parent="cut_ui/DressImg" unique_id=88703482]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 56.0
+offset_right = 166.0
+offset_bottom = 98.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="FabricImg" type="TextureRect" parent="cut_ui" unique_id=1031517139]
+offset_left = 11.0
+offset_top = 256.0
+offset_right = 262.0
+offset_bottom = 411.0
+texture = ExtResource("6_m1rg6")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Button" type="Button" parent="cut_ui/FabricImg" unique_id=614058594]
+layout_mode = 0
+offset_left = 199.0
+offset_top = 61.0
+offset_right = 231.0
+offset_bottom = 95.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_in3w1")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_j4xrv")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_4oet5")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_nk05s")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1pe74")
+
+[node name="Button2" type="Button" parent="cut_ui/FabricImg" unique_id=1321048604]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 61.0
+offset_right = 51.0
+offset_bottom = 96.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_ixj5i")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_jektj")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_k4u8u")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_g8oyv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hwfjo")
+
+[node name="Label" type="Label" parent="cut_ui/FabricImg" unique_id=299492895]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 56.0
+offset_right = 166.0
+offset_bottom = 98.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ColorImg" type="TextureRect" parent="cut_ui" unique_id=694074745]
+offset_left = 11.0
+offset_top = 411.0
+offset_right = 262.0
+offset_bottom = 566.0
+texture = ExtResource("6_m1rg6")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Button" type="Button" parent="cut_ui/ColorImg" unique_id=423965481]
+layout_mode = 0
+offset_left = 199.0
+offset_top = 61.0
+offset_right = 231.0
+offset_bottom = 95.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_in3w1")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_j4xrv")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_4oet5")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_nk05s")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1pe74")
+
+[node name="Button2" type="Button" parent="cut_ui/ColorImg" unique_id=2068620351]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 61.0
+offset_right = 51.0
+offset_bottom = 96.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_ixj5i")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_jektj")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_k4u8u")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_g8oyv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hwfjo")
+
+[node name="Label" type="Label" parent="cut_ui/ColorImg" unique_id=886004807]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 57.0
+offset_right = 166.0
+offset_bottom = 99.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="cut_ui" unique_id=433234778]
+offset_left = 906.0
+offset_top = 238.0
+offset_right = 1182.0
+offset_bottom = 424.0
+texture = ExtResource("7_in3w1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="cut_button" type="Button" parent="cut_ui/TextureRect" unique_id=439539773]
+layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -8.0
-offset_top = -4.0
-offset_bottom = 4.0
+offset_left = -176.0
+offset_top = -24.0
+offset_right = -100.0
+offset_bottom = 21.0
 grow_horizontal = 0
 grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_sribc")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_7uf4u")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_coxbn")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_tencv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_f0elh")

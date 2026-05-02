@@ -226,7 +226,11 @@ func _finish_sewing() -> void:
 	for piece in get_tree().get_nodes_in_group("sewing_pieces"):
 		var t := create_tween()
 		t.tween_property(piece, "scale", Vector3.ZERO, 0.28).set_ease(Tween.EASE_IN)
+	
 	await get_tree().create_timer(0.32).timeout
+	
+	for piece in get_tree().get_nodes_in_group("sewing_pieces"):
+		piece.visible = false
 
 	# Load finished garment from config if not already in scene
 	if finished_model == null and _config.has("finished_scene"):

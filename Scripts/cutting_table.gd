@@ -9,8 +9,31 @@ extends Area3D
 @onready var back_piece: MeshInstance3D  = $back_piece
 @onready var front_outline: Sprite3D     = $front_outline
 @onready var back_outline: Sprite3D      = $back_outline
+
 @onready var cut_ui: CanvasLayer         = $cut_ui
-@onready var cut_button: Button          = $cut_ui/cut_button
+@onready var cut_button: Button = $cut_ui/TextureRect/cut_button
+
+# ── Selector nodes (already in scene) ────────────────────────
+@onready var label_dress:   Label         = $cut_ui/DressImg/Label
+@onready var label_fabric:  Label         = $cut_ui/FabricImg/Label
+@onready var label_color:   Label         = $cut_ui/ColorImg/Label
+
+@onready var dress_left:    Button        = $cut_ui/DressImg/Button
+@onready var dress_right:   Button        = $cut_ui/DressImg/Button2
+@onready var fabric_left:   Button        = $cut_ui/FabricImg/Button
+@onready var fabric_right:  Button        = $cut_ui/FabricImg/Button2
+@onready var color_left:    Button        = $cut_ui/ColorImg/Button
+@onready var color_right:   Button        = $cut_ui/ColorImg/Button2
+
+
+# ── Selector state ────────────────────────────────────────────
+var _dress_pool:  Array = ["T-Shirt", "Frock", "Bishop Gown", "Pants", "Jacket", "Maxi", "Lehenga"]
+var _fabric_pool: Array = ["Cotton", "Silk", "Linen", "Polyester", "Lawn", "Chiffon", "Denim"]
+var _color_pool:  Array = ["Navy Blue", "Crimson Red", "Forest Green", "Pearl White", "Jet Black", "Purple", "Golden", "Sky Blue"]
+
+var _dress_index:  int = 0
+var _fabric_index: int = 0
+var _color_index:  int = 0
 
 var player_ref: CharacterBody3D = null
 var _cut_done: bool = false   # tracks which action the button triggers
@@ -38,82 +61,61 @@ func _ready():
 
 	front_piece.visible  = false
 	back_piece.visible   = false
+	
+	# ── Connect selector buttons ──────────────────────────────
+	dress_left.pressed.connect(_on_dress_left)
+	dress_right.pressed.connect(_on_dress_right)
+	fabric_left.pressed.connect(_on_fabric_left)
+	fabric_right.pressed.connect(_on_fabric_right)
+	color_left.pressed.connect(_on_color_left)
+	color_right.pressed.connect(_on_color_right)
 
-	# Create the button in code and add it to the CanvasLayer
-	cut_button = Button.new()
-	cut_ui.add_child(cut_button)
-
-	_setup_cut_button()
-
+	# ── Set initial label text ────────────────────────────────
+	label_dress.text  = _dress_pool[0]
+	label_fabric.text = _fabric_pool[0]
+	label_color.text  = _color_pool[0]
+	
 	# Hide UI until cutting starts
 	cut_ui.visible = false
 
 	cut_button.pressed.connect(_on_cut_button_pressed)   # ← single handler, branches by state
-
+	cut_button.text = "CUT"
+	
 	print("CuttingTable ready!")
 
 
-# ── Button press dispatcher ────────────────────────────────────
+# ── Arrow callbacks ───────────────────────────────────────────
+func _on_dress_left() -> void:
+	_dress_index = (_dress_index - 1 + _dress_pool.size()) % _dress_pool.size()
+	label_dress.text = _dress_pool[_dress_index]
 
+func _on_dress_right() -> void:
+	_dress_index = (_dress_index + 1) % _dress_pool.size()
+	label_dress.text = _dress_pool[_dress_index]
+
+func _on_fabric_left() -> void:
+	_fabric_index = (_fabric_index - 1 + _fabric_pool.size()) % _fabric_pool.size()
+	label_fabric.text = _fabric_pool[_fabric_index]
+
+func _on_fabric_right() -> void:
+	_fabric_index = (_fabric_index + 1) % _fabric_pool.size()
+	label_fabric.text = _fabric_pool[_fabric_index]
+
+func _on_color_left() -> void:
+	_color_index = (_color_index - 1 + _color_pool.size()) % _color_pool.size()
+	label_color.text = _color_pool[_color_index]
+
+func _on_color_right() -> void:
+	_color_index = (_color_index + 1) % _color_pool.size()
+	label_color.text = _color_pool[_color_index]
+
+
+# ── Button press dispatcher ────────────────────────────────────
 func _on_cut_button_pressed():
 	if _cut_done:
 		_go_to_sewing()
 	else:
 		_do_cut()
-
-
-func _setup_cut_button():
-	# ── Position: mid-right ───────────────────────────────────
-	cut_button.anchor_left   = 1.0
-	cut_button.anchor_right  = 1.0
-	cut_button.anchor_top    = 0.5
-	cut_button.anchor_bottom = 0.5
-	cut_button.offset_left   = -220.0
-	cut_button.offset_right  = -20.0
-	cut_button.offset_top    = -40.0
-	cut_button.offset_bottom = 40.0
-
-	cut_button.text = "✂   CUT FABRIC"
-
-	# ── Font size ─────────────────────────────────────────────
-	cut_button.add_theme_font_size_override("font_size", 17)
-
-	# ── Normal state — dark charcoal with gold border ─────────
-	var normal := StyleBoxFlat.new()
-	normal.bg_color             = Color(0.10, 0.09, 0.08, 0.95)
-	normal.border_color         = Color(0.85, 0.68, 0.30, 1.0)   # gold
-	normal.set_border_width_all(2)
-	normal.set_corner_radius_all(6)
-	normal.set_content_margin_all(14)
-	normal.shadow_color         = Color(0.85, 0.68, 0.30, 0.25)
-	normal.shadow_size          = 8
-	cut_button.add_theme_stylebox_override("normal", normal)
-
-	# ── Hover state — gold tint ───────────────────────────────
-	var hover := StyleBoxFlat.new()
-	hover.bg_color              = Color(0.85, 0.68, 0.30, 0.18)
-	hover.border_color          = Color(0.95, 0.80, 0.40, 1.0)
-	hover.set_border_width_all(2)
-	hover.set_corner_radius_all(6)
-	hover.set_content_margin_all(14)
-	hover.shadow_color          = Color(0.85, 0.68, 0.30, 0.45)
-	hover.shadow_size           = 12
-	cut_button.add_theme_stylebox_override("hover", hover)
-
-	# ── Pressed state — bright gold flash ────────────────────
-	var pressed := StyleBoxFlat.new()
-	pressed.bg_color            = Color(0.85, 0.68, 0.30, 0.35)
-	pressed.border_color        = Color(1.0, 0.92, 0.55, 1.0)
-	pressed.set_border_width_all(2)
-	pressed.set_corner_radius_all(6)
-	pressed.set_content_margin_all(14)
-	cut_button.add_theme_stylebox_override("pressed", pressed)
-
-	# ── Text colours ──────────────────────────────────────────
-	cut_button.add_theme_color_override("font_color",         Color(0.90, 0.75, 0.35, 1.0))
-	cut_button.add_theme_color_override("font_hover_color",   Color(1.00, 0.90, 0.50, 1.0))
-	cut_button.add_theme_color_override("font_pressed_color", Color(1.00, 1.00, 0.70, 1.0))
-
 
 
 func _process(_delta):
@@ -156,6 +158,12 @@ func _start_cutting():
 
 
 func _do_cut():
+	
+	GameManager.current_order["dress"]  = _dress_pool[_dress_index]
+	GameManager.current_order["fabric"] = _fabric_pool[_fabric_index]
+	GameManager.current_order["color"]  = _color_pool[_color_index]
+	GameManager.current_order["type"]   = _dress_pool[_dress_index].to_lower().replace(" ", "_")
+	
 	cut_ui.visible = false
 
 	fabric_mesh.visible   = false
@@ -195,7 +203,7 @@ func _on_cutting_complete():
 
 	# ── Show "Next" button instead of returning to player ──────
 	_cut_done = true
-	cut_button.text = " NEXT → "
+	cut_button.text = "NEXT →"
 	cut_ui.visible  = true
 
 
@@ -224,14 +232,15 @@ func _go_to_sewing() -> void:
 
 
 func _on_sewing_complete() -> void:
-	# Reset cutting table state for next order
 	_cut_done = false
-	cut_button.text = "✂   CUT FABRIC"
+	cut_button.text = "CUT"
 
 	front_piece.remove_from_group("sewing_pieces")
 	back_piece.remove_from_group("sewing_pieces")
-	front_piece.scale = Vector3.ONE   # restore if shrunk
-	back_piece.scale  = Vector3.ONE
+	front_piece.scale   = Vector3.ONE
+	back_piece.scale    = Vector3.ONE
+	front_piece.visible = false   # ← keep hidden
+	back_piece.visible  = false   # ← keep hidden
 
 	await _switch_to_player_camera()
 	player_ref.unlock_from_minigame()

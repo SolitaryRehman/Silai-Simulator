@@ -68,6 +68,13 @@ func _ready() -> void:
 	close_btn.pressed.connect(_close_order_ui)
 	accept_btn.pressed.connect(_accept_order)
 
+	# ── When sewing finishes, mark this customer's order done ──
+	GameManager.garment_sewn.connect(_on_garment_sewn)   # ← add this
+
+
+func _on_garment_sewn(_type: String) -> void:
+	complete_order()   # unlocks customer for a new order
+
 
 func _physics_process(delta: float) -> void:
 	if not _walking:
@@ -172,13 +179,16 @@ func _close_order_ui() -> void:
 
 
 func _accept_order() -> void:
-	_order_pending              = true    #  Lock interaction
-	_current_order["status"]    = "pending"
+	_order_pending           = true
+	_current_order["status"] = "pending"
 	_current_order["timestamp"] = Time.get_datetime_string_from_system()
 
 	print("Order accepted: ", _current_order)
 	_save_order_to_database(_current_order)
 	_close_order_ui()
+
+	# ── Send to GameManager so cutting table becomes active ──
+	GameManager.receive_order(_current_order)   # ← add this line
 
 
 # --- Call this from your delivery/crafting script when order is fulfilled ---

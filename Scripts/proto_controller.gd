@@ -64,9 +64,6 @@ func _ready() -> void:
 	GameManager.order_received.connect(_on_order_received)
 	GameManager.garment_sewn.connect(_on_garment_sewn)
 	
-	# TEMP: small delay so GameManager is fully ready
-	await get_tree().create_timer(0.5).timeout
-	GameManager.receive_order("tshirt")
  
  
 func _unhandled_input(event: InputEvent) -> void:
