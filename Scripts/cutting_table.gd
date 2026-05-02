@@ -5,15 +5,19 @@ extends Area3D
 @onready var fabric_mesh: MeshInstance3D = $fabric_plane
 @onready var table_camera: Camera3D      = $table_camera
 @onready var sewing_camera: Camera3D     = $sewing_camera
+
 @onready var front_piece: MeshInstance3D = $front_piece
-@onready var back_piece: MeshInstance3D  = $back_piece
+@onready var back_piece: MeshInstance3D = $back_piece
 @onready var front_outline: Sprite3D     = $front_outline
 @onready var back_outline: Sprite3D      = $back_outline
 
 @onready var cut_ui: CanvasLayer         = $cut_ui
 @onready var cut_button: Button = $cut_ui/TextureRect/cut_button
 
-# ── Selector nodes (already in scene) ────────────────────────
+@onready var dress_img:  TextureRect = $cut_ui/DressImg
+@onready var fabric_img: TextureRect = $cut_ui/FabricImg
+@onready var color_img:  TextureRect = $cut_ui/ColorImg
+
 @onready var label_dress:   Label         = $cut_ui/DressImg/Label
 @onready var label_fabric:  Label         = $cut_ui/FabricImg/Label
 @onready var label_color:   Label         = $cut_ui/ColorImg/Label
@@ -145,8 +149,13 @@ func _start_cutting():
 	GameManager.current_state = GameManager.GameState.CUTTING
 	player_ref.lock_for_minigame()
 	prompt_label.visible = false
-
+	
+	dress_img.visible  = true 
+	fabric_img.visible = true  
+	color_img.visible  = true
+	
 	fabric_mesh.visible   = true
+	
 	front_outline.visible = true
 	back_outline.visible  = true
 	front_piece.visible   = false
@@ -163,6 +172,10 @@ func _do_cut():
 	GameManager.current_order["fabric"] = _fabric_pool[_fabric_index]
 	GameManager.current_order["color"]  = _color_pool[_color_index]
 	GameManager.current_order["type"]   = _dress_pool[_dress_index].to_lower().replace(" ", "_")
+	
+	dress_img.visible  = false   
+	fabric_img.visible = false   
+	color_img.visible  = false
 	
 	cut_ui.visible = false
 
