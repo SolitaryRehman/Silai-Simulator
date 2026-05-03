@@ -48,10 +48,17 @@ var _table_cam_global_rot: Vector3
 var _sewing_cam_global_pos: Vector3   # save sewing cam target
 var _sewing_cam_global_rot: Vector3
 
+var _front_piece_init_rot: Vector3
+var _back_piece_init_rot: Vector3
+
 func _ready():
+	
 	connect("body_entered", _on_body_entered)
 	connect("body_exited",  _on_body_exited)
-
+	
+	_front_piece_init_rot = front_piece.rotation_degrees
+	_back_piece_init_rot  = back_piece.rotation_degrees
+	
 	# Save BEFORE anything moves the camera
 	_table_cam_global_pos = table_camera.global_position
 	_table_cam_global_rot = table_camera.rotation_degrees
@@ -167,6 +174,10 @@ func _start_cutting():
 
 
 func _do_cut():
+	
+	# Reset transforms from any previous cut
+	front_piece.rotation_degrees = _front_piece_init_rot
+	back_piece.rotation_degrees  = _back_piece_init_rot
 	
 	GameManager.current_order["dress"]  = _dress_pool[_dress_index]
 	GameManager.current_order["fabric"] = _fabric_pool[_fabric_index]
