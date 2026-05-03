@@ -16,11 +16,11 @@ extends CharacterBody3D
 ## Look around rotation speed.
 @export var look_speed : float = 0.002
 ## Normal speed.
-@export var base_speed : float = 7.0
+@export var base_speed : float = 3.5
 ## Speed of jump.
 @export var jump_velocity : float = 4.5
 ## How fast do we run?
-@export var sprint_speed : float = 10.0
+@export var sprint_speed : float = 6.0
 ## How fast do we freefly?
 @export var freefly_speed : float = 25.0
  
@@ -65,9 +65,6 @@ func _ready() -> void:
 	GameManager.order_received.connect(_on_order_received)
 	GameManager.garment_sewn.connect(_on_garment_sewn)
 	
-	# TEMP: small delay so GameManager is fully ready
-	await get_tree().create_timer(0.5).timeout
-	GameManager.receive_order("tshirt")
  
  
 func _unhandled_input(event: InputEvent) -> void:
@@ -77,8 +74,6 @@ func _unhandled_input(event: InputEvent) -> void:
  
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		capture_mouse()
-	if Input.is_key_pressed(KEY_ESCAPE):
-		release_mouse()
  
 	if mouse_captured and event is InputEventMouseMotion:
 		rotate_look(event.relative)

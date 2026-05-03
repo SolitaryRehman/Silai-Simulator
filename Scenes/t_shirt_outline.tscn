@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://xjmb25b50j14"]
+
+[ext_resource type="Texture2D" uid="uid://cyp2no0yewxk5" path="res://Assets/Models/Tailor Shop/Clothes Outlines/t-shirt/black-dotted-t-shirt-icon-vector-13780465.png" id="1_fuc42"]
+
+[node name="t_shirt_outline" type="Sprite3D"]
+transform = Transform3D(0.15, 0, 0, 0, 0.15, 0, 0, 0, 0.15, 0, 0, 0)
+texture = ExtResource("1_fuc42")

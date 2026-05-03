@@ -1,15 +1,80 @@
-[gd_scene load_steps=3 format=3 uid="uid://bv0ubxe0fk8iu"]
+[gd_scene format=3 uid="uid://bv0ubxe0fk8iu"]
 
-[ext_resource type="PackedScene" uid="uid://igux220s3m1w" path="res://Assets/Models/Sewing Machine/vintage_sewing_machine.glb" id="1_fxr13"]
+[ext_resource type="PackedScene" uid="uid://igux220s3m1w" path="res://Assets/Models/Tailor Shop/Sewing Machine/vintage_sewing_machine.glb" id="1_fxr13"]
+[ext_resource type="Script" uid="uid://c02ld806tmslg" path="res://Scripts/sewing_machine.gd" id="1_lwsp0"]
+[ext_resource type="PackedScene" uid="uid://csuxoqx5mu6rc" path="res://Assets/Models/Tailor Shop/Clothes/T-shirt/oversized_t-shirt.glb" id="2_07mj2"]
+[ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="4_lqahp"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_by7c8"]
 radius = 0.61083984
 height = 1.9465332
 
-[node name="sewing_machine" type="StaticBody3D"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_m4wqb"]
 
-[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_fxr13")]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qweer"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k1by0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cky2j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l0y68"]
+
+[node name="sewing_machine" type="StaticBody3D" unique_id=941612735 groups=["sewing_machine"]]
+script = ExtResource("1_lwsp0")
+
+[node name="sewing_machine" parent="." unique_id=344145578 instance=ExtResource("1_fxr13")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1285168216]
 transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.037231468, 0.30685857, -0.22733322)
 shape = SubResource("CapsuleShape3D_by7c8")
+
+[node name="needle_tip" type="Node3D" parent="." unique_id=1266503309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5885285, 0.15124455, -0.19416863)
+
+[node name="finished_model" parent="." unique_id=1750228760 instance=ExtResource("2_07mj2")]
+transform = Transform3D(2.3, 0, 0, 0, 2.161293, 0.78664625, 0, -0.78664625, 2.161293, -0.08976832, -0.6461688, 0.8567941)
+
+[node name="sew_ui" type="CanvasLayer" parent="." unique_id=711172054]
+
+[node name="progress_bar" type="ProgressBar" parent="sew_ui" unique_id=852375410]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -2.0
+offset_right = 2.0
+offset_bottom = 27.0
+grow_horizontal = 2
+
+[node name="status_label" type="Label" parent="sew_ui" unique_id=2016338020]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="hint_label" type="Label" parent="sew_ui" unique_id=417759414]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 23.0
+grow_horizontal = 0
+
+[node name="TextureRect" type="TextureRect" parent="sew_ui" unique_id=1846574814]
+offset_left = -29.0
+offset_top = 188.0
+offset_right = 250.0
+offset_bottom = 423.0
+texture = ExtResource("4_lqahp")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="store_button" type="Button" parent="sew_ui/TextureRect" unique_id=1958938120]
+layout_mode = 0
+offset_left = 101.0
+offset_top = 91.0
+offset_right = 181.0
+offset_bottom = 143.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_m4wqb")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_qweer")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_k1by0")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_cky2j")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_l0y68")
