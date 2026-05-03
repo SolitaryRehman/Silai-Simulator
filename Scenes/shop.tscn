@@ -37,6 +37,8 @@
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
+[ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
+[ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
@@ -48,6 +50,26 @@ background_mode = 2
 sky = SubResource("Sky_fdj0q")
 tonemap_mode = 2
 glow_enabled = true
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wdw6i"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8crsr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rjsrv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2x7ys"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5menp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4lu2m"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_54a3j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vcmnq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n8j25"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oscnn"]
 
 [node name="shop" type="Node3D" unique_id=1902384018]
 
@@ -361,3 +383,62 @@ transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-
 
 [node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
 transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.1957035, 0.0844644, 1.0492007)
+target_z = 10.0
+walk_anim = "Walk"
+
+[node name="PauseCanvas" type="CanvasLayer" parent="." unique_id=1344630697]
+script = ExtResource("38_3ujtm")
+
+[node name="TextureRect" type="TextureRect" parent="PauseCanvas" unique_id=2033594718]
+offset_left = 134.0
+offset_top = 52.0
+offset_right = 1018.0
+offset_bottom = 595.0
+texture = ExtResource("39_ecslm")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResumeButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1754216025]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 163.0
+offset_right = 589.0
+offset_bottom = 219.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_wdw6i")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_8crsr")
+
+[node name="SaveButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1271127817]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 228.0
+offset_right = 589.0
+offset_bottom = 284.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rjsrv")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_2x7ys")
+
+[node name="LoadButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1818530474]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 294.0
+offset_right = 589.0
+offset_bottom = 350.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_5menp")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_4lu2m")
+
+[node name="OptionsButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=510749474]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 358.0
+offset_right = 589.0
+offset_bottom = 414.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_54a3j")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_vcmnq")
+
+[node name="QuitButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=711193461]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 426.0
+offset_right = 589.0
+offset_bottom = 482.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_n8j25")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_oscnn")

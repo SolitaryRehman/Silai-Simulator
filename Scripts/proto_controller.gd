@@ -73,8 +73,6 @@ func _unhandled_input(event: InputEvent) -> void:
  
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		capture_mouse()
-	if Input.is_key_pressed(KEY_ESCAPE):
-		release_mouse()
  
 	if mouse_captured and event is InputEventMouseMotion:
 		rotate_look(event.relative)

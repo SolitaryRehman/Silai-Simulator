@@ -148,9 +148,6 @@ func _process(_delta):
 	if GameManager.current_state != GameManager.GameState.CUTTING:
 		return
 
-	if Input.is_action_just_pressed("ui_cancel"):
-		_on_cutting_cancelled()
-
 
 func _start_cutting():
 	GameManager.current_state = GameManager.GameState.CUTTING
