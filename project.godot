@@ -17,7 +17,12 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Database="*uid://cm500yy6320g3"
 GameManager="*res://Scripts/GameManager.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg")
 
 [filesystem]
 

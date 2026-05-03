@@ -370,4 +370,11 @@ transform = Transform3D(-3.278354e-08, 0, 0.75, 0, 0.75, 0, -0.75, 0, -3.278354e
 [node name="Cutting_Table" parent="." instance=ExtResource("36_hvvn1")]
 transform = Transform3D(-3.278354e-08, 0, -0.75, 0, 0.75, 0, 0.75, 0, -3.278354e-08, 2.034748, 1.4460268, 14.253471)
 
+<<<<<<< Updated upstream
 [node name="CuttingMinigame" parent="." instance=ExtResource("37_1bx8h")]
+=======
+[node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
+transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.1957035, 0.0844644, 1.0492007)
+target_z = 10.0
+walk_anim = "Walk"
+>>>>>>> Stashed changes

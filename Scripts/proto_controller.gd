@@ -1,3 +1,4 @@
+#photo_controller.gd
 extends CharacterBody3D
  
 ## Can we move around?
