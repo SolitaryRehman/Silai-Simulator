@@ -51,6 +51,9 @@ var _sewing_cam_global_rot: Vector3
 var _front_piece_init_rot: Vector3
 var _back_piece_init_rot: Vector3
 
+var _front_piece_init_pos: Vector3
+var _back_piece_init_pos: Vector3
+
 func _ready():
 	
 	connect("body_entered", _on_body_entered)
@@ -58,6 +61,9 @@ func _ready():
 	
 	_front_piece_init_rot = front_piece.rotation_degrees
 	_back_piece_init_rot  = back_piece.rotation_degrees
+	
+	_front_piece_init_pos = front_piece.position
+	_back_piece_init_pos  = back_piece.position
 	
 	# Save BEFORE anything moves the camera
 	_table_cam_global_pos = table_camera.global_position
@@ -172,9 +178,7 @@ func _start_cutting():
 
 func _do_cut():
 	
-	# Reset transforms from any previous cut
-	front_piece.rotation_degrees = _front_piece_init_rot
-	back_piece.rotation_degrees  = _back_piece_init_rot
+	_reset_pieces()
 	
 	GameManager.current_order["dress"]  = _dress_pool[_dress_index]
 	GameManager.current_order["fabric"] = _fabric_pool[_fabric_index]
@@ -258,8 +262,9 @@ func _on_sewing_complete() -> void:
 
 	front_piece.remove_from_group("sewing_pieces")
 	back_piece.remove_from_group("sewing_pieces")
-	front_piece.scale   = Vector3.ONE
-	back_piece.scale    = Vector3.ONE
+	
+	_reset_pieces()
+	
 	front_piece.visible = false   # ← keep hidden
 	back_piece.visible  = false   # ← keep hidden
 
@@ -353,3 +358,14 @@ func _on_body_exited(body):
 	if body.is_in_group("player"):
 		player_ref = null
 		prompt_label.visible = false
+
+
+func _reset_pieces() -> void:
+	front_piece.rotation_degrees = _front_piece_init_rot
+	back_piece.rotation_degrees  = _back_piece_init_rot
+	front_piece.position         = _front_piece_init_pos
+	back_piece.position          = _back_piece_init_pos
+	front_piece.scale            = Vector3.ONE
+	back_piece.scale             = Vector3.ONE
+	front_piece.visible          = false
+	back_piece.visible           = false
