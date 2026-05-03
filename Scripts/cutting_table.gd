@@ -1,28 +1,12 @@
 # cutting_table.gd
 extends Area3D
-<<<<<<< Updated upstream
- 
-# ─────────────────────────────────────────────
-#  Node references
-#  Adjust the paths if your scene tree differs
-# ─────────────────────────────────────────────
-@onready var cutting_minigame: CanvasLayer = $"../CuttingMinigame"
-@onready var prompt_label: Label3D = $PromptLabel
- 
-var player_ref: CharacterBody3D = null
- 
- 
-func _ready():
-	connect("body_entered", _on_body_entered)
-	connect("body_exited", _on_body_exited)
-	#---------------------------------------------------------temp
-=======
 
 
 @onready var prompt_label: Label3D       = $PromptLabel
 @onready var fabric_mesh: MeshInstance3D = $fabric_plane
 @onready var table_camera: Camera3D      = $table_camera
 @onready var sewing_camera: Camera3D     = $sewing_camera
+
 @onready var front_piece: MeshInstance3D = $front_piece
 @onready var back_piece: MeshInstance3D  = $back_piece
 @onready var front_outline: Sprite3D     = $front_outline
@@ -31,7 +15,10 @@ func _ready():
 @onready var cut_ui: CanvasLayer         = $cut_ui
 @onready var cut_button: Button = $cut_ui/TextureRect/cut_button
 
-# ── Selector nodes ────────────────────────────────────────────
+@onready var dress_img:  TextureRect = $cut_ui/DressImg
+@onready var fabric_img: TextureRect = $cut_ui/FabricImg
+@onready var color_img:  TextureRect = $cut_ui/ColorImg
+
 @onready var label_dress:   Label  = $cut_ui/DressImg/Label
 @onready var label_fabric:  Label  = $cut_ui/FabricImg/Label
 @onready var label_color:   Label  = $cut_ui/ColorImg/Label
@@ -44,7 +31,7 @@ func _ready():
 @onready var color_right:   Button = $cut_ui/ColorImg/Button2
 
 
-# ── Selector pools ────────────────────────────────────────────
+# ── Selector state ────────────────────────────────────────────
 var _dress_pool:  Array = ["T-Shirt", "Frock", "Bishop Gown", "Pants", "Jacket", "Maxi", "Lehenga"]
 var _fabric_pool: Array = ["Cotton", "Silk", "Linen", "Polyester", "Lawn", "Chiffon", "Denim"]
 var _color_pool:  Array = ["Navy Blue", "Crimson Red", "Forest Green", "Pearl White", "Jet Black", "Purple", "Golden", "Sky Blue"]
@@ -54,20 +41,34 @@ var _fabric_index: int = 0
 var _color_index:  int = 0
 
 var player_ref: CharacterBody3D = null
-var _cut_done: bool = false
+var _cut_done: bool = false   # tracks which action the button triggers
 
 var _table_cam_global_pos: Vector3
 var _table_cam_global_rot: Vector3
+
 var _sewing_cam_global_pos: Vector3
 var _sewing_cam_global_rot: Vector3
 
+var _front_piece_init_rot: Vector3
+var _back_piece_init_rot: Vector3
+
+var _front_piece_init_pos: Vector3
+var _back_piece_init_pos: Vector3
 
 func _ready():
 	connect("body_entered", _on_body_entered)
 	connect("body_exited",  _on_body_exited)
 
-	_table_cam_global_pos  = table_camera.global_position
-	_table_cam_global_rot  = table_camera.rotation_degrees
+	_front_piece_init_rot = front_piece.rotation_degrees
+	_back_piece_init_rot  = back_piece.rotation_degrees
+
+	_front_piece_init_pos = front_piece.position
+	_back_piece_init_pos  = back_piece.position
+
+	# Save BEFORE anything moves the camera
+	_table_cam_global_pos = table_camera.global_position
+	_table_cam_global_rot = table_camera.rotation_degrees
+
 	_sewing_cam_global_pos = sewing_camera.global_position
 	_sewing_cam_global_rot = sewing_camera.rotation_degrees
 
@@ -77,6 +78,7 @@ func _ready():
 	front_piece.visible = false
 	back_piece.visible  = false
 
+	# ── Connect selector buttons ──────────────────────────────
 	dress_left.pressed.connect(_on_dress_left)
 	dress_right.pressed.connect(_on_dress_right)
 	fabric_left.pressed.connect(_on_fabric_left)
@@ -84,75 +86,98 @@ func _ready():
 	color_left.pressed.connect(_on_color_left)
 	color_right.pressed.connect(_on_color_right)
 
+	# ── Set initial label text ────────────────────────────────
 	label_dress.text  = _dress_pool[0]
 	label_fabric.text = _fabric_pool[0]
 	label_color.text  = _color_pool[0]
 
+	# Hide UI until cutting starts
 	cut_ui.visible = false
+
 	cut_button.pressed.connect(_on_cut_button_pressed)
 	cut_button.text = "CUT"
 
->>>>>>> Stashed changes
 	print("CuttingTable ready!")
-	print("CuttingMinigame found: ", cutting_minigame)
- 
- 
+
+
+# ── Arrow callbacks ───────────────────────────────────────────
+func _on_dress_left() -> void:
+	_dress_index = (_dress_index - 1 + _dress_pool.size()) % _dress_pool.size()
+	label_dress.text = _dress_pool[_dress_index]
+
+func _on_dress_right() -> void:
+	_dress_index = (_dress_index + 1) % _dress_pool.size()
+	label_dress.text = _dress_pool[_dress_index]
+
+func _on_fabric_left() -> void:
+	_fabric_index = (_fabric_index - 1 + _fabric_pool.size()) % _fabric_pool.size()
+	label_fabric.text = _fabric_pool[_fabric_index]
+
+func _on_fabric_right() -> void:
+	_fabric_index = (_fabric_index + 1) % _fabric_pool.size()
+	label_fabric.text = _fabric_pool[_fabric_index]
+
+func _on_color_left() -> void:
+	_color_index = (_color_index - 1 + _color_pool.size()) % _color_pool.size()
+	label_color.text = _color_pool[_color_index]
+
+func _on_color_right() -> void:
+	_color_index = (_color_index + 1) % _color_pool.size()
+	label_color.text = _color_pool[_color_index]
+
+
+# ── Button press dispatcher ────────────────────────────────────
+func _on_cut_button_pressed():
+	if _cut_done:
+		_go_to_sewing()
+	else:
+		_do_cut()
+
+
 func _process(_delta):
 	if player_ref == null:
 		return
- 
+
 	if Input.is_action_just_pressed("interact"):
-		
 		print("E pressed!")
-		print("Order: ", GameManager.current_order)
+		print("Order: ",  GameManager.current_order)
 		print("Status: ", GameManager.current_order.get("status"))
-		
+
 		if GameManager.current_order.is_empty():
 			print("No active order!")
 			return
 		if GameManager.current_order.get("status") == "pending_cut":
 			_start_cutting()
- 
- 
+		return
+
+	if GameManager.current_state != GameManager.GameState.CUTTING:
+		return
+
+
 func _start_cutting():
 	GameManager.current_state = GameManager.GameState.CUTTING
 	player_ref.lock_for_minigame()
 	prompt_label.visible = false
-<<<<<<< Updated upstream
- 
-	# Connect signals only once
-	if not cutting_minigame.cutting_complete.is_connected(_on_cutting_complete):
-		cutting_minigame.cutting_complete.connect(_on_cutting_complete)
-	if not cutting_minigame.cutting_cancelled.is_connected(_on_cutting_cancelled):
-		cutting_minigame.cutting_cancelled.connect(_on_cutting_cancelled)
- 
-	cutting_minigame.start_minigame(GameManager.current_order["type"])
- 
- 
-# Cutting done — let player walk to sewing table
-func _on_cutting_complete():
-	player_ref.in_minigame = false
-	player_ref.can_move = true
-	player_ref.can_jump = true
-	player_ref.capture_mouse()
- 
- 
-# Player pressed ESC — cancel and restore
-func _on_cutting_cancelled():
-=======
+
+	dress_img.visible  = true
+	fabric_img.visible = true
+	color_img.visible  = true
 
 	fabric_mesh.visible   = true
+
 	front_outline.visible = true
 	back_outline.visible  = true
 	front_piece.visible   = false
 	back_piece.visible    = false
 
 	cut_ui.visible = true
+
 	await _switch_to_table_camera()
 
 
 func _do_cut():
-	# Store selections back into GameManager.current_order
+	_reset_pieces()
+
 	GameManager.current_order["dress"]  = _dress_pool[_dress_index]
 	GameManager.current_order["fabric"] = _fabric_pool[_fabric_index]
 	GameManager.current_order["color"]  = _color_pool[_color_index]
@@ -160,14 +185,18 @@ func _do_cut():
 
 	# ── DB: Attach dress + parts + color to the current order ────────────────
 	var order_id: int = GameManager.current_order.get("full", {}).get("db_order_id",
-								Database.active_order_id)
+							Database.active_order_id)
 	if order_id > 0:
 		Database.attach_dress_to_order(
 			order_id,
-			_dress_pool[_dress_index],   # dress display name
-			_color_pool[_color_index],   # color
-			_fabric_pool[_fabric_index]  # fabric type
+			_dress_pool[_dress_index],
+			_color_pool[_color_index],
+			_fabric_pool[_fabric_index]
 		)
+
+	dress_img.visible  = false
+	fabric_img.visible = false
+	color_img.visible  = false
 
 	cut_ui.visible = false
 
@@ -206,6 +235,7 @@ func _animate_cut_split():
 func _on_cutting_complete():
 	GameManager.complete_cutting()
 
+	# ── Show "Next" button instead of returning to player ──────
 	_cut_done = true
 	cut_button.text = "NEXT →"
 	cut_ui.visible  = true
@@ -216,12 +246,15 @@ func _on_cutting_complete():
 func _go_to_sewing() -> void:
 	cut_ui.visible = false
 
+	# Add pieces to a group so SewingMachine can find+shrink them
 	front_piece.add_to_group("sewing_pieces")
 	back_piece.add_to_group("sewing_pieces")
 
+	# Animate pieces to sewing station AND move camera simultaneously
 	_switch_to_sewing_camera()
 	await _move_pieces_to_sewing()
 
+	# Hand off to the sewing machine
 	var sewing_machine: Node = get_tree().get_first_node_in_group("sewing_machine")
 	if sewing_machine == null:
 		push_error("CuttingTable: no node in group 'sewing_machine' found!")
@@ -238,8 +271,9 @@ func _on_sewing_complete() -> void:
 
 	front_piece.remove_from_group("sewing_pieces")
 	back_piece.remove_from_group("sewing_pieces")
-	front_piece.scale   = Vector3.ONE
-	back_piece.scale    = Vector3.ONE
+
+	_reset_pieces()
+
 	front_piece.visible = false
 	back_piece.visible  = false
 
@@ -248,7 +282,6 @@ func _on_sewing_complete() -> void:
 	prompt_label.visible = true
 	GameManager.current_state = GameManager.GameState.FREE_ROAM
 	GameManager.complete_sewing()
-
 
 func _switch_to_sewing_camera():
 	var t := create_tween().set_parallel(true)
@@ -275,31 +308,73 @@ func _move_pieces_to_sewing():
 
 func _on_cutting_cancelled():
 	cut_ui.visible = false
-	_cut_done      = false
+
+	_cut_done = false
 	cut_button.text = "✂   CUT FABRIC"
 
 	await _switch_to_player_camera()
->>>>>>> Stashed changes
 	player_ref.unlock_from_minigame()
 	if player_ref != null:
 		prompt_label.visible = true
- 
- 
+	front_piece.visible   = false
+	back_piece.visible    = false
+	fabric_mesh.visible   = true
+	front_outline.visible = true
+	back_outline.visible  = true
+	GameManager.current_state = GameManager.GameState.FREE_ROAM
+
+
+# ── Camera switching ───────────────────────────────────────────
+
+func _switch_to_table_camera():
+	var player_cam: Camera3D = player_ref.get_node("Head/Camera3D")
+
+	table_camera.global_position  = player_cam.global_position
+	table_camera.rotation_degrees = player_cam.rotation_degrees
+	table_camera.current = true
+
+	var t := create_tween().set_parallel(true)
+	t.tween_property(table_camera, "global_position",  _table_cam_global_pos, 0.5).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(table_camera, "rotation_degrees", _table_cam_global_rot, 0.5).set_ease(Tween.EASE_IN_OUT)
+	await t.finished
+
+
+func _switch_to_player_camera():
+	var player_cam: Camera3D = player_ref.get_node("Head/Camera3D")
+
+	var t := create_tween().set_parallel(true)
+	t.tween_property(table_camera, "global_position",  player_cam.global_position,  0.4).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(table_camera, "rotation_degrees", player_cam.rotation_degrees, 0.4).set_ease(Tween.EASE_IN_OUT)
+	await t.finished
+
+	player_cam.current   = true
+	table_camera.current = false
+
+
+# ── Area detection ─────────────────────────────────────────────
+
 func _on_body_entered(body):
-	
 	print("Something entered: ", body.name)
-<<<<<<< Updated upstream
 	print("Is in player group: ", body.is_in_group("player"))
-	
-=======
->>>>>>> Stashed changes
+
 	if body.is_in_group("player"):
 		player_ref = body
 		if not GameManager.current_order.is_empty():
 			prompt_label.visible = true
- 
- 
+
+
 func _on_body_exited(body):
 	if body.is_in_group("player"):
 		player_ref = null
 		prompt_label.visible = false
+
+
+func _reset_pieces() -> void:
+	front_piece.rotation_degrees = _front_piece_init_rot
+	back_piece.rotation_degrees  = _back_piece_init_rot
+	front_piece.position         = _front_piece_init_pos
+	back_piece.position          = _back_piece_init_pos
+	front_piece.scale            = Vector3.ONE
+	back_piece.scale             = Vector3.ONE
+	front_piece.visible          = false
+	back_piece.visible           = false
