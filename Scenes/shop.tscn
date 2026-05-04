@@ -40,6 +40,7 @@
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
+[ext_resource type="PackedScene" uid="uid://cip6keq7fer0j" path="res://Scenes/girl_1.tscn" id="39_rjsrv"]
 [ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
 [ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="41_8crsr"]
 
@@ -284,9 +285,6 @@ transform = Transform3D(-1.5298986e-07, 0, -3.5, 0, 3.5, 0, 3.5, 0, -1.5298986e-
 [node name="full_mirror" parent="large items" unique_id=385942115 instance=ExtResource("11_ow1eo")]
 transform = Transform3D(-0.85, 0, -7.430936e-08, 0, 0.85, 0, 7.430936e-08, 0, -0.85, 7.1117373, 0, 14.73836)
 
-[node name="clothes_wardrobe" parent="large items" unique_id=953397247 instance=ExtResource("12_k6pkm")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, 1.1839153, 0, 4.643481)
-
 [node name="clothes_rack_1" parent="large items" unique_id=470549517 instance=ExtResource("13_3568l")]
 transform = Transform3D(-7.430936e-08, 0, 1.7, 0, 1.7, 0, -1.7, 0, -7.430936e-08, 0.6422135, 0.8742883, 4.4872265)
 
@@ -394,9 +392,15 @@ transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-
 [node name="Cutting_Table" parent="." unique_id=1841641713 instance=ExtResource("36_hvvn1")]
 transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-08, 1.6652274, 1.1720003, 14.39215)
 
+[node name="clothes_wardrobe" parent="." unique_id=953397247 instance=ExtResource("12_k6pkm")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, 1.1839153, 0, 4.643481)
+
 [node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
-transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.567165, 0.0844644, -1.0948851)
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 9.567165, 0.0844644, -1.0948851)
 target_z = 10.0
+
+[node name="Girl_1" parent="." unique_id=1638784932 instance=ExtResource("39_rjsrv")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.177618, 0, -0.33224052)
 
 [node name="PauseCanvas" type="CanvasLayer" parent="." unique_id=1344630697]
 script = ExtResource("38_3ujtm")

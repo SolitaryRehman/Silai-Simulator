@@ -1,15 +1,17 @@
 extends CharacterBody3D
 
-@onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
+@onready var animation_player: AnimationPlayer = $Model/AnimationPlayer
 @onready var interaction_label: Label3D = $InteractionLabel
 @onready var order_ui: Panel = $CanvasLayer/OrderUI
 @onready var close_btn: Button = $CanvasLayer/OrderUI/CloseButton
 @onready var accept_btn: Button = $CanvasLayer/OrderUI/AcceptButton
 
 # --- Movement Settings ---
-@export var move_speed: float = 1.50
-@export var target_z: float = 10.0
-@export var idle_anim: String = "idle_2/mixamo_com"
+@export var move_speed: float = 0.50
+@export var target_z: float = 2.25
+
+@export var enter_anim: String = "girl_1_start"   
+@export var leave_anim: String = "girl_1_end/mixamo_com"  
 
 # --- Interaction Settings ---
 @export var interact_distance: float = 2.0
@@ -57,7 +59,7 @@ signal customer_left
 func _ready() -> void:
 	interaction_label.visible = false
 	order_ui.visible = false
-	animation_player.play("Walk_Formal")
+	animation_player.play(enter_anim)
 	_player = get_tree().get_first_node_in_group("player")
 
 	close_btn.pressed.connect(_close_order_ui)
@@ -120,7 +122,6 @@ func _physics_process(delta: float) -> void:
 		global_position.z = target_z
 		velocity          = Vector3.ZERO
 		_walking          = false
-		animation_player.play(idle_anim)
 		await get_tree().create_timer(label_appear_delay).timeout
 		_idle_done = true
 
@@ -147,7 +148,7 @@ func _process(_delta: float) -> void:
 func _start_leaving() -> void:
 	interaction_label.visible = false
 	_leaving = true
-	animation_player.play("Walk_Formal")
+	animation_player.play(leave_anim)
 
 	# Disable collision again so it passes back through the door
 	_set_collision(false)
@@ -155,7 +156,7 @@ func _start_leaving() -> void:
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(self, "rotation:y", rotation.y - PI, 1.2)
+	tween.tween_property(self, "rotation:y", rotation.y + PI, 1.2)
 
 
 # ─── helper so both _ready and _start_leaving use the same logic ───
