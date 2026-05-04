@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://xr108r1w07u5"]
 
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
+[ext_resource type="Script" uid="uid://dm1tlxke3j5q2" path="res://Scripts/shop.gd" id="1_8crsr"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="3_io27d"]
 [ext_resource type="PackedScene" uid="uid://bjsokr4gllj0e" path="res://Scenes/ceiling_1.tscn" id="4_fdj0q"]
@@ -39,6 +40,8 @@
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
+[ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
+[ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="41_8crsr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
@@ -71,7 +74,17 @@ glow_enabled = true
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oscnn"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lv45t"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l0nv7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0plxm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_enlih"]
+
 [node name="shop" type="Node3D" unique_id=1902384018]
+script = ExtResource("1_8crsr")
+customer_scene = ExtResource("37_1bx8h")
 
 [node name="ProtoController" parent="." unique_id=384047026 instance=ExtResource("3_io27d")]
 transform = Transform3D(0.9985835, 0, 0.053207427, 0, 1, 0, -0.053207427, 0, 0.9985835, 9.455302, 0, 13.697959)
@@ -382,7 +395,7 @@ transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-
 transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-08, 1.6652274, 1.1720003, 14.39215)
 
 [node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
-transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.567165, 0.0844644, 1.0492007)
+transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 9.567165, 0.0844644, -1.0948851)
 target_z = 10.0
 
 [node name="PauseCanvas" type="CanvasLayer" parent="." unique_id=1344630697]
@@ -441,3 +454,39 @@ offset_right = 589.0
 offset_bottom = 482.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_n8j25")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_oscnn")
+
+[node name="EnterImage" type="TextureRect" parent="PauseCanvas" unique_id=2122213617]
+offset_left = -42.0
+offset_top = 473.0
+offset_right = 248.0
+offset_bottom = 644.0
+texture = ExtResource("40_wdw6i")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OpenButton" type="Button" parent="PauseCanvas/EnterImage" unique_id=501910841]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 59.0
+offset_right = 182.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("41_8crsr")
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxEmpty_lv45t")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_l0nv7")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_0plxm")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_enlih")
+toggle_mode = true
+text = "Off"
+
+[node name="Label" type="Label" parent="PauseCanvas/EnterImage" unique_id=1381235294]
+layout_mode = 0
+offset_left = 53.0
+offset_top = -28.0
+offset_right = 238.0
+offset_bottom = 12.0
+theme_override_fonts/font = ExtResource("41_8crsr")
+theme_override_font_sizes/font_size = 32
+text = "Allow Customers"

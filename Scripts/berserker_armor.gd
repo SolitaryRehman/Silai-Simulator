@@ -70,6 +70,13 @@ func _ready() -> void:
 	_customer_name = _customer_data.get("Name", _customer_name)
 
 	_print_customer_info()
+	
+	# Start with collision OFF so the customer walks straight through the door
+	_set_collision(false)
+
+	# Re-enable after 2.5 sec — by then it has cleared the door frame
+	await get_tree().create_timer(2.5).timeout
+	_set_collision(true)
 
 
 func _print_customer_info() -> void:
@@ -143,16 +150,20 @@ func _start_leaving() -> void:
 	_leaving = true
 	animation_player.play("Walk_Formal")
 
-	# Disable all collision shapes so the customer walks through the door bodies
-	for child in get_children():
-		if child is CollisionShape3D:
-			child.disabled = true
+	# Disable collision again so it passes back through the door
+	_set_collision(false)
 
-	# Right-side U-turn: subtract PI instead of adding it
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(self, "rotation:y", rotation.y - PI, 1.2)
+
+
+# ─── helper so both _ready and _start_leaving use the same logic ───
+func _set_collision(enabled: bool) -> void:
+	for child in get_children():
+		if child is CollisionShape3D:
+			child.disabled = not enabled
 
 
 func _open_order_ui() -> void:
