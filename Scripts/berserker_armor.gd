@@ -10,18 +10,17 @@ extends CharacterBody3D
 # --- Movement Settings ---
 @export var move_speed: float = 1.50
 @export var target_z: float = 10.0
-@export var walk_anim: String = "Walk"
 @export var idle_anim: String = "idle_2/mixamo_com"
 
 # --- Interaction Settings ---
 @export var interact_distance: float = 3.0
 @export var label_appear_delay: float = 1.0
 
-# ── DB-resolved customer data (populated in _ready via Database) ───────────────
-var _customer_data: Dictionary = {}   # all columns + "customer_type"
-var _customer_name: String     = ""   # resolved name for this visit
+# ── DB-resolved customer data ──────────────────────────────────────────────────
+var _customer_data: Dictionary = {}
+var _customer_name: String     = ""
 
-# --- Randomization Pools (still used for order dresses / fabric) ---
+# --- Randomization Pools ---
 var dress_pool: Array = [
 	"T-Shirt", "Frock", "Bishop Gown", "Pants", "Jacket", "Maxi", "Lehenga"
 ]
@@ -49,26 +48,25 @@ var _order_pending: bool     = false
 var _order_generated: bool   = false
 var _current_order: Dictionary = {}
 
+# --- Leave state ---
+var _leaving: bool           = false
+
+# Emitted just before this node frees itself so a spawner can queue the next customer
+signal customer_left
+
 
 func _ready() -> void:
 	interaction_label.visible = false
 	order_ui.visible = false
-	animation_player.play(walk_anim)
+	animation_player.play("Walk_Formal")
 	_player = get_tree().get_first_node_in_group("player")
 
 	close_btn.pressed.connect(_close_order_ui)
 	accept_btn.pressed.connect(_accept_order)
 	GameManager.garment_sewn.connect(_on_garment_sewn)
 
-	# ── Pick a random name then resolve/create in DB ──────────────────────────
-	# Step 1: name only from pool
 	_customer_name = Database.get_random_name()
-
-	# Step 2: DB checks — if new, generate measurements etc. from arrays there
-	# (Database.get_or_create_customer handles the "name exists?" branching)
 	_customer_data = Database.get_or_create_customer(_customer_name)
-
-	# Use the name from DB record in case it was formatted differently
 	_customer_name = _customer_data.get("Name", _customer_name)
 
 	_print_customer_info()
@@ -92,6 +90,20 @@ func _on_garment_sewn(_type: String) -> void:
 
 
 func _physics_process(delta: float) -> void:
+
+	# ── Leave / U-turn movement ────────────────────────────────────────────────
+	if _leaving:
+		# Collision is already disabled so the customer walks straight through doors
+		velocity = global_transform.basis.z * move_speed
+		move_and_slide()
+
+		# Once far enough back, signal the spawner then remove from scene
+		if global_position.z < -5.0:
+			customer_left.emit()
+			queue_free()
+		return
+
+	# ── Normal walk-in ────────────────────────────────────────────────────────
 	if not _walking:
 		return
 
@@ -108,7 +120,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
-	if not _idle_done or _player == null:
+	if not _idle_done or _player == null or _leaving:
 		return
 
 	var dist: float = global_position.distance_to(_player.global_position)
@@ -123,6 +135,26 @@ func _process(_delta: float) -> void:
 		_open_order_ui()
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# U-turn + walk back
+# ─────────────────────────────────────────────────────────────────────────────
+func _start_leaving() -> void:
+	interaction_label.visible = false
+	_leaving = true
+	animation_player.play("Walk_Formal")
+
+	# Disable all collision shapes so the customer walks through the door bodies
+	for child in get_children():
+		if child is CollisionShape3D:
+			child.disabled = true
+
+	# Right-side U-turn: subtract PI instead of adding it
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(self, "rotation:y", rotation.y - PI, 1.2)
+
+
 func _open_order_ui() -> void:
 	interaction_label.visible = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -132,25 +164,23 @@ func _open_order_ui() -> void:
 		_order_generated = true
 		print("Order generated for %s: " % _customer_name, _current_order)
 
-	# --- Populate UI ---
 	order_ui.get_node("CustomerName").text = _customer_name
 
-	# Show customer type badge if VIP or Rude
 	var ctype: String = _customer_data.get("customer_type", "Normal")
 	if order_ui.has_node("CustomerType"):
 		var type_lbl: Label = order_ui.get_node("CustomerType")
 		match ctype:
 			"VIP":
-				type_lbl.text           = "⭐ VIP — %.0f%% discount" \
-										  % Database.get_vip_discount(_customer_data.get("CustomerID", -1))
-				type_lbl.modulate       = Color(1.0, 0.85, 0.2)
+				type_lbl.text     = "⭐ VIP — %.0f%% discount" \
+									% Database.get_vip_discount(_customer_data.get("CustomerID", -1))
+				type_lbl.modulate = Color(1.0, 0.85, 0.2)
 			"Rude":
-				type_lbl.text           = "⚠ Rude — +%d day delay" \
-										  % Database.get_rude_delay(_customer_data.get("CustomerID", -1))
-				type_lbl.modulate       = Color(1.0, 0.35, 0.35)
+				type_lbl.text     = "⚠ Rude — +%d day delay" \
+									% Database.get_rude_delay(_customer_data.get("CustomerID", -1))
+				type_lbl.modulate = Color(1.0, 0.35, 0.35)
 			_:
-				type_lbl.text           = "Normal"
-				type_lbl.modulate       = Color(0.85, 0.85, 0.85)
+				type_lbl.text     = "Normal"
+				type_lbl.modulate = Color(0.85, 0.85, 0.85)
 
 	var dresses: Array = _current_order["dresses"]
 	for i in range(1, 4):
@@ -186,15 +216,12 @@ func _generate_random_order() -> Dictionary:
 	var xp_range:   Array = xp_ranges[num_dresses]
 	var coin_range: Array = coin_ranges[num_dresses]
 
-	var xp:    int = randi_range(xp_range[0],   xp_range[1])
-	var coins: int = randi_range(coin_range[0],  coin_range[1])
-
 	return {
 		"customer_name": _customer_name,
 		"dresses":       dresses,
 		"fabric_used":   fabric_used_pool[randi() % fabric_used_pool.size()],
-		"xp_reward":     xp,
-		"coin_reward":   coins,
+		"xp_reward":     randi_range(xp_range[0],   xp_range[1]),
+		"coin_reward":   randi_range(coin_range[0],  coin_range[1]),
 		"timestamp":     Time.get_datetime_string_from_system(),
 		"status":        "pending"
 	}
@@ -210,31 +237,24 @@ func _accept_order() -> void:
 	_current_order["status"] = "pending"
 	_current_order["timestamp"] = Time.get_datetime_string_from_system()
 
-	# ── DB: Create the Order record right now ─────────────────────────────────
 	var cid: int = _customer_data.get("CustomerID", -1)
 	if cid != -1:
 		var oid: int = Database.create_order_record(cid)
-		_current_order["db_order_id"] = oid   # carry it with the order dict
+		_current_order["db_order_id"] = oid
 
 	print("Order accepted: ", _current_order)
 	_close_order_ui()
 	GameManager.receive_order(_current_order)
+
+	_start_leaving()
 
 
 func complete_order() -> void:
 	_order_pending   = false
 	_order_generated = false
 	_current_order   = {}
-
-	# Next visit: pick a fresh name and (re)resolve in DB
-	_customer_name = Database.get_random_name()
-	_customer_data = Database.get_or_create_customer(_customer_name)
-	_customer_name = _customer_data.get("Name", _customer_name)
-
 	print("Order completed! Customer ready for a new order.")
 
 
 func _save_order_to_database(_order: Dictionary) -> void:
-	# Database.create_order_record() is now called inside _accept_order().
-	# This stub is kept so nothing breaks if it's called from elsewhere.
 	pass

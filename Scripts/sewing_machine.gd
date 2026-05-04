@@ -10,9 +10,10 @@ signal sewing_complete
 @onready var status_label:   Label       = $sew_ui/status_label
 @onready var hint_label:     Label       = $sew_ui/hint_label
 @onready var finished_model: Node3D      = $finished_model
+@onready var texture_rect: TextureRect = $sew_ui/TextureRect
+@onready var _store_button: Button = $sew_ui/TextureRect/store_button
 
 
-var _store_button: Button
 
 # ── Runtime state ─────────────────────────────────────────────
 var _pieces:        Array      = []
@@ -38,9 +39,11 @@ func _ready() -> void:
 	sew_ui.visible = false
 	if finished_model:
 		finished_model.visible = false
+	_store_button.text = "STORE"
+	_store_button.visible = false
+	_store_button.pressed.connect(_on_store_pressed)
+	texture_rect.visible = false  # hidden until sewing is complete
 	_build_flash_material()
-	_build_store_button()
-
 
 # ─────────────────────────────────────────────────────────────
 # Called by CuttingTable after pieces arrive at sewing station
@@ -53,63 +56,20 @@ func begin_sewing(pieces: Array, clothing_type: String, camera: Camera3D) -> voi
 	_seam_markers.clear()
 	_seam_done.clear()
 
-	# Collect every Marker3D child tagged "seam_point" from all pieces
+	# ← Reset pieces so they're visible and full-size on every round
+	for piece in _pieces:
+		piece.visible = true
+		piece.scale   = Vector3.ONE
+
 	for piece in _pieces:
 		for child in piece.get_children():
 			if child is Marker3D and child.is_in_group("seam_point"):
 				_seam_markers.append(child)
 				_seam_done.append(false)
 
-	print("Seam markers found: ", _seam_markers.size())
-
-	# _spawn_debug_seam_markers() # this function call to see the red and green points 
 	_refresh_ui()
 	sew_ui.visible  = true
 	hint_label.text = "Drag pieces — guide each seam edge to the needle"
-
-
-# ─────────────────────────────────────────────────────────────
-# Debug markers — remove _spawn_debug_seam_markers() call
-# from begin_sewing() once seam points look correct
-# ─────────────────────────────────────────────────────────────
-func _spawn_debug_seam_markers() -> void:
-	# Clean up previous debug markers
-	for child in get_tree().root.get_children():
-		if child.is_in_group("debug_seam"):
-			child.queue_free()
-
-	# Red sphere at each seam marker
-	for marker in _seam_markers:
-		var m   := MeshInstance3D.new()
-		var s   := SphereMesh.new()
-		s.radius = 0.03
-		s.height = 0.06
-		m.mesh   = s
-		var mat             := StandardMaterial3D.new()
-		mat.albedo_color     = Color(1, 0, 0)
-		mat.emission_enabled = true
-		mat.emission         = Color(1, 0, 0)
-		m.set_surface_override_material(0, mat)
-		m.add_to_group("debug_seam")
-		get_tree().root.add_child(m)
-		m.global_position = marker.global_position
-		print("Seam marker at: ", marker.global_position)
-
-	# Green sphere at needle tip
-	var n   := MeshInstance3D.new()
-	var s2  := SphereMesh.new()
-	s2.radius = 0.03
-	s2.height = 0.06
-	n.mesh    = s2
-	var mat2             := StandardMaterial3D.new()
-	mat2.albedo_color     = Color(0, 1, 0)
-	mat2.emission_enabled = true
-	mat2.emission         = Color(0, 1, 0)
-	n.set_surface_override_material(0, mat2)
-	n.add_to_group("debug_seam")
-	get_tree().root.add_child(n)
-	n.global_position = needle_tip.global_position
-	print("Needle at: ", needle_tip.global_position)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -183,7 +143,7 @@ func _process(_delta: float) -> void:
 
 
 func _check_seams() -> void:
-	var radius: float   = _config.get("seam_radius", 0.15)
+	var radius: float   = _config.get("seam_radius", 0.04)
 	var needle: Vector3 = needle_tip.global_position
 
 	for i in _seam_markers.size():
@@ -218,11 +178,6 @@ func _finish_sewing() -> void:
 	_pieces   = []
 	sew_ui.visible = false
 
-	# Clean up debug markers
-	for child in get_tree().root.get_children():
-		if child.is_in_group("debug_seam"):
-			child.queue_free()
-
 	# Shrink pieces out
 	for piece in get_tree().get_nodes_in_group("sewing_pieces"):
 		var t := create_tween()
@@ -256,66 +211,13 @@ func _finish_sewing() -> void:
 	progress_bar.visible   = false
 	status_label.visible   = false
 	hint_label.visible     = false
+	texture_rect.visible   = true   # show texture rect now that sewing is done
 	_store_button.visible  = true
 
 	_store_button.modulate = Color(1, 1, 1, 0)
 	var t_btn := create_tween()
 	t_btn.tween_property(_store_button, "modulate", Color(1, 1, 1, 1), 0.35)
 
-func _build_store_button() -> void:
-	_store_button = Button.new()
-	sew_ui.add_child(_store_button)
-
-	# ── Position: mid-left ────────────────────────────────────
-	_store_button.anchor_left   = 0.0
-	_store_button.anchor_right  = 0.0
-	_store_button.anchor_top    = 0.5
-	_store_button.anchor_bottom = 0.5
-	_store_button.offset_left   = 20.0
-	_store_button.offset_right  = 220.0
-	_store_button.offset_top    = -40.0
-	_store_button.offset_bottom = 40.0
-
-	_store_button.text = "STORE"
-	_store_button.add_theme_font_size_override("font_size", 17)
-
-	# Normal — dark with gold border (matches your cut button style)
-	var normal := StyleBoxFlat.new()
-	normal.bg_color           = Color(0.10, 0.09, 0.08, 0.95)
-	normal.border_color       = Color(0.85, 0.68, 0.30, 1.0)
-	normal.set_border_width_all(2)
-	normal.set_corner_radius_all(6)
-	normal.set_content_margin_all(14)
-	normal.shadow_color       = Color(0.85, 0.68, 0.30, 0.25)
-	normal.shadow_size        = 8
-	_store_button.add_theme_stylebox_override("normal", normal)
-
-	# Hover
-	var hover := StyleBoxFlat.new()
-	hover.bg_color            = Color(0.85, 0.68, 0.30, 0.18)
-	hover.border_color        = Color(0.95, 0.80, 0.40, 1.0)
-	hover.set_border_width_all(2)
-	hover.set_corner_radius_all(6)
-	hover.set_content_margin_all(14)
-	hover.shadow_color        = Color(0.85, 0.68, 0.30, 0.45)
-	hover.shadow_size         = 12
-	_store_button.add_theme_stylebox_override("hover", hover)
-
-	# Pressed
-	var pressed := StyleBoxFlat.new()
-	pressed.bg_color          = Color(0.85, 0.68, 0.30, 0.35)
-	pressed.border_color      = Color(1.0, 0.92, 0.55, 1.0)
-	pressed.set_border_width_all(2)
-	pressed.set_corner_radius_all(6)
-	pressed.set_content_margin_all(14)
-	_store_button.add_theme_stylebox_override("pressed", pressed)
-
-	_store_button.add_theme_color_override("font_color",         Color(0.90, 0.75, 0.35, 1.0))
-	_store_button.add_theme_color_override("font_hover_color",   Color(1.00, 0.90, 0.50, 1.0))
-	_store_button.add_theme_color_override("font_pressed_color", Color(1.00, 1.00, 0.70, 1.0))
-
-	_store_button.visible = false
-	_store_button.pressed.connect(_on_store_pressed)
 
 func _on_store_pressed() -> void:
 	
@@ -324,6 +226,7 @@ func _on_store_pressed() -> void:
 	t_btn.tween_property(_store_button, "modulate", Color(1, 1, 1, 0), 0.2)
 	await t_btn.finished
 	_store_button.visible = false
+	texture_rect.visible  = false  # hide texture rect when order is stored
 
 	# Shrink out the finished shirt
 	if finished_model and finished_model.visible:
@@ -368,3 +271,4 @@ func _flash_piece(piece: MeshInstance3D) -> void:
 	piece.set_surface_override_material(0, _flash_mat)
 	await get_tree().create_timer(0.16).timeout
 	piece.set_surface_override_material(0, orig)
+	

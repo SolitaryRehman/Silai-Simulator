@@ -786,7 +786,7 @@ func finalize_order(order_id: int) -> void:
 		                (
 		                    SELECT v.Discount_rate / 100.0
 		                    FROM   VIP        v
-		                    JOIN   "Order"    o_v ON o_v.CustomerID = v.CustomerID
+							JOIN   "Order"    o_v ON o_v.CustomerID = v.CustomerID
 		                    WHERE  o_v.OrderID = ?
 		                ),
 		                0.0
