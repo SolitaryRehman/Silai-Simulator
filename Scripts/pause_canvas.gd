@@ -12,9 +12,7 @@ func _ready():
 
 func _unhandled_input(event: InputEvent):
 	if event.is_action_pressed("ui_cancel"):
-		if get_tree().paused:
-			_resume()
-		else:
+		if not get_tree().paused:
 			_pause()
 
 func _pause():
