@@ -3,8 +3,8 @@ extends CharacterBody3D
 @onready var animation_player: AnimationPlayer = $Model/AnimationPlayer
 @onready var interaction_label: Label3D = $InteractionLabel
 @onready var order_ui: Panel = $CanvasLayer/OrderUI
-@onready var close_btn: Button = $CanvasLayer/OrderUI/CloseButton
-@onready var accept_btn: Button = $CanvasLayer/OrderUI/AcceptButton
+@onready var close_button: Button = $CanvasLayer/OrderUI/CloseButton
+@onready var accept_button: Button = $CanvasLayer/OrderUI/AcceptButton
 
 # --- Movement Settings ---
 @export var move_speed: float = 0.50
@@ -16,6 +16,8 @@ extends CharacterBody3D
 # --- Interaction Settings ---
 @export var interact_distance: float = 2.0
 @export var label_appear_delay: float = 1.0
+
+@export var interact_offset: Vector3 = Vector3(0, 0, 0)
 
 # ── DB-resolved customer data ──────────────────────────────────────────────────
 var _customer_data: Dictionary = {}
@@ -62,8 +64,8 @@ func _ready() -> void:
 	animation_player.play(enter_anim)
 	_player = get_tree().get_first_node_in_group("player")
 
-	close_btn.pressed.connect(_close_order_ui)
-	accept_btn.pressed.connect(_accept_order)
+	close_button.pressed.connect(_close_order_ui)
+	accept_button.pressed.connect(_accept_order)
 	GameManager.garment_sewn.connect(_on_garment_sewn)
 
 	_customer_name = Database.get_random_name()
@@ -97,7 +99,7 @@ func _on_garment_sewn(_type: String) -> void:
 	complete_order()
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 
 	# ── Leave / U-turn movement ────────────────────────────────────────────────
 	if _leaving:
@@ -130,7 +132,8 @@ func _process(_delta: float) -> void:
 	if not _idle_done or _player == null or _leaving:
 		return
 
-	var dist: float = global_position.distance_to(_player.global_position)
+	var check_pos: Vector3 = global_position + interact_offset
+	var dist: float = check_pos.distance_to(_player.global_position)
 
 	interaction_label.visible = (
 		dist <= interact_distance

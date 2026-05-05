@@ -2133,7 +2133,7 @@ libraries/ = SubResource("AnimationLibrary_n8rl5")
 libraries/girl_1_end = SubResource("AnimationLibrary_73m0q")
 
 [node name="InteractionLabel" type="Label3D" parent="." unique_id=307745606]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.205422, 1.8358451, 6.080193)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.205422, 1.8358451, 6.0280685)
 billboard = 1
 text = "interact"
 font = ExtResource("14_dngua")

@@ -1,12 +1,13 @@
 extends Node3D
 
-@export var customer_scene: PackedScene
+@export var customer_scene_berserker: PackedScene
+@export var customer_scene_girl: PackedScene
 
 @onready var open_button: Button = $PauseCanvas/EnterImage/OpenButton
 
 var _shop_open: bool = false
 var _spawn_timer: Timer
-var _customer_active: bool = false  # ← tracks if a customer is already inside
+var _customer_active: bool = false
 
 
 func _ready() -> void:
@@ -35,25 +36,30 @@ func _spawn_customer() -> void:
 	if not _shop_open:
 		return
 
-	# If a customer is already in the shop, cancel silently and turn button off
 	if _customer_active:
 		_shop_open = false
 		open_button.button_pressed = false
 		open_button.text = "OFF"
 		return
 
-	var customer = customer_scene.instantiate()
-	add_child(customer)
-	customer.global_position = Vector3(9.56, 0.0, -1.0)
-	customer.scale = Vector3(1.2, 1.2, 1.2)  # ← scale applied here
-	customer.customer_left.connect(_on_customer_left)
+	if randi() % 2 == 0:
+		var customer = customer_scene_berserker.instantiate()
+		add_child(customer)
+		customer.global_position = Vector3(9.56, 0.0, -1.0)
+		customer.scale = Vector3(1.3, 1.3, 1.3)
+		customer.customer_left.connect(_on_customer_left)
+	else:
+		var customer = customer_scene_girl.instantiate()
+		add_child(customer)
+		customer.global_position = Vector3(9.56, 0.0, -1.0)
+		customer.scale = Vector3(1.2, 1.2, 1.2)
+		customer.customer_left.connect(_on_customer_left)
 
-	_customer_active = true  # ← lock the shop
-
+	_customer_active = true
 	_shop_open = false
 	open_button.button_pressed = false
 	open_button.text = "OFF"
 
 
 func _on_customer_left() -> void:
-	_customer_active = false  # ← unlock so next customer can come in
+	_customer_active = false

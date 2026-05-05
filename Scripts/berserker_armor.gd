@@ -3,8 +3,8 @@ extends CharacterBody3D
 @onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
 @onready var interaction_label: Label3D = $InteractionLabel
 @onready var order_ui: Panel = $CanvasLayer/OrderUI
-@onready var close_btn: Button = $CanvasLayer/OrderUI/CloseButton
-@onready var accept_btn: Button = $CanvasLayer/OrderUI/AcceptButton
+@onready var close_button: Button = $CanvasLayer/OrderUI/CloseButton
+@onready var accept_button: Button = $CanvasLayer/OrderUI/AcceptButton
 
 # --- Movement Settings ---
 @export var move_speed: float = 1.50
@@ -60,8 +60,8 @@ func _ready() -> void:
 	animation_player.play("Walk_Formal")
 	_player = get_tree().get_first_node_in_group("player")
 
-	close_btn.pressed.connect(_close_order_ui)
-	accept_btn.pressed.connect(_accept_order)
+	close_button.pressed.connect(_close_order_ui)
+	accept_button.pressed.connect(_accept_order)
 	GameManager.garment_sewn.connect(_on_garment_sewn)
 
 	_customer_name = Database.get_random_name()
@@ -95,7 +95,7 @@ func _on_garment_sewn(_type: String) -> void:
 	complete_order()
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 
 	# ── Leave / U-turn movement ────────────────────────────────────────────────
 	if _leaving:
