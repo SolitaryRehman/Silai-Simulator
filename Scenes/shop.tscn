@@ -402,7 +402,6 @@ target_z = 9.8
 
 [node name="Girl_1" parent="." unique_id=1638784932 instance=ExtResource("39_rjsrv")]
 transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.177618, 0, -0.33224052)
-interact_offset = Vector3(0, 0, 7.3)
 
 [node name="PauseCanvas" type="CanvasLayer" parent="." unique_id=1344630697]
 script = ExtResource("38_3ujtm")

@@ -5,15 +5,17 @@ extends Node3D
 
 @onready var open_button: Button = $PauseCanvas/EnterImage/OpenButton
 
-var _shop_open: bool = false
-var _spawn_timer: Timer
+var _shop_open: bool       = false
 var _customer_active: bool = false
+var _spawn_girl_next: bool = false   # false = berserker first
+
+var _spawn_timer: Timer
 
 
 func _ready() -> void:
-	open_button.toggle_mode = true
+	open_button.toggle_mode    = true
 	open_button.button_pressed = false
-	open_button.text = "OFF"
+	open_button.text           = "OFF"
 	open_button.toggled.connect(_on_btn_toggled)
 
 	_spawn_timer = Timer.new()
@@ -37,29 +39,33 @@ func _spawn_customer() -> void:
 		return
 
 	if _customer_active:
-		_shop_open = false
-		open_button.button_pressed = false
-		open_button.text = "OFF"
+		_close_shop()
 		return
 
-	if randi() % 2 == 0:
-		var customer = customer_scene_berserker.instantiate()
-		add_child(customer)
-		customer.global_position = Vector3(9.56, 0.0, -1.0)
-		customer.scale = Vector3(1.3, 1.3, 1.3)
-		customer.customer_left.connect(_on_customer_left)
-	else:
-		var customer = customer_scene_girl.instantiate()
-		add_child(customer)
-		customer.global_position = Vector3(9.56, 0.0, -1.0)
+	var customer
+
+	if _spawn_girl_next:
+		customer = customer_scene_girl.instantiate()
 		customer.scale = Vector3(1.2, 1.2, 1.2)
-		customer.customer_left.connect(_on_customer_left)
+	else:
+		customer = customer_scene_berserker.instantiate()
+		customer.scale = Vector3(1.3, 1.3, 1.3)
+
+	_spawn_girl_next = not _spawn_girl_next   # flip for next time
+
+	add_child(customer)
+	customer.global_position = Vector3(9.56, 0.0, -1.0)
+	customer.customer_left.connect(_on_customer_left, CONNECT_ONE_SHOT)
 
 	_customer_active = true
-	_shop_open = false
-	open_button.button_pressed = false
-	open_button.text = "OFF"
+	_close_shop()
 
 
 func _on_customer_left() -> void:
 	_customer_active = false
+
+
+func _close_shop() -> void:
+	_shop_open                 = false
+	open_button.button_pressed = false
+	open_button.text           = "OFF"

@@ -17,7 +17,7 @@ extends CharacterBody3D
 @export var interact_distance: float = 2.0
 @export var label_appear_delay: float = 1.0
 
-@export var interact_offset: Vector3 = Vector3(0, 0, 0)
+@export var interact_offset: Vector3 = Vector3(0, 0, 7.3)
 
 # ── DB-resolved customer data ──────────────────────────────────────────────────
 var _customer_data: Dictionary = {}
