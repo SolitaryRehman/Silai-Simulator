@@ -43,6 +43,7 @@
 [ext_resource type="PackedScene" uid="uid://cip6keq7fer0j" path="res://Scenes/girl_1.tscn" id="39_rjsrv"]
 [ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
 [ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="41_8crsr"]
+[ext_resource type="Texture2D" uid="uid://2cefvmc0u51h" path="res://Assets/Images/Levels and XP and coins/level_xp_coins.png" id="44_2x7ys"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
@@ -495,3 +496,33 @@ offset_bottom = 12.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 text = "Allow Customers"
+
+[node name="TextureRect2" type="TextureRect" parent="PauseCanvas" unique_id=1555158573]
+offset_left = -140.0
+offset_top = -17.0
+offset_right = 351.0
+offset_bottom = 237.0
+texture = ExtResource("44_2x7ys")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LevelLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=1041698482]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 66.0
+offset_right = 290.0
+offset_bottom = 189.0
+
+[node name="XPLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=856671221]
+layout_mode = 0
+offset_left = 462.0
+offset_top = 67.0
+offset_right = 578.0
+offset_bottom = 110.0
+
+[node name="CoinLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=35122923]
+layout_mode = 0
+offset_left = 462.0
+offset_top = 149.0
+offset_right = 578.0
+offset_bottom = 192.0
