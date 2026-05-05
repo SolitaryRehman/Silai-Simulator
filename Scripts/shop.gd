@@ -1,13 +1,19 @@
 extends Node3D
 
-@export var customer_scene_berserker: PackedScene
-@export var customer_scene_girl: PackedScene
 
+@onready var enter_image: TextureRect = $PauseCanvas/EnterImage
 @onready var open_button: Button = $PauseCanvas/EnterImage/OpenButton
 
 @onready var level_label: Label = $PauseCanvas/TextureRect2/LevelLabel
 @onready var xp_label: Label = $PauseCanvas/TextureRect2/XPLabel
 @onready var coins_label: Label = $PauseCanvas/TextureRect2/CoinLabel
+
+@onready var sewing_machine: StaticBody3D = $sewing_machine
+
+
+@export var customer_scene_berserker: PackedScene
+@export var customer_scene_girl: PackedScene
+
 
 var _shop_open: bool       = false
 var _customer_active: bool = false
@@ -31,6 +37,8 @@ func _ready() -> void:
 	GameManager.stats_changed.connect(_refresh_hud)
 
 	_refresh_hud()
+	
+	sewing_machine.sewing_complete.connect(_on_sewing_complete)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,3 +107,14 @@ func _close_shop() -> void:
 	_shop_open                 = false
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
+
+
+func on_cutting_started() -> void:
+	enter_image.visible = false
+
+
+func _on_sewing_complete() -> void:
+	# Wait for camera tween to finish returning to player
+	# Adjust this delay to match your camera transition duration
+	await get_tree().create_timer(0.6).timeout
+	enter_image.visible = true

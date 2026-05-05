@@ -155,6 +155,9 @@ func _process(_delta):
 
 
 func _start_cutting():
+	
+	get_parent().on_cutting_started()
+	
 	GameManager.current_state = GameManager.GameState.CUTTING
 	player_ref.lock_for_minigame()
 	prompt_label.visible = false
