@@ -397,13 +397,6 @@ transform = Transform3D(-2.6226834e-08, 0, -0.6, 0, 0.6, 0, 0.6, 0, -2.6226834e-
 [node name="clothes_wardrobe" parent="." unique_id=953397247 instance=ExtResource("12_k6pkm")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, 1.1839153, 0, 4.643481)
 
-[node name="Character_1" parent="." unique_id=570073092 instance=ExtResource("37_1bx8h")]
-transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 9.567165, 0.0844644, -1.0948851)
-target_z = 9.8
-
-[node name="Girl_1" parent="." unique_id=1638784932 instance=ExtResource("39_rjsrv")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.177618, 0, -0.33224052)
-
 [node name="PauseCanvas" type="CanvasLayer" parent="." unique_id=1344630697]
 script = ExtResource("38_3ujtm")
 
@@ -498,20 +491,20 @@ theme_override_font_sizes/font_size = 32
 text = "Allow Customers"
 
 [node name="TextureRect2" type="TextureRect" parent="PauseCanvas" unique_id=1555158573]
-offset_left = -140.0
-offset_top = -17.0
-offset_right = 351.0
-offset_bottom = 237.0
+offset_left = -92.0
+offset_top = -16.0
+offset_right = 371.0
+offset_bottom = 210.0
 texture = ExtResource("44_2x7ys")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="LevelLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=1041698482]
 layout_mode = 0
-offset_left = 203.0
-offset_top = 50.0
-offset_right = 291.0
-offset_bottom = 209.0
+offset_left = 187.0
+offset_top = 32.0
+offset_right = 275.0
+offset_bottom = 191.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 128
 text = "1"
@@ -520,20 +513,20 @@ vertical_alignment = 1
 
 [node name="XPLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=856671221]
 layout_mode = 0
-offset_left = 462.0
-offset_top = 67.0
-offset_right = 714.0
-offset_bottom = 110.0
+offset_left = 429.0
+offset_top = 57.0
+offset_right = 681.0
+offset_bottom = 100.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
 
 [node name="CoinLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=35122923]
 layout_mode = 0
-offset_left = 462.0
-offset_top = 149.0
-offset_right = 756.0
-offset_bottom = 192.0
+offset_left = 429.0
+offset_top = 131.0
+offset_right = 723.0
+offset_bottom = 174.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
