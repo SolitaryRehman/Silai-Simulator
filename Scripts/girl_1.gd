@@ -104,7 +104,7 @@ func _physics_process(_delta: float) -> void:
 	# ── Leave / U-turn movement ────────────────────────────────────────────────
 	if _leaving:
 		# Collision is already disabled so the customer walks straight through doors
-		velocity = global_transform.basis.z * move_speed
+		velocity = Vector3(0, 0, -move_speed)
 		move_and_slide()
 
 		# Once far enough back, signal the spawner then remove from scene
@@ -155,11 +155,6 @@ func _start_leaving() -> void:
 
 	# Disable collision again so it passes back through the door
 	_set_collision(false)
-
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE)
-	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(self, "rotation:y", rotation.y + PI, 1.2)
 
 
 # ─── helper so both _ready and _start_leaving use the same logic ───
