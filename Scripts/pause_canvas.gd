@@ -3,11 +3,6 @@ extends CanvasLayer
 @onready var pause_menu: TextureRect = $TextureRect  
 @onready var resume_button: Button   = $TextureRect/ResumeButton
 
-@onready var level_label: Label = $TextureRect2/LevelLabel
-@onready var xp_label: Label = $TextureRect2/XPLabel
-@onready var coin_label: Label = $TextureRect2/CoinLabel
-
-
 var _mouse_mode_before_pause: Input.MouseMode  # ← add this
 
 func _ready():

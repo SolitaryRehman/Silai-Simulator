@@ -5,6 +5,10 @@ extends Node3D
 
 @onready var open_button: Button = $PauseCanvas/EnterImage/OpenButton
 
+@onready var level_label: Label = $PauseCanvas/TextureRect2/LevelLabel
+@onready var xp_label: Label = $PauseCanvas/TextureRect2/XPLabel
+@onready var coins_label: Label = $PauseCanvas/TextureRect2/CoinLabel
+
 var _shop_open: bool       = false
 var _customer_active: bool = false
 var _spawn_girl_next: bool = false   # false = berserker first
@@ -22,7 +26,32 @@ func _ready() -> void:
 	_spawn_timer.one_shot = true
 	_spawn_timer.timeout.connect(_spawn_customer)
 	add_child(_spawn_timer)
+	
+	# Connect to GameManager so HUD updates whenever XP / coins change
+	GameManager.stats_changed.connect(_refresh_hud)
 
+	_refresh_hud()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HUD
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _refresh_hud() -> void:
+	# ── Swap these three lines for Database calls when ready ──────────────────
+	var level: int = GameManager.player_level
+	var xp:    int = GameManager.player_xp
+	var coins: int = GameManager.player_coins
+	# ── e.g. var level: int = Database.get_player_level() ────────────────────
+
+	level_label.text = str(level)
+	xp_label.text    = str(xp)
+	coins_label.text = str(coins)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shop toggle
+# ─────────────────────────────────────────────────────────────────────────────
 
 func _on_btn_toggled(pressed: bool) -> void:
 	_shop_open = pressed
@@ -63,6 +92,7 @@ func _spawn_customer() -> void:
 
 func _on_customer_left() -> void:
 	_customer_active = false
+	_refresh_hud()   # coins/xp may have changed after order completion
 
 
 func _close_shop() -> void:

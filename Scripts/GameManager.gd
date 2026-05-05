@@ -4,6 +4,7 @@ extends Node
 signal order_received(order_data)
 signal garment_cut(garment_type)
 signal garment_sewn(garment_type)
+signal stats_changed
 
 enum GameState {
 	FREE_ROAM,
@@ -16,6 +17,11 @@ var current_state: GameState = GameState.FREE_ROAM
 var current_order: Dictionary = {}
 var cut_pieces: Array = []
 var is_piece_cut: bool = false
+
+# ── HUD mirror — always in sync with Database ─────────────────────────────────
+var player_level: int = 1
+var player_xp:    int = 0
+var player_coins: int = 0
 
 
 func receive_order(order):
@@ -53,6 +59,9 @@ func complete_sewing():
 	if xp > 0 or coins > 0:
 		Database.add_player_rewards(xp, coins)
 
+# ── Pull fresh values from DB into the HUD mirrors ────────────────────────
+	_sync_stats()
+
 	# Log to console for verification during demo
 	var player_data: Dictionary = Database.get_player_data()
 	print("═══ Order Complete! ═══")
@@ -63,3 +72,13 @@ func complete_sewing():
 	print("════════════════════════")
 
 	current_state = GameState.FREE_ROAM
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pulls latest Level / XP / Coins from the DB and notifies the HUD
+# ─────────────────────────────────────────────────────────────────────────────
+func _sync_stats() -> void:
+	var data: Dictionary = Database.get_player_data()
+	player_level = data.get("Level",      1)
+	player_xp    = data.get("Current_xp", 0)
+	player_coins = data.get("Coins",      0)
+	emit_signal("stats_changed")

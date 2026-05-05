@@ -508,21 +508,32 @@ stretch_mode = 5
 
 [node name="LevelLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=1041698482]
 layout_mode = 0
-offset_left = 202.0
-offset_top = 66.0
-offset_right = 290.0
-offset_bottom = 189.0
+offset_left = 203.0
+offset_top = 50.0
+offset_right = 291.0
+offset_bottom = 209.0
+theme_override_fonts/font = ExtResource("41_8crsr")
+theme_override_font_sizes/font_size = 128
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="XPLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=856671221]
 layout_mode = 0
 offset_left = 462.0
 offset_top = 67.0
-offset_right = 578.0
+offset_right = 714.0
 offset_bottom = 110.0
+theme_override_fonts/font = ExtResource("41_8crsr")
+theme_override_font_sizes/font_size = 32
+vertical_alignment = 1
 
 [node name="CoinLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=35122923]
 layout_mode = 0
 offset_left = 462.0
 offset_top = 149.0
-offset_right = 578.0
+offset_right = 756.0
 offset_bottom = 192.0
+theme_override_fonts/font = ExtResource("41_8crsr")
+theme_override_font_sizes/font_size = 32
+vertical_alignment = 1
