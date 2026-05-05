@@ -14,7 +14,7 @@ extends Node
 #  SECTION 1 — CONSTANTS & DATA POOLS
 # ──────────────────────────────────────────────────────────────────────────────
 
-const DB_PATH := "user://silai_simulator"   # godot-sqlite appends .db automatically
+const DB_PATH := "res://silai_simulator"   # godot-sqlite appends .db automatically
 
 # ── Customer Type Classification ──────────────────────────────────────────────
 # Names in VIP_NAMES  → get a random discount (10–25 %)
@@ -185,7 +185,7 @@ func _create_tables() -> void:
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Customer (
 			CustomerID      INTEGER PRIMARY KEY AUTOINCREMENT,
-			Name            TEXT    NOT NULL UNIQUE,
+			Name            TEXT    NOT NULL UNIQUE, 
 			House           TEXT,
 			Street          TEXT,
 			Sector          TEXT,
@@ -205,7 +205,9 @@ func _create_tables() -> void:
 			CustomerID  INTEGER NOT NULL,
 			PhoneNo     TEXT    NOT NULL,
 			PRIMARY KEY (CustomerID, PhoneNo),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 		);
 	""")
 
@@ -215,7 +217,9 @@ func _create_tables() -> void:
 			CustomerID    INTEGER PRIMARY KEY,
 			Discount_rate REAL    NOT NULL
 			              CHECK(Discount_rate >= 0 AND Discount_rate <= 100),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 		);
 	""")
 
@@ -224,7 +228,9 @@ func _create_tables() -> void:
 		CREATE TABLE IF NOT EXISTS Rude (
 			CustomerID  INTEGER PRIMARY KEY,
 			Time_delay  INTEGER NOT NULL CHECK(Time_delay >= 0),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
+			ON DELETE CASCADE 
+			ON UPDATE CASCADE
 		);
 	""")
 
@@ -257,12 +263,14 @@ func _create_tables() -> void:
 			ItemID  INTEGER PRIMARY KEY,
 			Type    TEXT    NOT NULL,
 			Speed   REAL    NOT NULL DEFAULT 1.0 CHECK(Speed > 0),
-			FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID) ON DELETE CASCADE
+			FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID) 
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 		);
 	""")
 
 	# ── Player ────────────────────────────────────────────────────────────────
-	# Level is a DERIVED attribute (computed by trigger from Current_xp).
+	# Level is a calculated attribute (computed by trigger from Current_xp).
 	# Formula: Level = floor(Current_xp / 500) + 1
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Player (
@@ -275,7 +283,7 @@ func _create_tables() -> void:
 	""")
 
 	# ── Order ─────────────────────────────────────────────────────────────────
-	# Total_price is a DERIVED attribute computed via SQL on finalize_order().
+	# Total_price is a DERIVED attribute computed via SQL on finalize_order(). improves query performance (real world decision of keeping total price in table)
 	# Using quoted "Order" because ORDER is a reserved SQL keyword.
 	db.query("""
 		CREATE TABLE IF NOT EXISTS "Order" (
@@ -288,7 +296,7 @@ func _create_tables() -> void:
 			Order_status    TEXT    NOT NULL DEFAULT 'Pending'
 			                CHECK(Order_status IN
 			                      ('Pending','Cutting','Sewing','Completed','Cancelled')),
-			Total_price     REAL             DEFAULT 0.0,
+			Total_price     REAL             DEFAULT 0.0, 
 			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 		);
 	""")
@@ -299,7 +307,9 @@ func _create_tables() -> void:
 			DressID     INTEGER PRIMARY KEY AUTOINCREMENT,
 			OrderID     INTEGER NOT NULL,
 			Dress_type  TEXT    NOT NULL,
-			FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE
+			FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) 
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 		);
 	""")
 
@@ -309,22 +319,26 @@ func _create_tables() -> void:
 			DressID  INTEGER NOT NULL,
 			Color    TEXT    NOT NULL,
 			PRIMARY KEY (DressID, Color),
-			FOREIGN KEY (DressID) REFERENCES Dress(DressID) ON DELETE CASCADE
+			FOREIGN KEY (DressID) REFERENCES Dress(DressID) 
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 		);
 	""")
 
 	# ── Dress_Parts — merged M:N (Dress ↔ Fabric) + weak entity ─────────────
 	# Composite PK: (DressID, Part_name)
-	# Represents which fabric and how much is used per part of a dress.
+	# Represents which fabric and how much is used per part of a dress. CHANGED PK ADDED FABRICID
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Dress_Parts (
 			DressID        INTEGER NOT NULL,
 			Part_name      TEXT    NOT NULL,
 			FabricID       INTEGER NOT NULL,
 			Quantity_used  REAL    NOT NULL CHECK(Quantity_used > 0),
-			PRIMARY KEY (DressID, Part_name),
-			FOREIGN KEY (DressID)  REFERENCES Dress(DressID)   ON DELETE CASCADE,
-			FOREIGN KEY (FabricID) REFERENCES Fabric(FabricID)
+			PRIMARY KEY (DressID, Part_name, FabricID),
+			FOREIGN KEY (DressID)  REFERENCES Dress(DressID)   
+			ON DELETE CASCADE ON UPDATE CASCADE,
+			FOREIGN KEY (FabricID) REFERENCES Fabric(FabricID)		
+			ON DELETE RESTRICT ON UPDATE CASCADE
 		);
 	""")
 
@@ -338,7 +352,7 @@ func _create_tables() -> void:
 func _create_triggers() -> void:
 
 	# ── Trigger 1: Auto-level Player when XP changes ──────────────────────────
-	# Level = floor(Current_xp / 500) + 1, minimum 1.
+	# Level = floor(Current_xp / 500) + 1, minimum 1. single slash performs integer division!
 	# Fires AFTER every XP update so the level is always in sync.
 	db.query("""
 		CREATE TRIGGER IF NOT EXISTS trg_player_level_up
@@ -346,7 +360,7 @@ func _create_triggers() -> void:
 		FOR EACH ROW
 		BEGIN
 			UPDATE Player
-			SET    Level = MAX(1, (NEW.Current_xp / 500) + 1)
+			SET    Level = MAX(1, (NEW.Current_xp / 500) + 1) 
 			WHERE  PlayerID = NEW.PlayerID;
 		END;
 	""")
@@ -366,17 +380,17 @@ func _create_triggers() -> void:
 
 	# ── Trigger 3: Auto-mark Payment as Paid when Order is Completed ──────────
 	# Fires whenever Order_status is updated to 'Completed'.
-	db.query("""
-		CREATE TRIGGER IF NOT EXISTS trg_order_auto_pay
-		AFTER UPDATE OF Order_status ON "Order"
-		FOR EACH ROW
-		WHEN NEW.Order_status = 'Completed'
-		BEGIN
-			UPDATE "Order"
-			SET    Payment_status = 'Paid'
-			WHERE  OrderID = NEW.OrderID;
-		END;
-	""")
+	#db.query("""
+		#CREATE TRIGGER IF NOT EXISTS trg_order_auto_pay
+		#AFTER UPDATE OF Order_status ON "Order"
+		#FOR EACH ROW
+		#WHEN NEW.Order_status = 'Completed'
+		#BEGIN
+			#UPDATE "Order"
+			#SET    Payment_status = 'Paid'
+			#WHERE  OrderID = NEW.OrderID;
+		#END;
+	#""")  DO THIS AFTER DELIVERY FUNCTIONALITY ADDED!!!!!!
 
 	print("Database: Triggers created / verified.")
 
@@ -392,22 +406,22 @@ func _create_views() -> void:
 		CREATE VIEW IF NOT EXISTS v_order_summary AS
 		SELECT
 			o.OrderID,
-			c.Name                                        AS Customer_Name,
+			c.Name AS Customer_Name,
 			c.City,
 			CASE
 				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
 				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-				ELSE                               'Normal'
-			END                                           AS Customer_Type,
-			COALESCE(v.Discount_rate, 0)                  AS Discount_pct,
-			COALESCE(r.Time_delay,    0)                  AS Delay_days,
+				ELSE 'Normal'
+			END AS Customer_Type,
+			COALESCE(v.Discount_rate, 0) AS Discount_pct,
+			COALESCE(r.Time_delay, 0) AS Delay_days,
 			d.Dress_type,
 			dc.Color,
 			o.Order_date,
 			o.Receiving_date,
 			o.Order_status,
 			o.Payment_status,
-			ROUND(o.Total_price, 2)                       AS Total_price
+			ROUND(o.Total_price, 2) AS Total_price
 		FROM "Order"    o
 		JOIN  Customer  c  ON c.CustomerID = o.CustomerID
 		JOIN  Dress     d  ON d.OrderID    = o.OrderID
@@ -423,12 +437,12 @@ func _create_views() -> void:
 			d.DressID,
 			d.Dress_type,
 			o.OrderID,
-			c.Name                                           AS Customer_Name,
+			c.Name AS Customer_Name,
 			dp.Part_name,
 			f.Fabric_type,
 			f.Unit_cost,
 			dp.Quantity_used,
-			ROUND(f.Unit_cost * dp.Quantity_used, 2)         AS Part_cost
+			ROUND(f.Unit_cost * dp.Quantity_used, 2) AS Part_cost
 		FROM Dress          d
 		JOIN "Order"        o  ON o.OrderID    = d.OrderID
 		JOIN Customer       c  ON c.CustomerID = o.CustomerID
@@ -445,15 +459,15 @@ func _create_views() -> void:
 			CASE
 				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
 				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-				ELSE                               'Normal'
-			END                                        AS Customer_Type,
-			COUNT(o.OrderID)                           AS Total_orders,
-			ROUND(SUM(o.Total_price), 2)               AS Total_spent,
-			ROUND(AVG(o.Total_price), 2)               AS Avg_order_value
-		FROM Customer   c
-		JOIN "Order"    o ON o.CustomerID = c.CustomerID
-		LEFT JOIN VIP   v ON v.CustomerID = c.CustomerID
-		LEFT JOIN Rude  r ON r.CustomerID = c.CustomerID
+				ELSE 'Normal'
+			END AS Customer_Type,
+			COUNT(o.OrderID) AS Total_orders,
+			ROUND(SUM(o.Total_price), 2) AS Total_spent,
+			ROUND(AVG(o.Total_price), 2) AS Avg_order_value
+		FROM Customer c
+		JOIN "Order" o ON o.CustomerID = c.CustomerID
+		LEFT JOIN VIP v ON v.CustomerID = c.CustomerID
+		LEFT JOIN Rude r ON r.CustomerID = c.CustomerID
 		WHERE o.Order_status = 'Completed'
 		GROUP BY c.CustomerID, c.Name;
 	""")
