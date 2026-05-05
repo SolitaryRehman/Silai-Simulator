@@ -490,43 +490,43 @@ theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 text = "Allow Customers"
 
-[node name="TextureRect2" type="TextureRect" parent="PauseCanvas" unique_id=1555158573]
+[node name="HudTexture" type="TextureRect" parent="PauseCanvas" unique_id=1555158573]
 offset_left = -92.0
 offset_top = -16.0
-offset_right = 371.0
-offset_bottom = 210.0
+offset_right = 325.0
+offset_bottom = 184.0
 texture = ExtResource("44_2x7ys")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LevelLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=1041698482]
+[node name="LevelLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=1041698482]
 layout_mode = 0
-offset_left = 187.0
-offset_top = 32.0
-offset_right = 275.0
-offset_bottom = 191.0
+offset_left = 163.0
+offset_top = 22.0
+offset_right = 251.0
+offset_bottom = 181.0
 theme_override_fonts/font = ExtResource("41_8crsr")
-theme_override_font_sizes/font_size = 128
+theme_override_font_sizes/font_size = 100
 text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="XPLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=856671221]
+[node name="XPLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=856671221]
 layout_mode = 0
-offset_left = 429.0
-offset_top = 57.0
-offset_right = 681.0
-offset_bottom = 100.0
+offset_left = 381.0
+offset_top = 45.0
+offset_right = 633.0
+offset_bottom = 88.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
 
-[node name="CoinLabel" type="Label" parent="PauseCanvas/TextureRect2" unique_id=35122923]
+[node name="CoinLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=35122923]
 layout_mode = 0
-offset_left = 429.0
-offset_top = 131.0
-offset_right = 723.0
-offset_bottom = 174.0
+offset_left = 381.0
+offset_top = 117.0
+offset_right = 675.0
+offset_bottom = 160.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1

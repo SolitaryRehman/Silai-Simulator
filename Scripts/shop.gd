@@ -4,9 +4,11 @@ extends Node3D
 @onready var enter_image: TextureRect = $PauseCanvas/EnterImage
 @onready var open_button: Button = $PauseCanvas/EnterImage/OpenButton
 
-@onready var level_label: Label = $PauseCanvas/TextureRect2/LevelLabel
-@onready var xp_label: Label = $PauseCanvas/TextureRect2/XPLabel
-@onready var coins_label: Label = $PauseCanvas/TextureRect2/CoinLabel
+@onready var hud_texture: TextureRect = $PauseCanvas/HudTexture
+@onready var level_label: Label = $PauseCanvas/HudTexture/LevelLabel
+@onready var xp_label: Label = $PauseCanvas/HudTexture/XPLabel
+@onready var coins_label: Label = $PauseCanvas/HudTexture/CoinLabel
+
 
 @onready var sewing_machine: StaticBody3D = $sewing_machine
 
@@ -111,6 +113,7 @@ func _close_shop() -> void:
 
 func on_cutting_started() -> void:
 	enter_image.visible = false
+	hud_texture.visible = false
 
 
 func _on_sewing_complete() -> void:
@@ -118,3 +121,4 @@ func _on_sewing_complete() -> void:
 	# Adjust this delay to match your camera transition duration
 	await get_tree().create_timer(0.6).timeout
 	enter_image.visible = true
+	hud_texture.visible = true
