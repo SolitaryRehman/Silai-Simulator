@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bux88vay5d17o"
-path.s3tc="res://.godot/imported/wood_2_baseColor.png-2ef29f924b56a9263e9cee75888a1fdd.s3tc.ctex"
+uid="uid://dj4wgrfh36bn8"
+path.s3tc="res://.godot/imported/antique_chandelier_3.jpg-772f4feef36131fa7504b834a69a0288.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "e991491cb21052240414a40312bcf4e1"
+}
 
 [deps]
 
-source_file="res://Assets/Models/Wooden ceiling/textures/wood_2_baseColor.png"
-dest_files=["res://.godot/imported/wood_2_baseColor.png-2ef29f924b56a9263e9cee75888a1fdd.s3tc.ctex"]
+source_file="res://Assets/Models/Tailor Shop/Chandelier/antique/antique_chandelier_3.jpg"
+dest_files=["res://.godot/imported/antique_chandelier_3.jpg-772f4feef36131fa7504b834a69a0288.s3tc.ctex"]
 
 [params]
 

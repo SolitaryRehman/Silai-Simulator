@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://u7v6py701ssj"
-path="res://.godot/imported/scene.gltf-132c2aca98f962e78c1f6e70d529490b.scn"
+uid="uid://db8q3iqmkmyr7"
+path="res://.godot/imported/antique_chandelier.glb-a57743986c98d28ee8891711a33de5b5.scn"
 
 [deps]
 
-source_file="res://Assets/Models/Wooden ceiling/scene.gltf"
-dest_files=["res://.godot/imported/scene.gltf-132c2aca98f962e78c1f6e70d529490b.scn"]
+source_file="res://Assets/Models/Tailor Shop/Chandelier/antique/antique_chandelier.glb"
+dest_files=["res://.godot/imported/antique_chandelier.glb-a57743986c98d28ee8891711a33de5b5.scn"]
 
 [params]
 

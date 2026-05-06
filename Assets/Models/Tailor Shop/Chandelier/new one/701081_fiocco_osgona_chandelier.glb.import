@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://u7v6py701ssj"
-path="res://.godot/imported/scene.gltf-132c2aca98f962e78c1f6e70d529490b.scn"
+uid="uid://ci265u7fei42m"
+path="res://.godot/imported/701081_fiocco_osgona_chandelier.glb-365b5dc271bbfca446b3a032d617abc4.scn"
 
 [deps]
 
-source_file="res://Assets/Models/Wooden ceiling/scene.gltf"
-dest_files=["res://.godot/imported/scene.gltf-132c2aca98f962e78c1f6e70d529490b.scn"]
+source_file="res://Assets/Models/Tailor Shop/Chandelier/new one/701081_fiocco_osgona_chandelier.glb"
+dest_files=["res://.godot/imported/701081_fiocco_osgona_chandelier.glb-365b5dc271bbfca446b3a032d617abc4.scn"]
 
 [params]
 

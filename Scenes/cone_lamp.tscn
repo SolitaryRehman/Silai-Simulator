@@ -138,11 +138,21 @@ mesh = SubResource("ArrayMesh_15k7r")
 skeleton = NodePath("")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1753424942]
-transform = Transform3D(1, 0, 1.110223e-15, 0, 1, 0, -1.110223e-15, 0, 1, -0.3608129, 0.3508082, 0.07956338)
-light_color = Color(1, 1, 0.9411765, 1)
+transform = Transform3D(1, 0, 1.110223e-15, 0, 1, 0, -1.110223e-15, 0, 1, -0.3615624, 0.3508082, 0.079300165)
+light_color = Color(1, 1, 0.78431374, 1)
 light_energy = 2.0
 light_bake_mode = 1
 shadow_enabled = true
 distance_fade_enabled = true
 omni_range = 10.0
 omni_attenuation = 0.5
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="." unique_id=1507024233]
+transform = Transform3D(1, 0, 1.110223e-15, 0, 1, 0, -1.110223e-15, 0, 1, -0.3615624, 0.52239525, 0.079300165)
+visible = false
+light_color = Color(1, 1, 0.8627451, 1)
+light_energy = 10.0
+light_size = 0.05
+light_bake_mode = 1
+omni_range = 0.2
+omni_attenuation = 2.0

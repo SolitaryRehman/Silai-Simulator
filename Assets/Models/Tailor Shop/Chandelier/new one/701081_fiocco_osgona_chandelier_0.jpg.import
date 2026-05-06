@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bux88vay5d17o"
-path.s3tc="res://.godot/imported/wood_2_baseColor.png-2ef29f924b56a9263e9cee75888a1fdd.s3tc.ctex"
+uid="uid://d2tf1b4brag2y"
+path.s3tc="res://.godot/imported/701081_fiocco_osgona_chandelier_0.jpg-c97f021ae1f91132500b67774838a2a3.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "caf45c3e5e1db017898e7a8dc991edc2"
+}
 
 [deps]
 
-source_file="res://Assets/Models/Wooden ceiling/textures/wood_2_baseColor.png"
-dest_files=["res://.godot/imported/wood_2_baseColor.png-2ef29f924b56a9263e9cee75888a1fdd.s3tc.ctex"]
+source_file="res://Assets/Models/Tailor Shop/Chandelier/new one/701081_fiocco_osgona_chandelier_0.jpg"
+dest_files=["res://.godot/imported/701081_fiocco_osgona_chandelier_0.jpg-c97f021ae1f91132500b67774838a2a3.s3tc.ctex"]
 
 [params]
 

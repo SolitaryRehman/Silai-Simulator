@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="3_io27d"]
 [ext_resource type="PackedScene" uid="uid://bjsokr4gllj0e" path="res://Scenes/ceiling_1.tscn" id="4_fdj0q"]
-[ext_resource type="LightmapGIData" uid="uid://g2qp06we3rwt" path="res://Resources/lightmaps_bake/shop.lmbake" id="5_4lu2m"]
 [ext_resource type="PackedScene" uid="uid://cp1idox80gijh" path="res://Scenes/door_1.tscn" id="5_k6jq0"]
 [ext_resource type="PackedScene" uid="uid://b1uy0vr202fcm" path="res://Scenes/office_desk.tscn" id="6_3ps1r"]
 [ext_resource type="PackedScene" uid="uid://dglyunmb58kds" path="res://Scenes/office_chair.tscn" id="6_ymrm4"]
@@ -101,12 +100,6 @@ environment = SubResource("Environment_k6jq0")
 transform = Transform3D(0.99393415, 0.10994887, -0.002498943, -0.036035478, 0.34705928, 0.9371508, 0.10390594, -0.93137604, 0.3489161, 0, 0, 0)
 visible = false
 shadow_enabled = true
-
-[node name="LightmapGI" type="LightmapGI" parent="." unique_id=546048465]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.070532, 1.2142309, 7.1772223)
-visible = false
-supersampling = true
-light_data = ExtResource("5_4lu2m")
 
 [node name="floor" type="Node3D" parent="." unique_id=1779688918]
 metadata/_edit_lock_ = true
@@ -399,25 +392,28 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.2144687, 0.20747149, 
 [node name="lights" type="Node3D" parent="." unique_id=1302026706]
 
 [node name="Cone_lamp" parent="lights" unique_id=1556258962 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 15.282044, 0.6532861, 16.173073)
+transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, 12.637239, 0.6532861, 15.004408)
 
 [node name="Cone_lamp2" parent="lights" unique_id=285117750 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 15.282044, 0.6532861, 8.764293)
+transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 15.282044, 0.6532861, 8.711858)
 
 [node name="Cone_lamp3" parent="lights" unique_id=544161301 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 15.282044, 0.6532861, 2.361138)
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 16.327393, 0.6532861, -0.10306573)
 
 [node name="Cone_lamp4" parent="lights" unique_id=1172326789 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 7.458235, 0.6532861, 2.361138)
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 8.738101, 0.6532861, -0.13481706)
 
 [node name="Cone_lamp5" parent="lights" unique_id=819229830 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 0.8777864, 0.6532861, 2.361138)
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 2.4900756, 0.6532861, -0.11515796)
 
-[node name="Cone_lamp6" parent="lights" unique_id=1035531813 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 0.8777864, 0.6532861, 8.703145)
+[node name="Cone_lamp6" parent="lights" unique_id=74837536 instance=ExtResource("37_5menp")]
+transform = Transform3D(-2.1855695e-07, 0, 5, 0, 5, 0, -5, 0, -2.1855695e-07, 0.08939743, 0.6532861, 4.980242)
 
-[node name="Cone_lamp7" parent="lights" unique_id=1598135116 instance=ExtResource("37_5menp")]
-transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 1.195435, 0.8316432, 16.079828)
+[node name="Cone_lamp7" parent="lights" unique_id=1055375684 instance=ExtResource("37_5menp")]
+transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, -1.1040319, 0.6816745, 14.997131)
+
+[node name="Cone_lamp8" parent="lights" unique_id=340164343 instance=ExtResource("37_5menp")]
+transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, 6.4485197, 0.6816745, 14.997131)
 
 [node name="sewing_machine" parent="." unique_id=259510592 instance=ExtResource("31_0icju")]
 transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-08, 0.62555724, 1.1914588, 13.216177)
