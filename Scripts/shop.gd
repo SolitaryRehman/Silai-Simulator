@@ -67,7 +67,7 @@ func _on_btn_toggled(pressed: bool) -> void:
 	_shop_open = pressed
 	if pressed:
 		open_button.text = "ON"
-		_spawn_timer.start(randf_range(3.0, 15.0))
+		_spawn_timer.start(randf_range(3.0, 10.0))
 	else:
 		open_button.text = "OFF"
 		_spawn_timer.stop()

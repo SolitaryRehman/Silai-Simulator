@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://8kg8fciclvrd"
-path="res://.godot/imported/modern_sofa.glb-c19cf64dd22c0375ae66f02780831b97.scn"
+uid="uid://cobrp8ox2y3c"
+path="res://.godot/imported/gothic lamp.glb-871f9b7a219e072cac739f1523fb88e0.scn"
 
 [deps]
 
-source_file="res://Assets/Models/Tailor Shop/Sofa/twin small sofas/modern_sofa.glb"
-dest_files=["res://.godot/imported/modern_sofa.glb-c19cf64dd22c0375ae66f02780831b97.scn"]
+source_file="res://Assets/Models/Tailor Shop/wall lamps/gothic lamp/gothic lamp.glb"
+dest_files=["res://.godot/imported/gothic lamp.glb-871f9b7a219e072cac739f1523fb88e0.scn"]
 
 [params]
 
@@ -17,15 +17,15 @@ nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 nodes/apply_root_scale=true
-nodes/root_scale=50.0
+nodes/root_scale=0.009999999999999998
 nodes/import_as_skeleton_bones=false
 nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
 meshes/ensure_tangents=true
 meshes/generate_lods=true
 meshes/create_shadow_meshes=true
-meshes/light_baking=0
-meshes/lightmap_texel_size=0.05
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
 meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
