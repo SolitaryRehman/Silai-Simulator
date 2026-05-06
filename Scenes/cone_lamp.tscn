@@ -139,8 +139,8 @@ skeleton = NodePath("")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1753424942]
 transform = Transform3D(1, 0, 1.110223e-15, 0, 1, 0, -1.110223e-15, 0, 1, -0.3615624, 0.3508082, 0.079300165)
-light_color = Color(1, 1, 0.78431374, 1)
-light_energy = 2.0
+light_color = Color(1, 1, 0.827451, 1)
+light_energy = 1.5
 light_bake_mode = 1
 shadow_enabled = true
 distance_fade_enabled = true
@@ -149,8 +149,7 @@ omni_attenuation = 0.5
 
 [node name="OmniLight3D2" type="OmniLight3D" parent="." unique_id=1507024233]
 transform = Transform3D(1, 0, 1.110223e-15, 0, 1, 0, -1.110223e-15, 0, 1, -0.3615624, 0.52239525, 0.079300165)
-visible = false
-light_color = Color(1, 1, 0.8627451, 1)
+light_color = Color(1, 1, 0.827451, 1)
 light_energy = 10.0
 light_size = 0.05
 light_bake_mode = 1

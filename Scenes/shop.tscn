@@ -38,6 +38,7 @@
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
+[ext_resource type="PackedScene" uid="uid://byg303usa6j7r" path="res://Scenes/chandelier.tscn" id="37_4lu2m"]
 [ext_resource type="PackedScene" uid="uid://cun15a86gbcja" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
@@ -295,7 +296,7 @@ transform = Transform3D(-7.430936e-08, 0, 1.7, 0, 1.7, 0, -1.7, 0, -7.430936e-08
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.6790528, 0.13037696, 0.8610735)
 
 [node name="manequin" parent="large items" unique_id=782946519 instance=ExtResource("15_cuuv1")]
-transform = Transform3D(7.1549286e-09, 0, -0.6, 0, 0.6, 0, 0.6, 0, 7.1549286e-09, 14.810399, 1.1329551, 5.332082)
+transform = Transform3D(7.1549286e-09, 0, -0.6, 0, 0.6, 0, 0.6, 0, 7.1549286e-09, 14.810399, 1.105753, 5.332082)
 
 [node name="manequin2" parent="large items" unique_id=851423923 instance=ExtResource("15_cuuv1")]
 transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 4.3671927, 1.1329551, 0.2855569)
@@ -391,28 +392,33 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.2144687, 0.20747149, 
 
 [node name="lights" type="Node3D" parent="." unique_id=1302026706]
 
-[node name="Cone_lamp" parent="lights" unique_id=1556258962 instance=ExtResource("37_5menp")]
+[node name="chandelier" parent="lights" unique_id=330042388 instance=ExtResource("37_4lu2m")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 6.7922344, 3.1696024, 7.0129614)
+
+[node name="lamps" type="Node3D" parent="lights" unique_id=1004847732]
+
+[node name="Cone_lamp" parent="lights/lamps" unique_id=1556258962 instance=ExtResource("37_5menp")]
 transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, 12.637239, 0.6532861, 15.004408)
 
-[node name="Cone_lamp2" parent="lights" unique_id=285117750 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp2" parent="lights/lamps" unique_id=285117750 instance=ExtResource("37_5menp")]
 transform = Transform3D(5.9624405e-08, 0, -5, 0, 5, 0, 5, 0, 5.9624405e-08, 15.282044, 0.6532861, 8.711858)
 
-[node name="Cone_lamp3" parent="lights" unique_id=544161301 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp3" parent="lights/lamps" unique_id=544161301 instance=ExtResource("37_5menp")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 16.327393, 0.6532861, -0.10306573)
 
-[node name="Cone_lamp4" parent="lights" unique_id=1172326789 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp4" parent="lights/lamps" unique_id=1172326789 instance=ExtResource("37_5menp")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 8.738101, 0.6532861, -0.13481706)
 
-[node name="Cone_lamp5" parent="lights" unique_id=819229830 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp5" parent="lights/lamps" unique_id=819229830 instance=ExtResource("37_5menp")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 2.4900756, 0.6532861, -0.11515796)
 
-[node name="Cone_lamp6" parent="lights" unique_id=74837536 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp6" parent="lights/lamps" unique_id=74837536 instance=ExtResource("37_5menp")]
 transform = Transform3D(-2.1855695e-07, 0, 5, 0, 5, 0, -5, 0, -2.1855695e-07, 0.08939743, 0.6532861, 4.980242)
 
-[node name="Cone_lamp7" parent="lights" unique_id=1055375684 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp7" parent="lights/lamps" unique_id=1055375684 instance=ExtResource("37_5menp")]
 transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, -1.1040319, 0.6816745, 14.997131)
 
-[node name="Cone_lamp8" parent="lights" unique_id=340164343 instance=ExtResource("37_5menp")]
+[node name="Cone_lamp8" parent="lights/lamps" unique_id=340164343 instance=ExtResource("37_5menp")]
 transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, 6.4485197, 0.6816745, 14.997131)
 
 [node name="sewing_machine" parent="." unique_id=259510592 instance=ExtResource("31_0icju")]
