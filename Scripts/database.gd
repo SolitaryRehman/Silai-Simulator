@@ -2,10 +2,10 @@
 # ══════════════════════════════════════════════════════════════════════════════
 #  SILAI SIMULATOR — Central Database Manager
 #  AutoLoad this as "Database" in:
-#    Project Settings → AutoLoad → Add → res://database.gd → Name: Database
+#    Project Settings , AutoLoad , Add , res://database.gd , Name: Database
 #
 #  Requires: godot-sqlite plugin by 2shady4u
-#    (Project → Project Settings → Plugins → Enable "godot-sqlite")
+#    (Project , Project Settings , Plugins , Enable "godot-sqlite")
 # ══════════════════════════════════════════════════════════════════════════════
 extends Node
 
@@ -17,9 +17,9 @@ extends Node
 const DB_PATH := "res://silai_simulator"   # godot-sqlite appends .db automatically
 
 # ── Customer Type Classification ──────────────────────────────────────────────
-# Names in VIP_NAMES  → get a random discount (10–25 %)
-# Names in RUDE_NAMES → get a random extra delay (1–4 days)
-# Everything else     → Normal (no discount, base 3-day receiving)
+# Names in VIP_NAMES  , get a random discount (10–25 %)
+# Names in RUDE_NAMES , get a random extra delay (1–4 days)
+# Everything else     , Normal (no discount, base 3-day receiving)
 const VIP_NAMES: Array = [
 	"Ahmed", "Sara", "Zara", "Hamza", "Fatima",
 	"Ayesha", "Hassan", "Maryam", "Ali", "Noor"
@@ -75,7 +75,7 @@ const BASE_RECEIVING_DAYS:   int   = 3          # normal receiving window (days)
 # ── Dress parts template ──────────────────────────────────────────────────────
 # Keys MUST match what GameManager produces:
 #   dress_name.to_lower().replace(" ", "_")
-# e.g. "T-Shirt" → "t-shirt"  |  "Bishop Gown" → "bishop_gown"
+# e.g. "T-Shirt" to "t-shirt"  |  "Bishop Gown" to "bishop_gown"
 # Each entry: [Part_name, Quantity_used (metres)]
 # Max 4 parts per dress (schema limit for this project)
 const DRESS_PARTS_TEMPLATE: Dictionary = {
@@ -503,10 +503,12 @@ func _prefill_fabrics() -> void:
 			[f["type"], f["cost"], f["stock"]]
 		)
 
-
+# SIUUUUUUUU CHANGED MACHINES AND PRICES
 func _prefill_shop_items() -> void:
 	var items: Array = [
-		{"name": "Sewing Machine", "price": 500.0, "unlocked": true,  "in_use": true },
+		{"name": "Embroidery Machine", "price": 1000.0, "unlocked": false,  "in_use": false },
+		{"name": "Overlocking Machine", "price": 2500.0, "unlocked": false,  "in_use": false },
+		{"name": "Desi Machine", "price": 500.0, "unlocked": true,  "in_use": true },
 		{"name": "Cutting Table",  "price": 300.0, "unlocked": true,  "in_use": true },
 		{"name": "Iron",           "price": 100.0, "unlocked": true,  "in_use": false},
 		{"name": "Dress Form",     "price": 200.0, "unlocked": false, "in_use": false},
@@ -520,14 +522,22 @@ func _prefill_shop_items() -> void:
 			[item["name"], item["price"], unlock_s, use_s]
 		)
 
-	# Machine record for the Sewing Machine (subclass of ShopItems)
-	db.query("SELECT ItemID FROM ShopItems WHERE Item_name = 'Sewing Machine';")
-	if not db.query_result.is_empty():
-		var mid: int = db.query_result[0]["ItemID"]
-		db.query_with_bindings(
-			"INSERT OR IGNORE INTO Machine (ItemID, Type, Speed) VALUES (?, ?, ?);",
-			[mid, "Industrial", 5.0]
-		)
+	var machines: Array = [
+		{"name": "Embroidery Machine", "type":"Electrical", "speed": 10.0},
+		{"name": "Overlocking Machine", "type":"Electrical", "speed": 15.0},
+		{"name": "Desi Machine", "type":"Mechanical", "speed": 2.0}
+	]
+	
+# ADDED MACHINE PREFILLING BELOW!!!:
+		
+	for machine in machines:
+		db.query_with_bindings("SELECT ItemID FROM ShopItems WHERE Item_name = ?;", [machine["name"]])
+		if not db.query_result.is_empty():
+			var id: int = db.query_result[0]["ItemID"]
+			db.query_with_bindings(
+				"INSERT OR IGNORE INTO Machine (ItemID, Type, Speed) VALUES (?, ?, ?);",
+				[id, machine["type"], machine["speed"]]
+			)
 
 
 func _prefill_player() -> void:
@@ -552,8 +562,8 @@ func get_random_name() -> String:
 ##
 ## Workflow:
 ##   1. Check DB for a Customer row with this Name.
-##   2. If found  → return their stored data (returning customer).
-##   3. If not    → generate measurements/address from pools, INSERT, classify VIP/Rude.
+##   2. If found  , then return their stored data (returning customer).
+##   3. If not    , then generate measurements/address from pools, INSERT, classify VIP/Rude.
 ##
 ## Returns a Dictionary with all Customer fields plus "customer_type" key.
 func get_or_create_customer(name: String) -> Dictionary:
@@ -565,22 +575,22 @@ func get_or_create_customer(name: String) -> Dictionary:
 
 	if not db.query_result.is_empty():
 		# ── Returning customer ─────────────────────────────────────────────────
-		var customer: Dictionary = db.query_result[0].duplicate()
+		var customer: Dictionary = db.query_result[0].duplicate() #picked whole record of customer (whole dictionary from array)
 		active_customer_id       = customer["CustomerID"]
-		customer["customer_type"] = _resolve_customer_type(active_customer_id)
-		print("Database: Returning customer '%s' (ID=%d, Type=%s)."
+		customer["customer_type"] = _resolve_customer_type(active_customer_id) #new field customer_type
+		print("Database: Returning customer '%s' (ID=%d, Type=%s)."   
 			  % [name, active_customer_id, customer["customer_type"]])
 		return customer
 
 	else:
 		# ── New customer — generate everything from pools ──────────────────────
-		var generated: Dictionary = _generate_customer_record(name)
+		var generated: Dictionary = _generate_customer_record(name) 
 		_insert_full_customer(generated)
-		generated["customer_type"] = _resolve_customer_type(active_customer_id)
-		generated["CustomerID"]    = active_customer_id
+		generated["customer_type"] = _resolve_customer_type(active_customer_id) #additional attribute
+		generated["CustomerID"]    = active_customer_id # added active id from INSERT FULL CUSTOMER FUNCTION to the 
 		print("Database: New customer '%s' created (ID=%d, Type=%s)."
 			  % [name, active_customer_id, generated["customer_type"]])
-		return generated
+		return generated #this is output, not a database record.. just for printing // to return to the game , not database
 
 
 func _resolve_customer_type(customer_id: int) -> String:
@@ -622,19 +632,22 @@ func _insert_full_customer(data: Dictionary) -> void:
 		data["Sleeve_length"], data["Trouser_length"], data["Waist"]
 	])
 
-	db.query("SELECT last_insert_rowid() AS id;")
-	active_customer_id = int(db.query_result[0]["id"])
+	db.query("SELECT last_insert_rowid() AS id;") #auto increment happens on ID so when record was inserted in customer, ID Was generated so accessing that
+	active_customer_id = int(db.query_result[0]["id"]) #assigned the ID a variable
 
 	# Customer_Phone — generate a plausible Pakistani mobile number
-	var phone: String = "03%01d%01d-%07d" % [
-		randi() % 4,
-		randi() % 10,
-		randi() % 10000000
-	]
-	db.query_with_bindings(
-		"INSERT INTO Customer_Phone (CustomerID, PhoneNo) VALUES (?, ?);",
-		[active_customer_id, phone]
-	)
+# Customer_Phone — multivalued: insert 1, 2 or 3 numbers per customer
+	var num_phones: int = randi() % 3 + 1  # 1 or 2 or 3
+	for i in range(num_phones):
+		var phone: String = "03%01d%01d-%07d" % [
+			randi() % 4,
+			randi() % 10,
+			randi() % 10000000
+		]
+		db.query_with_bindings(
+			"INSERT INTO Customer_Phone (CustomerID, PhoneNo) VALUES (?, ?);",
+			[active_customer_id, phone]
+			)
 
 	# ── Classify based on name: VIP / Rude / Normal ───────────────────────────
 	var name: String = data["Name"]
@@ -644,7 +657,7 @@ func _insert_full_customer(data: Dictionary) -> void:
 			"INSERT OR IGNORE INTO VIP (CustomerID, Discount_rate) VALUES (?, ?);",
 			[active_customer_id, discount]
 		)
-		print("Database: '%s' → VIP (%.0f%% discount)." % [name, discount])
+		print("Database: '%s' ; VIP (%.0f%% discount)." % [name, discount])
 
 	elif name in RUDE_NAMES:
 		var delay: int = randi_range(RUDE_DELAY_RANGE[0], RUDE_DELAY_RANGE[1])
@@ -652,10 +665,10 @@ func _insert_full_customer(data: Dictionary) -> void:
 			"INSERT OR IGNORE INTO Rude (CustomerID, Time_delay) VALUES (?, ?);",
 			[active_customer_id, delay]
 		)
-		print("Database: '%s' → Rude (+%d day delay)." % [name, delay])
+		print("Database: '%s' ; Rude (+%d day delay)." % [name, delay])
 
 	else:
-		print("Database: '%s' → Normal customer." % name)
+		print("Database: '%s' ; Normal customer." % name)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -735,7 +748,7 @@ func attach_dress_to_order(
 	var fabric_id: int = int(db.query_result[0]["FabricID"])
 
 	# ── Insert Dress_Parts using template ────────────────────────────────────
-	# Key: same normalization GameManager uses  ("T-Shirt" → "t-shirt")
+	# Key: same normalization GameManager uses  ("T-Shirt" to "t-shirt")
 	var key: String = dress_display.to_lower().replace(" ", "_")
 
 	if not DRESS_PARTS_TEMPLATE.has(key):
@@ -763,7 +776,7 @@ func attach_dress_to_order(
 ##
 ## THE IMPRESSIVE DERIVED ATTRIBUTE QUERY:
 ##   Computes Total_price via a correlated subquery that:
-##     1. JOINs Dress → Dress_Parts → Fabric to sum (unit_cost × quantity)
+##     1. JOINs Dress and Dress_Parts and Fabric to sum (unit_cost × quantity)
 ##     2. Applies VIP discount via a correlated sub-subquery on the VIP table
 ##     3. Handles NULLs with COALESCE and rounds to 2 decimal places
 ##   Then sets Order_status = 'Completed'.
