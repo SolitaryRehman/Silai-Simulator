@@ -1,3 +1,4 @@
+#girl_1.gd
 extends CharacterBody3D
 
 @onready var animation_player: AnimationPlayer = $Model/AnimationPlayer

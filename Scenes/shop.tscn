@@ -39,7 +39,7 @@
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
 [ext_resource type="PackedScene" uid="uid://byg303usa6j7r" path="res://Scenes/chandelier.tscn" id="37_4lu2m"]
-[ext_resource type="PackedScene" uid="uid://cun15a86gbcja" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
+[ext_resource type="PackedScene" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
 [ext_resource type="PackedScene" uid="uid://cip6keq7fer0j" path="res://Scenes/girl_1.tscn" id="39_rjsrv"]

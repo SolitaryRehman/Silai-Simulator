@@ -295,7 +295,7 @@ func _create_tables() -> void:
 			                CHECK(Payment_status IN ('Unpaid', 'Paid')),
 			Order_status    TEXT    NOT NULL DEFAULT 'Pending'
 			                CHECK(Order_status IN
-			                      ('Pending','Cutting','Sewing','Completed','Cancelled')),
+			                      ('Pending','Cutting','Sewing','Completed','Cancelled')), 
 			Total_price     REAL             DEFAULT 0.0, 
 			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 		);
@@ -685,10 +685,10 @@ func create_order_record(customer_id: int) -> int:
 	db.query_with_bindings("""
 		INSERT INTO "Order"
 			(CustomerID, Order_date, Receiving_date, Payment_status, Order_status, Total_price)
-		VALUES (?, ?, ?, 'Unpaid', 'Pending', 0.0);
+		VALUES (?, ?, ?, 'Unpaid', 'Pending', 0.0);     
 	""", [customer_id, order_date, receiving_date])
 
-	db.query("SELECT last_insert_rowid() AS id;")
+	db.query("SELECT last_insert_rowid() AS id;")  #for auto-incremented ID cz we dont manually set them
 	active_order_id = int(db.query_result[0]["id"])
 	print("Database: Order %d created (Customer %d, due %s)."
 		  % [active_order_id, customer_id, receiving_date])
@@ -708,14 +708,14 @@ func _compute_receiving_date(customer_id: int) -> String:
 
 	var future_unix: int  = int(Time.get_unix_time_from_system()) + (total_days * 86400)
 	var dt:          Dictionary = Time.get_datetime_dict_from_unix_time(future_unix)
-	return "%04d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
+	return "%04d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]] #Current time (Unix), Add days (in seconds), Convert to date dictionary, Format as YYYY-MM-DD string
 
 
 ## Called by cutting_table after the player selects dress, color, and fabric.
 ## Creates the Dress row + Dress_Color + all Dress_Parts for this order.
 func attach_dress_to_order(
 		order_id:     int,
-		dress_display:String,   # e.g. "T-Shirt"  (stored in Dress.Dress_type)
+		dress_display:String,   # e.g. "T-Shirt"  (stored in Dress.Dress_type) PASSING FROM MAIN SCRIPTS????
 		color:        String,   # e.g. "Navy Blue"
 		fabric_type:  String    # e.g. "Cotton"   (resolved to FabricID)
 ) -> void:
@@ -748,11 +748,11 @@ func attach_dress_to_order(
 	var fabric_id: int = int(db.query_result[0]["FabricID"])
 
 	# ── Insert Dress_Parts using template ────────────────────────────────────
-	# Key: same normalization GameManager uses  ("T-Shirt" to "t-shirt")
+	# Key: same normalization GameManager uses  ("T-Shirt" to "t-shirt") TO MATCH W KEY IN DICT
 	var key: String = dress_display.to_lower().replace(" ", "_")
 
 	if not DRESS_PARTS_TEMPLATE.has(key):
-		push_warning("Database: No parts template for '%s' (key='%s')." % [dress_display, key])
+		push_warning("Database: No parts template for '%s' (key='%s')." % [dress_display, key]) #DICTIONARY KEY!! 
 		return
 
 	for part in DRESS_PARTS_TEMPLATE[key]:
@@ -780,10 +780,7 @@ func attach_dress_to_order(
 ##     2. Applies VIP discount via a correlated sub-subquery on the VIP table
 ##     3. Handles NULLs with COALESCE and rounds to 2 decimal places
 ##   Then sets Order_status = 'Completed'.
-##   trg_order_auto_pay trigger then automatically sets Payment_status = 'Paid'.
 func finalize_order(order_id: int) -> void:
-	if order_id <= 0:
-		order_id = active_order_id
 	if order_id <= 0:
 		push_error("Database: finalize_order() — no valid order ID!")
 		return
@@ -829,7 +826,6 @@ func finalize_order(order_id: int) -> void:
 		WHERE OrderID = ?;
 	""", [order_id, order_id, order_id])
 	# ^ Three bindings for the three ? placeholders (order_id used 3 times)
-	# Trigger trg_order_auto_pay fires and sets Payment_status = 'Paid'
 
 	# Log the computed price
 	db.query_with_bindings(
@@ -840,8 +836,8 @@ func finalize_order(order_id: int) -> void:
 	if not db.query_result.is_empty():
 		price = float(db.query_result[0]["Total_price"])
 
-	print("Database: Order %d finalized. Total price = %.2f coins." % [order_id, price])
-	active_order_id = -1
+	print("Database: Order %d finalized. Total price = %.2f coins." % [order_id, price]) #MONEY = COINS
+	active_order_id = -1 
 	active_dress_id = -1
 
 
@@ -851,7 +847,7 @@ func finalize_order(order_id: int) -> void:
 
 ## Adds XP and Coins to the single player (PlayerID = 1).
 ## The trg_player_level_up trigger handles Level recalculation automatically.
-func add_player_rewards(xp: int, coins: int) -> void:
+func add_player_rewards(xp: int, coins: int) -> void:  #WHOSE SENDING IN THESE PARAMS??
 	db.query_with_bindings("""
 		UPDATE Player
 		SET Current_xp = Current_xp + ?,
@@ -862,7 +858,7 @@ func add_player_rewards(xp: int, coins: int) -> void:
 
 
 ## Returns the player's full stats with a computed "xp_to_next_level" column.
-func get_player_data() -> Dictionary:
+func get_player_data() -> Dictionary:    #WHEN GAME LOADS CALL THIS!
 	db.query("""
 		SELECT
 			PlayerID,
@@ -884,7 +880,7 @@ func get_player_data() -> Dictionary:
 # ──────────────────────────────────────────────────────────────────────────────
 
 ## Full order details for a given OrderID using the summary view.
-func get_order_details(order_id: int) -> Dictionary:
+func get_order_details(order_id: int) -> Dictionary:   #used where????
 	db.query_with_bindings(
 		"SELECT * FROM v_order_summary WHERE OrderID = ?;",
 		[order_id]
@@ -909,20 +905,16 @@ func get_order_history() -> Array:
 	return db.query_result.duplicate()
 
 
-## Total earnings across all completed orders.
+## Total earnings across all completed orders. ADDED inner coalesce. Removed redundant null checks in the end
 func get_total_earnings() -> float:
 	db.query("""
-		SELECT ROUND(COALESCE(SUM(Total_price), 0.0), 2) AS earnings
+		SELECT ROUND(COALESCE(SUM(COALESCE(Total_price, 0.0)), 0.0), 2) AS earnings  
 		FROM "Order"
 		WHERE Order_status = 'Completed';
 	""")
-	if db.query_result.is_empty():
-		return 0.0
-	var val = db.query_result[0]["earnings"]
-	return 0.0 if val == null else float(val)
+	return float(db.query_result[0]["earnings"])
 
-
-## VIP discount % for a customer (0.0 if not VIP).
+## VIP discount % for a customer (0.0 if not VIP). VIP Discount calculated in above functions so why not use this utility in them????
 func get_vip_discount(customer_id: int) -> float:
 	db.query_with_bindings(
 		"SELECT Discount_rate FROM VIP WHERE CustomerID = ?;",
@@ -945,14 +937,14 @@ func get_rude_delay(customer_id: int) -> int:
 
 
 ## Fabric unit cost by name (used for UI price previews).
-func get_fabric_cost(fabric_type: String) -> float:
-	db.query_with_bindings(
-		"SELECT Unit_cost FROM Fabric WHERE Fabric_type = ?;",
-		[fabric_type]
-	)
-	if db.query_result.is_empty():
-		return 0.0
-	return float(db.query_result[0]["Unit_cost"])
+#func get_fabric_cost(fabric_type: String) -> float:
+	#db.query_with_bindings(
+		#"SELECT Unit_cost FROM Fabric WHERE Fabric_type = ?;",
+		#[fabric_type]
+	#)
+	#if db.query_result.is_empty():
+		#return 0.0
+	#return float(db.query_result[0]["Unit_cost"])
 
 
 ## Top customers by total spend — useful for a leaderboard or stats screen.

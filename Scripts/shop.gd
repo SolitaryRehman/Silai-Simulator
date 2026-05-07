@@ -1,3 +1,4 @@
+#shop.gd
 extends Node3D
 
 

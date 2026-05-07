@@ -1,3 +1,4 @@
+#pause_canvas.gd
 extends CanvasLayer
 
 @onready var pause_menu: TextureRect = $TextureRect  

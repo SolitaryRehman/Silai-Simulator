@@ -1,3 +1,4 @@
+#berserk_armor.gd
 extends CharacterBody3D
 
 @onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
