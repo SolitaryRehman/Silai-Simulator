@@ -77,7 +77,7 @@ func _on_game_options_pressed():
 
 func _on_quit_pressed():
 	if is_animating:
-		return
+		await animation_player.animation_finished
 	is_animating = true
 
 	# If somehow quit is pressed before sword is drawn, draw first then quit
@@ -88,11 +88,10 @@ func _on_quit_pressed():
 
 
 func quit_sequence():
-	animation_player.play("Sword_Attack_RM")
+	animation_player.play("Sword_Attack")
 	await animation_player.animation_finished
 
 	animation_player.play("Sword_Idle")
-	await animation_player.animation_finished
 
 	await get_tree().create_timer(2.0).timeout
 	get_tree().quit()
