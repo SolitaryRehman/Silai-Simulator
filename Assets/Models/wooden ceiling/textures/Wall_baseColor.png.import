@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ciak1gtk7bw32"
-path.s3tc="res://.godot/imported/Wall_baseColor.png-7eb034a2544d4ab412a22d1e5e7272e6.s3tc.ctex"
+path.s3tc="res://.godot/imported/Wall_baseColor.png-32e2d8738d6807e0455527aa45cf99ba.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Assets/Models/wooden ceiling/textures/Wall_baseColor.png"
-dest_files=["res://.godot/imported/Wall_baseColor.png-7eb034a2544d4ab412a22d1e5e7272e6.s3tc.ctex"]
+source_file="res://Assets/Models/Wooden ceiling/textures/Wall_baseColor.png"
+dest_files=["res://.godot/imported/Wall_baseColor.png-32e2d8738d6807e0455527aa45cf99ba.s3tc.ctex"]
 
 [params]
 
