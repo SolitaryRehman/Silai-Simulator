@@ -1,25 +1,13 @@
 # database.gd
-# ══════════════════════════════════════════════════════════════════════════════
-#  SILAI SIMULATOR — Central Database Manager
-#  AutoLoad this as "Database" in:
-#    Project Settings , AutoLoad , Add , res://database.gd , Name: Database
-#
-#  Requires: godot-sqlite plugin by 2shady4u
-#    (Project , Project Settings , Plugins , Enable "godot-sqlite")
-# ══════════════════════════════════════════════════════════════════════════════
+# AutoLoad as "Database" — must be ABOVE GameManager in the AutoLoad list.
 extends Node
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  SECTION 1 — CONSTANTS & DATA POOLS
 # ──────────────────────────────────────────────────────────────────────────────
 
-const DB_PATH := "res://silai_simulator"   # godot-sqlite appends .db automatically
+const DB_PATH := "res://silai_simulator"
 
-# ── Customer Type Classification ──────────────────────────────────────────────
-# Names in VIP_NAMES  , get a random discount (10–25 %)
-# Names in RUDE_NAMES , get a random extra delay (1–4 days)
-# Everything else     , Normal (no discount, base 3-day receiving)
 const VIP_NAMES: Array = [
 	"Ahmed", "Sara", "Zara", "Hamza", "Fatima",
 	"Ayesha", "Hassan", "Maryam", "Ali", "Noor"
@@ -28,23 +16,17 @@ const RUDE_NAMES: Array = [
 	"Babar", "Javed", "Naseem", "Shafiq", "Gulzar",
 	"Rafiq", "Munna", "Bhola", "Dada", "Chacha"
 ]
-
-# Full name pool used by berserkarmor.gd to pick a random customer name
 const NAME_POOL: Array = [
-	# VIP
 	"Ahmed", "Sara", "Zara", "Hamza", "Fatima",
 	"Ayesha", "Hassan", "Maryam", "Ali", "Noor",
-	# Rude
 	"Babar", "Javed", "Naseem", "Shafiq", "Gulzar",
 	"Rafiq", "Munna", "Bhola", "Dada", "Chacha",
-	# Normal
 	"Usman", "Bilal", "Kamran", "Raza", "Tariq",
 	"Nadia", "Hira", "Sana", "Rabia", "Amna",
 	"Imran", "Faisal", "Asad", "Omer", "Saad"
 ]
 
-# ── Address pools ─────────────────────────────────────────────────────────────
-const HOUSE_POOL:  Array = [
+const HOUSE_POOL: Array = [
 	"12-A", "45-B", "7-C", "88", "3/4", "22-D", "101", "56-F", "9-G", "77"
 ]
 const STREET_POOL: Array = [
@@ -59,7 +41,6 @@ const CITY_POOL: Array = [
 	"Islamabad", "Rawalpindi", "Lahore", "Karachi", "Peshawar", "Quetta"
 ]
 
-# ── Measurement ranges [min, max] in inches ───────────────────────────────────
 const COLLAR_RANGE:   Array = [13, 18]
 const CHEST_RANGE:    Array = [32, 48]
 const SHOULDER_RANGE: Array = [14, 20]
@@ -67,60 +48,40 @@ const SLEEVE_RANGE:   Array = [22, 28]
 const TROUSER_RANGE:  Array = [36, 46]
 const WAIST_RANGE:    Array = [28, 44]
 
-# ── VIP / Rude ranges ─────────────────────────────────────────────────────────
-const VIP_DISCOUNT_RANGE:    Array = [10, 25]   # percent off total price
-const RUDE_DELAY_RANGE:      Array = [1,   4]   # extra days added to receiving date
-const BASE_RECEIVING_DAYS:   int   = 3          # normal receiving window (days)
+const VIP_DISCOUNT_RANGE:  Array = [10, 25]
+const RUDE_DELAY_RANGE:    Array = [1,   4]
+const BASE_RECEIVING_DAYS: int   = 3
 
-# ── Dress parts template ──────────────────────────────────────────────────────
-# Keys MUST match what GameManager produces:
-#   dress_name.to_lower().replace(" ", "_")
-# e.g. "T-Shirt" to "t-shirt"  |  "Bishop Gown" to "bishop_gown"
-# Each entry: [Part_name, Quantity_used (metres)]
-# Max 4 parts per dress (schema limit for this project)
+# ── Order generation pools — single source of truth for both customer scripts ──
+const DRESS_POOL: Array = [
+	"T-Shirt", "Frock", "Bishop Gown", "Pants", "Jacket", "Maxi", "Lehenga"
+]
+const FABRIC_POOL: Array = [
+	"Cotton", "Silk", "Linen", "Polyester", "Lawn", "Chiffon", "Denim"
+]
+const COLOR_POOL: Array = [
+	"Navy Blue", "Crimson Red", "Forest Green", "Pearl White",
+	"Jet Black", "Purple", "Golden", "Sky Blue"
+]
+const FABRIC_USED_POOL: Array = [
+	"2.5 meters", "3.0 meters", "3.5 meters", "4.0 meters",
+	"4.5 meters", "5.0 meters", "5.5 meters"
+]
+
+# XP / coin ranges per number of dresses in one order
+const XP_RANGES: Dictionary   = { 1: [50, 120],  2: [130, 250], 3: [260, 400] }
+const COIN_RANGES: Dictionary = { 1: [100, 300], 2: [320, 550], 3: [570, 900] }
+
+# Keys = dress_display.to_lower().replace(" ", "_")
+# "T-Shirt" → "t-shirt"   |   "Bishop Gown" → "bishop_gown"
 const DRESS_PARTS_TEMPLATE: Dictionary = {
-	"t-shirt":     [
-		["Front Panel",  1.5],
-		["Back Panel",   1.5],
-		["Sleeve",       0.5],
-		["Collar",       0.2]
-	],
-	"frock":       [
-		["Bodice",       1.0],
-		["Skirt",        2.0],
-		["Sleeve",       0.5],
-		["Neckband",     0.3]
-	],
-	"bishop_gown": [
-		["Bodice",       1.2],
-		["Skirt",        2.5],
-		["Bishop Sleeve",0.8],
-		["Collar",       0.3]
-	],
-	"pants":       [
-		["Front Panel",  1.5],
-		["Back Panel",   1.5],
-		["Waistband",    0.3],
-		["Pocket",       0.2]
-	],
-	"jacket":      [
-		["Front Panel",  1.2],
-		["Back Panel",   1.2],
-		["Sleeve",       0.7],
-		["Lining",       0.8]
-	],
-	"maxi":        [
-		["Bodice",       1.0],
-		["Skirt",        3.0],
-		["Sleeve",       0.5],
-		["Hem",          0.3]
-	],
-	"lehenga":     [
-		["Skirt",        2.5],
-		["Blouse",       1.0],
-		["Dupatta",      2.0],
-		["Waistband",    0.3]
-	],
+	"t-shirt":     [["Front Panel", 1.5], ["Back Panel", 1.5], ["Sleeve", 0.5], ["Collar", 0.2]],
+	"frock":       [["Bodice", 1.0], ["Skirt", 2.0], ["Sleeve", 0.5], ["Neckband", 0.3]],
+	"bishop_gown": [["Bodice", 1.2], ["Skirt", 2.5], ["Bishop Sleeve", 0.8], ["Collar", 0.3]],
+	"pants":       [["Front Panel", 1.5], ["Back Panel", 1.5], ["Waistband", 0.3], ["Pocket", 0.2]],
+	"jacket":      [["Front Panel", 1.2], ["Back Panel", 1.2], ["Sleeve", 0.7], ["Lining", 0.8]],
+	"maxi":        [["Bodice", 1.0], ["Skirt", 3.0], ["Sleeve", 0.5], ["Hem", 0.3]],
+	"lehenga":     [["Skirt", 2.5], ["Blouse", 1.0], ["Dupatta", 2.0], ["Waistband", 0.3]],
 }
 
 
@@ -130,8 +91,6 @@ const DRESS_PARTS_TEMPLATE: Dictionary = {
 
 var db: SQLite = null
 
-# Track the IDs of the currently active workflow so other scripts
-# can call Database.active_order_id without passing parameters around.
 var active_customer_id: int = -1
 var active_order_id:    int = -1
 var active_dress_id:    int = -1
@@ -150,19 +109,18 @@ func _ready() -> void:
 	print("═══ Database: Fully initialized. ═══")
 
 
-func _notification(what: int) -> void:
+func _notification(what: int) -> void:  #close db upon closing window
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_close_db()
 
 
 func _open_db() -> void:
 	db = SQLite.new()
-	db.path             = DB_PATH
-	db.verbosity_level  = SQLite.QUIET   # change to SQLite.NORMAL for debug output
+	db.path            = DB_PATH
+	db.verbosity_level = SQLite.QUIET #Do not print unnecessary logs/messages
 	if not db.open_db():
-		push_error("Database: FATAL — could not open database at '%s.db'!" % DB_PATH)
+		push_error("Database: FATAL — could not open '%s.db'!" % DB_PATH)
 		return
-	# Enable foreign key enforcement (off by default in SQLite)
 	db.query("PRAGMA foreign_keys = ON;")
 	print("Database: Connected to '%s.db'." % DB_PATH)
 
@@ -174,18 +132,14 @@ func _close_db() -> void:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#  SECTION 4 — DDL (Data Definition Language)
-#  Creates every table in the final relational schema.
+#  SECTION 4 — DDL
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _create_tables() -> void:
-
-	# ── Customer ──────────────────────────────────────────────────────────────
-	# Name is UNIQUE so a returning customer is found by name, not random ID.
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Customer (
 			CustomerID      INTEGER PRIMARY KEY AUTOINCREMENT,
-			Name            TEXT    NOT NULL UNIQUE, 
+			Name            TEXT    NOT NULL UNIQUE,
 			House           TEXT,
 			Street          TEXT,
 			Sector          TEXT,
@@ -198,43 +152,32 @@ func _create_tables() -> void:
 			Waist           REAL
 		);
 	""")
-
-	# ── Customer_Phone — multivalued attribute, separate relation ─────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Customer_Phone (
 			CustomerID  INTEGER NOT NULL,
 			PhoneNo     TEXT    NOT NULL,
 			PRIMARY KEY (CustomerID, PhoneNo),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── VIP — specialization subclass ────────────────────────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS VIP (
 			CustomerID    INTEGER PRIMARY KEY,
 			Discount_rate REAL    NOT NULL
 			              CHECK(Discount_rate >= 0 AND Discount_rate <= 100),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── Rude — specialization subclass ───────────────────────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Rude (
 			CustomerID  INTEGER PRIMARY KEY,
 			Time_delay  INTEGER NOT NULL CHECK(Time_delay >= 0),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) 
-			ON DELETE CASCADE 
-			ON UPDATE CASCADE
+			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── Fabric ────────────────────────────────────────────────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Fabric (
 			FabricID        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -243,8 +186,6 @@ func _create_tables() -> void:
 			Stock_quantity  INTEGER NOT NULL DEFAULT 100 CHECK(Stock_quantity >= 0)
 		);
 	""")
-
-	# ── ShopItems (superclass) ────────────────────────────────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS ShopItems (
 			ItemID        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -256,22 +197,15 @@ func _create_tables() -> void:
 			              CHECK(Use_Status IN ('In Use', 'Not In Use'))
 		);
 	""")
-
-	# ── Machine — specialization subclass of ShopItems ───────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Machine (
 			ItemID  INTEGER PRIMARY KEY,
 			Type    TEXT    NOT NULL,
 			Speed   REAL    NOT NULL DEFAULT 1.0 CHECK(Speed > 0),
-			FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID) 
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
+			FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── Player ────────────────────────────────────────────────────────────────
-	# Level is a calculated attribute (computed by trigger from Current_xp).
-	# Formula: Level = floor(Current_xp / 500) + 1
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Player (
 			PlayerID    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -281,10 +215,6 @@ func _create_tables() -> void:
 			Current_xp  INTEGER NOT NULL DEFAULT 0 CHECK(Current_xp >= 0)
 		);
 	""")
-
-	# ── Order ─────────────────────────────────────────────────────────────────
-	# Total_price is a DERIVED attribute computed via SQL on finalize_order(). improves query performance (real world decision of keeping total price in table)
-	# Using quoted "Order" because ORDER is a reserved SQL keyword.
 	db.query("""
 		CREATE TABLE IF NOT EXISTS "Order" (
 			OrderID         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -295,39 +225,29 @@ func _create_tables() -> void:
 			                CHECK(Payment_status IN ('Unpaid', 'Paid')),
 			Order_status    TEXT    NOT NULL DEFAULT 'Pending'
 			                CHECK(Order_status IN
-			                      ('Pending','Cutting','Sewing','Completed','Cancelled')), 
-			Total_price     REAL             DEFAULT 0.0, 
+			                      ('Pending','Cutting','Sewing','Completed','Cancelled')),
+			Total_price     REAL    DEFAULT 0.0,
 			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 		);
 	""")
-
-	# ── Dress ─────────────────────────────────────────────────────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Dress (
 			DressID     INTEGER PRIMARY KEY AUTOINCREMENT,
 			OrderID     INTEGER NOT NULL,
 			Dress_type  TEXT    NOT NULL,
-			FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) 
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
+			FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── Dress_Color — multivalued attribute (Phase 3, Step 6) ─────────────────
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Dress_Color (
 			DressID  INTEGER NOT NULL,
 			Color    TEXT    NOT NULL,
 			PRIMARY KEY (DressID, Color),
-			FOREIGN KEY (DressID) REFERENCES Dress(DressID) 
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
+			FOREIGN KEY (DressID) REFERENCES Dress(DressID)
+			ON DELETE CASCADE ON UPDATE CASCADE
 		);
 	""")
-
-	# ── Dress_Parts — merged M:N (Dress ↔ Fabric) + weak entity ─────────────
-	# Composite PK: (DressID, Part_name)
-	# Represents which fabric and how much is used per part of a dress. CHANGED PK ADDED FABRICID
 	db.query("""
 		CREATE TABLE IF NOT EXISTS Dress_Parts (
 			DressID        INTEGER NOT NULL,
@@ -335,38 +255,32 @@ func _create_tables() -> void:
 			FabricID       INTEGER NOT NULL,
 			Quantity_used  REAL    NOT NULL CHECK(Quantity_used > 0),
 			PRIMARY KEY (DressID, Part_name, FabricID),
-			FOREIGN KEY (DressID)  REFERENCES Dress(DressID)   
+			FOREIGN KEY (DressID)  REFERENCES Dress(DressID)
 			ON DELETE CASCADE ON UPDATE CASCADE,
-			FOREIGN KEY (FabricID) REFERENCES Fabric(FabricID)		
+			FOREIGN KEY (FabricID) REFERENCES Fabric(FabricID)
 			ON DELETE RESTRICT ON UPDATE CASCADE
 		);
 	""")
-
 	print("Database: All tables created / verified.")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#  SECTION 5 — TRIGGERS (Course topic: Week 14)
+#  SECTION 5 — TRIGGERS
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _create_triggers() -> void:
-
-	# ── Trigger 1: Auto-level Player when XP changes ──────────────────────────
-	# Level = floor(Current_xp / 500) + 1, minimum 1. single slash performs integer division!
-	# Fires AFTER every XP update so the level is always in sync.
+	# Level = floor(Current_xp / 500) + 1  (integer division, minimum 1)
 	db.query("""
 		CREATE TRIGGER IF NOT EXISTS trg_player_level_up
 		AFTER UPDATE OF Current_xp ON Player
 		FOR EACH ROW
 		BEGIN
 			UPDATE Player
-			SET    Level = MAX(1, (NEW.Current_xp / 500) + 1) 
+			SET    Level = MAX(1, (NEW.Current_xp / 500) + 1)
 			WHERE  PlayerID = NEW.PlayerID;
 		END;
 	""")
-
-	# ── Trigger 2: Deduct fabric stock when a dress part is inserted ──────────
-	# Each INSERT into Dress_Parts automatically reduces the Fabric stock.
+	# Deduct fabric stock automatically on each Dress_Parts INSERT
 	db.query("""
 		CREATE TRIGGER IF NOT EXISTS trg_deduct_fabric_stock
 		AFTER INSERT ON Dress_Parts
@@ -377,51 +291,35 @@ func _create_triggers() -> void:
 			WHERE  FabricID = NEW.FabricID;
 		END;
 	""")
-
-	# ── Trigger 3: Auto-mark Payment as Paid when Order is Completed ──────────
-	# Fires whenever Order_status is updated to 'Completed'.
-	#db.query("""
-		#CREATE TRIGGER IF NOT EXISTS trg_order_auto_pay
-		#AFTER UPDATE OF Order_status ON "Order"
-		#FOR EACH ROW
-		#WHEN NEW.Order_status = 'Completed'
-		#BEGIN
-			#UPDATE "Order"
-			#SET    Payment_status = 'Paid'
-			#WHERE  OrderID = NEW.OrderID;
-		#END;
-	#""")  DO THIS AFTER DELIVERY FUNCTIONALITY ADDED!!!!!!
-
+	# Payment trigger fires via deliver_order() (delivery button), not here.
 	print("Database: Triggers created / verified.")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#  SECTION 6 — VIEWS (heavily use JOINs and subqueries — Week 5 & 6)
+#  SECTION 6 — VIEWS
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _create_views() -> void:
-
-	# ── View 1: Full order summary (JOIN across 6 tables + LEFT JOINs) ────────
 	db.query("""
 		CREATE VIEW IF NOT EXISTS v_order_summary AS
 		SELECT
 			o.OrderID,
-			c.Name AS Customer_Name,
+			c.Name                         AS Customer_Name,
 			c.City,
 			CASE
 				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
 				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-				ELSE 'Normal'
-			END AS Customer_Type,
-			COALESCE(v.Discount_rate, 0) AS Discount_pct,
-			COALESCE(r.Time_delay, 0) AS Delay_days,
+				ELSE                               'Normal'
+			END                            AS Customer_Type,
+			COALESCE(v.Discount_rate, 0)   AS Discount_pct,
+			COALESCE(r.Time_delay,    0)   AS Delay_days,
 			d.Dress_type,
 			dc.Color,
 			o.Order_date,
 			o.Receiving_date,
 			o.Order_status,
 			o.Payment_status,
-			ROUND(o.Total_price, 2) AS Total_price
+			ROUND(o.Total_price, 2)        AS Total_price
 		FROM "Order"    o
 		JOIN  Customer  c  ON c.CustomerID = o.CustomerID
 		JOIN  Dress     d  ON d.OrderID    = o.OrderID
@@ -429,28 +327,24 @@ func _create_views() -> void:
 		LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
 		LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID;
 	""")
-
-	# ── View 2: Per-part cost breakdown (JOIN + arithmetic) ───────────────────
 	db.query("""
 		CREATE VIEW IF NOT EXISTS v_dress_cost_breakdown AS
 		SELECT
 			d.DressID,
 			d.Dress_type,
 			o.OrderID,
-			c.Name AS Customer_Name,
+			c.Name                                   AS Customer_Name,
 			dp.Part_name,
 			f.Fabric_type,
 			f.Unit_cost,
 			dp.Quantity_used,
 			ROUND(f.Unit_cost * dp.Quantity_used, 2) AS Part_cost
-		FROM Dress          d
-		JOIN "Order"        o  ON o.OrderID    = d.OrderID
-		JOIN Customer       c  ON c.CustomerID = o.CustomerID
-		JOIN Dress_Parts   dp  ON dp.DressID   = d.DressID
-		JOIN Fabric         f  ON f.FabricID   = dp.FabricID;
+		FROM Dress         d
+		JOIN "Order"       o  ON o.OrderID    = d.OrderID
+		JOIN Customer      c  ON c.CustomerID = o.CustomerID
+		JOIN Dress_Parts  dp  ON dp.DressID   = d.DressID
+		JOIN Fabric        f  ON  f.FabricID  = dp.FabricID;
 	""")
-
-	# ── View 3: Top customers by total spending (subquery + aggregation) ──────
 	db.query("""
 		CREATE VIEW IF NOT EXISTS v_customer_spending AS
 		SELECT
@@ -459,25 +353,23 @@ func _create_views() -> void:
 			CASE
 				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
 				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-				ELSE 'Normal'
-			END AS Customer_Type,
-			COUNT(o.OrderID) AS Total_orders,
-			ROUND(SUM(o.Total_price), 2) AS Total_spent,
-			ROUND(AVG(o.Total_price), 2) AS Avg_order_value
-		FROM Customer c
-		JOIN "Order" o ON o.CustomerID = c.CustomerID
-		LEFT JOIN VIP v ON v.CustomerID = c.CustomerID
+				ELSE                               'Normal'
+			END                            AS Customer_Type,
+			COUNT(o.OrderID)               AS Total_orders,
+			ROUND(SUM(o.Total_price), 2)   AS Total_spent,
+			ROUND(AVG(o.Total_price), 2)   AS Avg_order_value
+		FROM Customer  c
+		JOIN "Order"   o ON o.CustomerID = c.CustomerID
+		LEFT JOIN VIP  v ON v.CustomerID = c.CustomerID
 		LEFT JOIN Rude r ON r.CustomerID = c.CustomerID
 		WHERE o.Order_status = 'Completed'
 		GROUP BY c.CustomerID, c.Name;
 	""")
-
 	print("Database: Views created / verified.")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#  SECTION 7 — PREFILL DATA (DML — Week 4)
-#  Tables prefilled: Fabric, ShopItems, Machine, Player
+#  SECTION 7 — PREFILL
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _prefill_data() -> void:
@@ -503,40 +395,39 @@ func _prefill_fabrics() -> void:
 			[f["type"], f["cost"], f["stock"]]
 		)
 
-# SIUUUUUUUU CHANGED MACHINES AND PRICES
+
 func _prefill_shop_items() -> void:
 	var items: Array = [
-		{"name": "Embroidery Machine", "price": 1000.0, "unlocked": false,  "in_use": false },
-		{"name": "Overlocking Machine", "price": 2500.0, "unlocked": false,  "in_use": false },
-		{"name": "Desi Machine", "price": 500.0, "unlocked": true,  "in_use": true },
-		{"name": "Cutting Table",  "price": 300.0, "unlocked": true,  "in_use": true },
-		{"name": "Iron",           "price": 100.0, "unlocked": true,  "in_use": false},
-		{"name": "Dress Form",     "price": 200.0, "unlocked": false, "in_use": false},
-		{"name": "Display Rack",   "price": 150.0, "unlocked": false, "in_use": false},
+		{"name": "Embroidery Machine",  "price": 1000.0, "unlocked": false, "in_use": false},
+		{"name": "Overlocking Machine", "price": 2500.0, "unlocked": false, "in_use": false},
+		{"name": "Desi Machine",        "price":  500.0, "unlocked": true,  "in_use": true },
+		{"name": "Cutting Table",       "price":  300.0, "unlocked": true,  "in_use": true },
+		{"name": "Iron",                "price":  100.0, "unlocked": true,  "in_use": false},
+		{"name": "Dress Form",          "price":  200.0, "unlocked": false, "in_use": false},
+		{"name": "Display Rack",        "price":  150.0, "unlocked": false, "in_use": false},
 	]
 	for item in items:
-		var unlock_s: String = "Unlocked"   if item["unlocked"] else "Locked"
-		var use_s:    String = "In Use"     if item["in_use"]   else "Not In Use"
+		var unlock_s: String = "Unlocked" if item["unlocked"] else "Locked"
+		var use_s:    String = "In Use"   if item["in_use"]   else "Not In Use"
 		db.query_with_bindings(
 			"INSERT OR IGNORE INTO ShopItems (Item_name, Price, Unlock_Status, Use_Status) VALUES (?, ?, ?, ?);",
 			[item["name"], item["price"], unlock_s, use_s]
 		)
-
 	var machines: Array = [
-		{"name": "Embroidery Machine", "type":"Electrical", "speed": 10.0},
-		{"name": "Overlocking Machine", "type":"Electrical", "speed": 15.0},
-		{"name": "Desi Machine", "type":"Mechanical", "speed": 2.0}
+		{"name": "Embroidery Machine",  "type": "Electrical", "speed": 10.0},
+		{"name": "Overlocking Machine", "type": "Electrical", "speed": 15.0},
+		{"name": "Desi Machine",        "type": "Mechanical", "speed":  2.0},
 	]
-	
-# ADDED MACHINE PREFILLING BELOW!!!:
-		
 	for machine in machines:
-		db.query_with_bindings("SELECT ItemID FROM ShopItems WHERE Item_name = ?;", [machine["name"]])
+		db.query_with_bindings(
+			"SELECT ItemID FROM ShopItems WHERE Item_name = ?;",
+			[machine["name"]]
+		)
 		if not db.query_result.is_empty():
-			var id: int = db.query_result[0]["ItemID"]
+			var mid: int = db.query_result[0]["ItemID"]
 			db.query_with_bindings(
 				"INSERT OR IGNORE INTO Machine (ItemID, Type, Speed) VALUES (?, ?, ?);",
-				[id, machine["type"], machine["speed"]]
+				[mid, machine["type"], machine["speed"]]
 			)
 
 
@@ -549,57 +440,39 @@ func _prefill_player() -> void:
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  SECTION 8 — CUSTOMER FUNCTIONS
-#  Implements the "name-first, DB-check, then generate" logic from the brief.
 # ──────────────────────────────────────────────────────────────────────────────
 
-## Returns a random name from NAME_POOL.
-## Call this in berserkarmor._ready() to pick this customer's identity.
 func get_random_name() -> String:
 	return NAME_POOL[randi() % NAME_POOL.size()]
 
 
-## Main entry point called by berserkarmor when the order UI is first opened.
-##
-## Workflow:
-##   1. Check DB for a Customer row with this Name.
-##   2. If found  , then return their stored data (returning customer).
-##   3. If not    , then generate measurements/address from pools, INSERT, classify VIP/Rude.
-##
-## Returns a Dictionary with all Customer fields plus "customer_type" key.
+## Step 1: check DB by Name.
+## Found  → return stored record (returning customer).
+## Not found → generate from pools, INSERT, classify VIP/Rude.
 func get_or_create_customer(name: String) -> Dictionary:
-	# ── Step 1: Name lookup ───────────────────────────────────────────────────
-	db.query_with_bindings(
-		"SELECT * FROM Customer WHERE Name = ?;",
-		[name]
-	)
-
+	db.query_with_bindings("SELECT * FROM Customer WHERE Name = ?;", [name])
 	if not db.query_result.is_empty():
-		# ── Returning customer ─────────────────────────────────────────────────
-		var customer: Dictionary = db.query_result[0].duplicate() #picked whole record of customer (whole dictionary from array)
-		active_customer_id       = customer["CustomerID"]
-		customer["customer_type"] = _resolve_customer_type(active_customer_id) #new field customer_type
-		print("Database: Returning customer '%s' (ID=%d, Type=%s)."   
+		var customer: Dictionary  = db.query_result[0].duplicate()
+		active_customer_id        = customer["CustomerID"]
+		customer["customer_type"] = _resolve_customer_type(active_customer_id)
+		print("Database: Returning customer '%s' (ID=%d, Type=%s)."
 			  % [name, active_customer_id, customer["customer_type"]])
 		return customer
-
 	else:
-		# ── New customer — generate everything from pools ──────────────────────
-		var generated: Dictionary = _generate_customer_record(name) 
+		var generated: Dictionary = _generate_customer_record(name)
 		_insert_full_customer(generated)
-		generated["customer_type"] = _resolve_customer_type(active_customer_id) #additional attribute
-		generated["CustomerID"]    = active_customer_id # added active id from INSERT FULL CUSTOMER FUNCTION to the 
+		generated["customer_type"] = _resolve_customer_type(active_customer_id)
+		generated["CustomerID"]    = active_customer_id
 		print("Database: New customer '%s' created (ID=%d, Type=%s)."
 			  % [name, active_customer_id, generated["customer_type"]])
-		return generated #this is output, not a database record.. just for printing // to return to the game , not database
+		return generated
 
 
 func _resolve_customer_type(customer_id: int) -> String:
 	db.query_with_bindings("SELECT CustomerID FROM VIP  WHERE CustomerID = ?;", [customer_id])
-	if not db.query_result.is_empty():
-		return "VIP"
+	if not db.query_result.is_empty(): return "VIP"
 	db.query_with_bindings("SELECT CustomerID FROM Rude WHERE CustomerID = ?;", [customer_id])
-	if not db.query_result.is_empty():
-		return "Rude"
+	if not db.query_result.is_empty(): return "Rude"
 	return "Normal"
 
 
@@ -620,7 +493,6 @@ func _generate_customer_record(name: String) -> Dictionary:
 
 
 func _insert_full_customer(data: Dictionary) -> void:
-	# Insert Customer row
 	db.query_with_bindings("""
 		INSERT INTO Customer
 			(Name, House, Street, Sector, City,
@@ -631,25 +503,20 @@ func _insert_full_customer(data: Dictionary) -> void:
 		data["Collar_size"], data["Chest"], data["Shoulder"],
 		data["Sleeve_length"], data["Trouser_length"], data["Waist"]
 	])
+	db.query("SELECT last_insert_rowid() AS id;")
+	active_customer_id = int(db.query_result[0]["id"])
 
-	db.query("SELECT last_insert_rowid() AS id;") #auto increment happens on ID so when record was inserted in customer, ID Was generated so accessing that
-	active_customer_id = int(db.query_result[0]["id"]) #assigned the ID a variable
-
-	# Customer_Phone — generate a plausible Pakistani mobile number
-# Customer_Phone — multivalued: insert 1, 2 or 3 numbers per customer
-	var num_phones: int = randi() % 3 + 1  # 1 or 2 or 3
-	for i in range(num_phones):
+	# 1–3 phone numbers per customer (multivalued attribute)
+	var num_phones: int = randi() % 3 + 1
+	for _i in range(num_phones):
 		var phone: String = "03%01d%01d-%07d" % [
-			randi() % 4,
-			randi() % 10,
-			randi() % 10000000
+			randi() % 4, randi() % 10, randi() % 10000000
 		]
 		db.query_with_bindings(
 			"INSERT INTO Customer_Phone (CustomerID, PhoneNo) VALUES (?, ?);",
 			[active_customer_id, phone]
-			)
+		)
 
-	# ── Classify based on name: VIP / Rude / Normal ───────────────────────────
 	var name: String = data["Name"]
 	if name in VIP_NAMES:
 		var discount: float = float(randi_range(VIP_DISCOUNT_RANGE[0], VIP_DISCOUNT_RANGE[1]))
@@ -657,73 +524,72 @@ func _insert_full_customer(data: Dictionary) -> void:
 			"INSERT OR IGNORE INTO VIP (CustomerID, Discount_rate) VALUES (?, ?);",
 			[active_customer_id, discount]
 		)
-		print("Database: '%s' ; VIP (%.0f%% discount)." % [name, discount])
-
+		print("Database: '%s' → VIP (%.0f%% discount)." % [name, discount])
 	elif name in RUDE_NAMES:
 		var delay: int = randi_range(RUDE_DELAY_RANGE[0], RUDE_DELAY_RANGE[1])
 		db.query_with_bindings(
 			"INSERT OR IGNORE INTO Rude (CustomerID, Time_delay) VALUES (?, ?);",
 			[active_customer_id, delay]
 		)
-		print("Database: '%s' ; Rude (+%d day delay)." % [name, delay])
-
+		print("Database: '%s' → Rude (+%d day delay)." % [name, delay])
 	else:
-		print("Database: '%s' ; Normal customer." % name)
+		print("Database: '%s' → Normal customer." % name)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  SECTION 9 — ORDER FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 
-## Creates an Order record in DB the moment the player accepts a customer's order.
-## Dress details are NOT known yet (chosen at cutting table) — they are attached later.
-## Returns the new OrderID and stores it in active_order_id.
+## Called at Accept press. Returns the new OrderID.
 func create_order_record(customer_id: int) -> int:
 	var order_date:     String = Time.get_datetime_string_from_system()
 	var receiving_date: String = _compute_receiving_date(customer_id)
-
 	db.query_with_bindings("""
 		INSERT INTO "Order"
 			(CustomerID, Order_date, Receiving_date, Payment_status, Order_status, Total_price)
-		VALUES (?, ?, ?, 'Unpaid', 'Pending', 0.0);     
+		VALUES (?, ?, ?, 'Unpaid', 'Pending', 0.0);
 	""", [customer_id, order_date, receiving_date])
-
-	db.query("SELECT last_insert_rowid() AS id;")  #for auto-incremented ID cz we dont manually set them
+	db.query("SELECT last_insert_rowid() AS id;")
 	active_order_id = int(db.query_result[0]["id"])
 	print("Database: Order %d created (Customer %d, due %s)."
 		  % [active_order_id, customer_id, receiving_date])
 	return active_order_id
 
 
+## Uses get_rude_delay() utility — single source of truth for delay logic.
 func _compute_receiving_date(customer_id: int) -> String:
-	var total_days: int = BASE_RECEIVING_DAYS
-
-	# Rude customers add their personal delay on top of the base window
-	db.query_with_bindings(
-		"SELECT Time_delay FROM Rude WHERE CustomerID = ?;",
-		[customer_id]
-	)
-	if not db.query_result.is_empty():
-		total_days += int(db.query_result[0]["Time_delay"])
-
+	var total_days: int   = BASE_RECEIVING_DAYS + get_rude_delay(customer_id)
 	var future_unix: int  = int(Time.get_unix_time_from_system()) + (total_days * 86400)
-	var dt:          Dictionary = Time.get_datetime_dict_from_unix_time(future_unix)
-	return "%04d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]] #Current time (Unix), Add days (in seconds), Convert to date dictionary, Format as YYYY-MM-DD string
+	var dt: Dictionary    = Time.get_datetime_dict_from_unix_time(future_unix)
+	return "%04d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
 
 
-## Called by cutting_table after the player selects dress, color, and fabric.
-## Creates the Dress row + Dress_Color + all Dress_Parts for this order.
-func attach_dress_to_order(
-		order_id:     int,
-		dress_display:String,   # e.g. "T-Shirt"  (stored in Dress.Dress_type) PASSING FROM MAIN SCRIPTS????
-		color:        String,   # e.g. "Navy Blue"
-		fabric_type:  String    # e.g. "Cotton"   (resolved to FabricID)
-) -> void:
-	if order_id == -1:
-		push_error("Database: attach_dress_to_order called with no active order!")
+## Called right after create_order_record() at Accept press.
+## Loops ALL dresses in the order (1–3) and inserts each one with its random
+## dress / color / fabric that was already decided by generate_random_dress_order().
+func attach_all_dresses_to_order(order_id: int, order_data: Dictionary) -> void:
+	var dresses: Array = order_data.get("dresses", [])
+	if dresses.is_empty():
+		push_warning("Database: attach_all_dresses_to_order — no dresses in order dict!")
 		return
+	for dress_dict in dresses:
+		_attach_single_dress(
+			order_id,
+			dress_dict.get("dress",  "T-Shirt"),
+			dress_dict.get("color",  "Navy Blue"),
+			dress_dict.get("fabric", "Cotton")
+		)
+	print("Database: %d dress(es) attached to Order %d." % [dresses.size(), order_id])
 
-	# ── Insert Dress row ──────────────────────────────────────────────────────
+
+## Internal — inserts one Dress + Dress_Color + Dress_Parts.
+## Does NOT modify Order_status (handled by update_order_status).
+func _attach_single_dress(
+		order_id:      int,
+		dress_display: String,
+		color:         String,
+		fabric_type:   String
+) -> void:
 	db.query_with_bindings(
 		"INSERT INTO Dress (OrderID, Dress_type) VALUES (?, ?);",
 		[order_id, dress_display]
@@ -731,123 +597,109 @@ func attach_dress_to_order(
 	db.query("SELECT last_insert_rowid() AS id;")
 	active_dress_id = int(db.query_result[0]["id"])
 
-	# ── Insert Dress_Color ────────────────────────────────────────────────────
 	db.query_with_bindings(
 		"INSERT OR IGNORE INTO Dress_Color (DressID, Color) VALUES (?, ?);",
 		[active_dress_id, color]
 	)
 
-	# ── Resolve FabricID ──────────────────────────────────────────────────────
 	db.query_with_bindings(
 		"SELECT FabricID FROM Fabric WHERE Fabric_type = ?;",
 		[fabric_type]
 	)
 	if db.query_result.is_empty():
-		push_error("Database: Fabric '%s' not found in DB!" % fabric_type)
-		return
+		push_error("Database: Fabric '%s' not found — using Cotton fallback." % fabric_type)
+		db.query("SELECT FabricID FROM Fabric WHERE Fabric_type = 'Cotton';")
+		if db.query_result.is_empty():
+			return
 	var fabric_id: int = int(db.query_result[0]["FabricID"])
 
-	# ── Insert Dress_Parts using template ────────────────────────────────────
-	# Key: same normalization GameManager uses  ("T-Shirt" to "t-shirt") TO MATCH W KEY IN DICT
 	var key: String = dress_display.to_lower().replace(" ", "_")
-
 	if not DRESS_PARTS_TEMPLATE.has(key):
-		push_warning("Database: No parts template for '%s' (key='%s')." % [dress_display, key]) #DICTIONARY KEY!! 
+		push_warning("Database: No parts template for key '%s'." % key)
 		return
-
 	for part in DRESS_PARTS_TEMPLATE[key]:
 		db.query_with_bindings("""
 			INSERT OR IGNORE INTO Dress_Parts (DressID, Part_name, FabricID, Quantity_used)
 			VALUES (?, ?, ?, ?);
 		""", [active_dress_id, part[0], fabric_id, float(part[1])])
-		# trg_deduct_fabric_stock fires automatically per part
+		# trg_deduct_fabric_stock fires automatically per INSERT
 
-	# Update Order status to Cutting
+
+## Updates Order_status. Called by GameManager at each workflow stage.
+func update_order_status(order_id: int, new_status: String) -> void:
 	db.query_with_bindings(
-		"UPDATE \"Order\" SET Order_status = 'Cutting' WHERE OrderID = ?;",
-		[order_id]
+		"UPDATE \"Order\" SET Order_status = ? WHERE OrderID = ?;",
+		[new_status, order_id]
 	)
 
-	print("Database: Dress '%s' (%s, %s) attached to Order %d."
-		  % [dress_display, color, fabric_type, order_id])
 
-
-## Called by GameManager.complete_sewing() when the garment is fully sewn.
+## Finalizes a sewn order — computes Total_price, sets Order_status = 'Completed'.
+## Payment_status = 'Paid' is set separately by deliver_order() (delivery button).
 ##
-## THE IMPRESSIVE DERIVED ATTRIBUTE QUERY:
-##   Computes Total_price via a correlated subquery that:
-##     1. JOINs Dress and Dress_Parts and Fabric to sum (unit_cost × quantity)
-##     2. Applies VIP discount via a correlated sub-subquery on the VIP table
-##     3. Handles NULLs with COALESCE and rounds to 2 decimal places
-##   Then sets Order_status = 'Completed'.
+## TOTAL_PRICE DERIVATION (derived attribute):
+##   Σ(Fabric.Unit_cost × Dress_Parts.Quantity_used) for all parts in this order
+##   × (1.0 - VIP discount / 100.0)  via correlated sub-subquery on VIP table.
+##   Covers: 2 INNER JOINs, correlated subquery, sub-subquery, COALESCE, ROUND, SUM.
 func finalize_order(order_id: int) -> void:
 	if order_id <= 0:
-		push_error("Database: finalize_order() — no valid order ID!")
+		push_error("Database: finalize_order() — invalid order_id: %d" % order_id)
 		return
-
 	db.query_with_bindings("""
 		UPDATE "Order"
 		SET
-		    Order_status = 'Completed',
-
-		    Total_price = (
-		        /*
-		         * DERIVED ATTRIBUTE: Total_price
-		         *
-		         * Inner query:  Σ (Fabric.Unit_cost × Dress_Parts.Quantity_used)
-		         *               for every part of every dress in this order.
-		         *
-		         * Correlated sub-subquery: fetch VIP.Discount_rate for this order's
-		         *   customer (NULL → 0.0 via COALESCE), convert to a multiplier,
-		         *   then deduct it from the raw sum.
-		         *
-		         * Uses: 2 INNER JOINs, 1 correlated subquery, COALESCE, ROUND.
-		         */
-		        SELECT ROUND(
-		            COALESCE(SUM(f.Unit_cost * dp.Quantity_used), 0.0)
-		            *
-		            (1.0 - COALESCE(
-		                (
-		                    SELECT v.Discount_rate / 100.0
-		                    FROM   VIP        v
-							JOIN   "Order"    o_v ON o_v.CustomerID = v.CustomerID
-		                    WHERE  o_v.OrderID = ?
-		                ),
-		                0.0
-		            )),
-		            2
-		        )
-		        FROM  Dress       d
-		        JOIN  Dress_Parts dp  ON dp.DressID  = d.DressID
-		        JOIN  Fabric       f  ON f.FabricID  = dp.FabricID
-		        WHERE d.OrderID = ?
-		    )
-
+			Order_status = 'Completed',
+			Total_price  = (
+				SELECT ROUND(
+					COALESCE(SUM(f.Unit_cost * dp.Quantity_used), 0.0)
+					*
+					(1.0 - COALESCE(
+						(
+							SELECT v.Discount_rate / 100.0
+							FROM   VIP       v
+							JOIN   "Order"   o_v ON o_v.CustomerID = v.CustomerID
+							WHERE  o_v.OrderID = ?
+						),
+						0.0
+					)),
+					2
+				)
+				FROM  Dress       d
+				JOIN  Dress_Parts dp ON dp.DressID  = d.DressID
+				JOIN  Fabric       f ON  f.FabricID = dp.FabricID
+				WHERE d.OrderID = ?
+			)
 		WHERE OrderID = ?;
 	""", [order_id, order_id, order_id])
-	# ^ Three bindings for the three ? placeholders (order_id used 3 times)
 
-	# Log the computed price
 	db.query_with_bindings(
 		"SELECT Total_price FROM \"Order\" WHERE OrderID = ?;",
 		[order_id]
 	)
 	var price: float = 0.0
 	if not db.query_result.is_empty():
-		price = float(db.query_result[0]["Total_price"])
+		var raw = db.query_result[0]["Total_price"]
+		price = 0.0 if raw == null else float(raw)
+	print("Database: Order %d finalized. Total_price = %.2f coins." % [order_id, price])
 
-	print("Database: Order %d finalized. Total price = %.2f coins." % [order_id, price]) #MONEY = COINS
-	active_order_id = -1 
-	active_dress_id = -1
+
+## Called when player presses Deliver button.
+## Sets Payment_status = 'Paid' only for Completed orders.
+func deliver_order(order_id: int) -> void:
+	db.query_with_bindings("""
+		UPDATE "Order"
+		SET    Payment_status = 'Paid'
+		WHERE  OrderID        = ?
+		  AND  Order_status   = 'Completed';
+	""", [order_id])
+	print("Database: Order %d delivered — Payment marked Paid." % order_id)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  SECTION 10 — PLAYER FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 
-## Adds XP and Coins to the single player (PlayerID = 1).
-## The trg_player_level_up trigger handles Level recalculation automatically.
-func add_player_rewards(xp: int, coins: int) -> void:  #WHOSE SENDING IN THESE PARAMS??
+## Adds XP + Coins. trg_player_level_up recalculates Level automatically.
+func add_player_rewards(xp: int, coins: int) -> void:
 	db.query_with_bindings("""
 		UPDATE Player
 		SET Current_xp = Current_xp + ?,
@@ -857,8 +709,9 @@ func add_player_rewards(xp: int, coins: int) -> void:  #WHOSE SENDING IN THESE P
 	print("Database: Player rewarded +%d XP, +%d coins." % [xp, coins])
 
 
-## Returns the player's full stats with a computed "xp_to_next_level" column.
-func get_player_data() -> Dictionary:    #WHEN GAME LOADS CALL THIS!
+## Full player stats including computed xp_to_next_level.
+## Called by GameManager._ready() and _sync_stats() to load/refresh HUD.
+func get_player_data() -> Dictionary:
 	db.query("""
 		SELECT
 			PlayerID,
@@ -879,76 +732,126 @@ func get_player_data() -> Dictionary:    #WHEN GAME LOADS CALL THIS!
 #  SECTION 11 — UTILITY / QUERY HELPERS
 # ──────────────────────────────────────────────────────────────────────────────
 
-## Full order details for a given OrderID using the summary view.
-func get_order_details(order_id: int) -> Dictionary:   #used where????
-	db.query_with_bindings(
-		"SELECT * FROM v_order_summary WHERE OrderID = ?;",
-		[order_id]
-	)
-	if db.query_result.is_empty():
-		return {}
-	return db.query_result[0].duplicate()
+## Generates a random order dict for a customer.
+## Called by berserk_armor.gd and girl_1.gd — single source of truth for all pools.
+func generate_random_dress_order(customer_name: String) -> Dictionary:
+	var num_dresses: int = randi_range(1, 3)
+	var dresses: Array   = []
+	for _i in range(num_dresses):
+		dresses.append({
+			"dress":  DRESS_POOL[randi()  % DRESS_POOL.size()],
+			"fabric": FABRIC_POOL[randi() % FABRIC_POOL.size()],
+			"color":  COLOR_POOL[randi()  % COLOR_POOL.size()],
+		})
+	var xp_range:   Array = XP_RANGES[num_dresses]
+	var coin_range: Array = COIN_RANGES[num_dresses]
+	return {
+		"customer_name": customer_name,
+		"dresses":       dresses,
+		"fabric_used":   FABRIC_USED_POOL[randi() % FABRIC_USED_POOL.size()],
+		"xp_reward":     randi_range(xp_range[0],   xp_range[1]),
+		"coin_reward":   randi_range(coin_range[0],  coin_range[1]),
+		"timestamp":     Time.get_datetime_string_from_system(),
+		"status":        "pending"
+	}
 
 
-## Per-part cost breakdown for a given DressID.
-func get_dress_cost_breakdown(dress_id: int) -> Array:
-	db.query_with_bindings(
-		"SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;",
-		[dress_id]
-	)
-	return db.query_result.duplicate()
-
-
-## All completed orders newest-first — used for a history screen.
-func get_order_history() -> Array:
-	db.query("SELECT * FROM v_order_summary WHERE Order_status = 'Completed' ORDER BY OrderID DESC;")
-	return db.query_result.duplicate()
-
-
-## Total earnings across all completed orders. ADDED inner coalesce. Removed redundant null checks in the end
-func get_total_earnings() -> float:
-	db.query("""
-		SELECT ROUND(COALESCE(SUM(COALESCE(Total_price, 0.0)), 0.0), 2) AS earnings  
-		FROM "Order"
-		WHERE Order_status = 'Completed';
-	""")
-	return float(db.query_result[0]["earnings"])
-
-## VIP discount % for a customer (0.0 if not VIP). VIP Discount calculated in above functions so why not use this utility in them????
 func get_vip_discount(customer_id: int) -> float:
 	db.query_with_bindings(
 		"SELECT Discount_rate FROM VIP WHERE CustomerID = ?;",
 		[customer_id]
 	)
-	if db.query_result.is_empty():
-		return 0.0
+	if db.query_result.is_empty(): return 0.0
 	return float(db.query_result[0]["Discount_rate"])
 
 
-## Rude delay days for a customer (0 if not Rude).
+## Rude delay days — used by _compute_receiving_date and UI display labels.
 func get_rude_delay(customer_id: int) -> int:
 	db.query_with_bindings(
 		"SELECT Time_delay FROM Rude WHERE CustomerID = ?;",
 		[customer_id]
 	)
-	if db.query_result.is_empty():
-		return 0
+	if db.query_result.is_empty(): return 0
 	return int(db.query_result[0]["Time_delay"])
 
 
-## Fabric unit cost by name (used for UI price previews).
-#func get_fabric_cost(fabric_type: String) -> float:
-	#db.query_with_bindings(
-		#"SELECT Unit_cost FROM Fabric WHERE Fabric_type = ?;",
-		#[fabric_type]
-	#)
-	#if db.query_result.is_empty():
-		#return 0.0
-	#return float(db.query_result[0]["Unit_cost"])
+## All orders currently in progress: Pending.
+## Called from cutting table when player selects which order to work on.
+func get_pending_orders() -> Array:
+	db.query("""
+		SELECT
+			o.OrderID,
+			c.Name                             AS Customer_Name,
+			c.City,
+			GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
+			o.Order_date,
+			o.Receiving_date,
+			o.Order_status,
+			CASE
+				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+				ELSE                               'Normal'
+			END                                AS Customer_Type
+		FROM "Order"   o
+		JOIN  Customer  c  ON c.CustomerID = o.CustomerID
+		LEFT JOIN Dress d  ON d.OrderID    = o.OrderID
+		LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
+		LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
+		WHERE o.Order_status IN ('Pending')
+		GROUP BY o.OrderID
+		ORDER BY o.OrderID ASC;
+	""")
+	return db.query_result.duplicate()
 
 
-## Top customers by total spend — useful for a leaderboard or stats screen.
-## Uses v_customer_spending view (subquery + GROUP BY + aggregate).
+## Sectors / cities with most completed-but-unpaid orders — for batch delivery.
+func get_top_delivery_areas(limit: int = 5) -> Array:
+	db.query_with_bindings("""
+		SELECT
+			c.Sector,
+			c.City,
+			COUNT(o.OrderID)             AS Pending_deliveries,
+			ROUND(SUM(o.Total_price), 2) AS Area_revenue
+		FROM "Order"   o
+		JOIN  Customer c ON c.CustomerID = o.CustomerID
+		WHERE o.Order_status   = 'Completed'
+		  AND o.Payment_status = 'Unpaid'
+		GROUP BY c.Sector, c.City
+		ORDER BY Pending_deliveries DESC
+		LIMIT ?;
+	""", [limit])
+	return db.query_result.duplicate()
+
+
+func get_order_details(order_id: int) -> Dictionary:
+	db.query_with_bindings("SELECT * FROM v_order_summary WHERE OrderID = ?;", [order_id])
+	if db.query_result.is_empty(): return {}
+	return db.query_result[0].duplicate()
+
+
+func get_dress_cost_breakdown(dress_id: int) -> Array:
+	db.query_with_bindings("SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;", [dress_id])
+	return db.query_result.duplicate()
+
+
+func get_order_history() -> Array:
+	db.query("""
+		SELECT * FROM v_order_summary
+		WHERE Order_status = 'Completed'
+		ORDER BY OrderID DESC;
+	""")
+	return db.query_result.duplicate()
+
+
+func get_total_earnings() -> float:
+	db.query("""
+		SELECT ROUND(COALESCE(SUM(COALESCE(Total_price, 0.0)), 0.0), 2) AS earnings
+		FROM "Order"
+		WHERE Order_status = 'Completed';
+	""")
+	return float(db.query_result[0]["earnings"])
+
+
 func get_top_customers(limit: int = 5) -> Array:
 	db.query_with_bindings(
 		"SELECT * FROM v_customer_spending ORDER BY Total_spent DESC LIMIT ?;",
