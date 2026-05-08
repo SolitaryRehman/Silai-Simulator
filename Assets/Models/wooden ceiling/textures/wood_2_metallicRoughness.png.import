@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bo208wjxxuxv3"
-path.s3tc="res://.godot/imported/wood_2_metallicRoughness.png-d814470f7d09c07ed029a5683409ea4e.s3tc.ctex"
+path.s3tc="res://.godot/imported/wood_2_metallicRoughness.png-388639112d1f8afb25b22d226acc59d8.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Assets/Models/Wooden ceiling/textures/wood_2_metallicRoughness.png"
-dest_files=["res://.godot/imported/wood_2_metallicRoughness.png-d814470f7d09c07ed029a5683409ea4e.s3tc.ctex"]
+source_file="res://Assets/Models/wooden ceiling/textures/wood_2_metallicRoughness.png"
+dest_files=["res://.godot/imported/wood_2_metallicRoughness.png-388639112d1f8afb25b22d226acc59d8.s3tc.ctex"]
 
 [params]
 

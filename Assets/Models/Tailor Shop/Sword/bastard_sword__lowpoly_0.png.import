@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ciak1gtk7bw32"
-path.s3tc="res://.godot/imported/Wall_baseColor.png-7eb034a2544d4ab412a22d1e5e7272e6.s3tc.ctex"
+uid="uid://dtwxhjjr5jvrn"
+path.s3tc="res://.godot/imported/bastard_sword__lowpoly_0.png-2c4bbb6c0626685bb0048e6fa1b435b1.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "05fe205a1f451da5121c858ac35a63d7"
+}
 
 [deps]
 
-source_file="res://Assets/Models/wooden ceiling/textures/Wall_baseColor.png"
-dest_files=["res://.godot/imported/Wall_baseColor.png-7eb034a2544d4ab412a22d1e5e7272e6.s3tc.ctex"]
+source_file="res://Assets/Models/Tailor Shop/Sword/bastard_sword__lowpoly_0.png"
+dest_files=["res://.godot/imported/bastard_sword__lowpoly_0.png-2c4bbb6c0626685bb0048e6fa1b435b1.s3tc.ctex"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://u7v6py701ssj"
-path="res://.godot/imported/scene.gltf-5da2db72e99055cb322622bf1b432895.scn"
+uid="uid://bmbc0tymcvew4"
+path="res://.godot/imported/bastard_sword__lowpoly.glb-aece6d60cf9d293266f1eb4ab7809d92.scn"
 
 [deps]
 
-source_file="res://Assets/Models/wooden ceiling/scene.gltf"
-dest_files=["res://.godot/imported/scene.gltf-5da2db72e99055cb322622bf1b432895.scn"]
+source_file="res://Assets/Models/Tailor Shop/Sword/bastard_sword__lowpoly.glb"
+dest_files=["res://.godot/imported/bastard_sword__lowpoly.glb-aece6d60cf9d293266f1eb4ab7809d92.scn"]
 
 [params]
 
@@ -17,7 +17,7 @@ nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 nodes/apply_root_scale=true
-nodes/root_scale=1.0
+nodes/root_scale=0.02
 nodes/import_as_skeleton_bones=false
 nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
