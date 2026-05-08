@@ -14,7 +14,6 @@ extends Node3D
 @export var customer_scene_berserker: PackedScene
 @export var customer_scene_girl:      PackedScene
 
-var _shop_open:       bool = false
 var _customer_active: bool = false
 var _spawn_girl_next: bool = false
 
@@ -25,53 +24,44 @@ func _ready() -> void:
 	open_button.toggle_mode    = true
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
-	open_button.toggled.connect(_on_btn_toggled)
+	open_button.toggled.connect(_on_allow_customer_pressed)  # use toggled instead of pressed
 
 	_spawn_timer          = Timer.new()
 	_spawn_timer.one_shot = true
 	_spawn_timer.timeout.connect(_spawn_customer)
 	add_child(_spawn_timer)
 
-	# HUD refreshes whenever GameManager emits stats_changed
-	# (fired by _sync_stats() after every order completion and on game start)
 	GameManager.stats_changed.connect(_refresh_hud)
-
-	# Load HUD immediately from DB on game start
 	_refresh_hud()
 
 	sewing_machine.sewing_complete.connect(_on_sewing_complete)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# HUD — reads from GameManager mirrors (which are synced from DB)
-# ─────────────────────────────────────────────────────────────────────────────
-
+# HUD
 func _refresh_hud() -> void:
 	level_label.text  = str(GameManager.player_level)
 	xp_label.text     = str(GameManager.player_xp)
 	coins_label.text  = str(GameManager.player_coins)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Shop toggle
-# ─────────────────────────────────────────────────────────────────────────────
-
-func _on_btn_toggled(pressed: bool) -> void:
-	_shop_open = pressed
-	if pressed:
-		open_button.text = "ON"
-		_spawn_timer.start(randf_range(3.0, 10.0))
-	else:
-		open_button.text = "OFF"
-		_spawn_timer.stop()
+# Button — starts the arrival timer only if no customer is present or waiting
+func _on_allow_customer_pressed(pressed: bool) -> void:
+	if not pressed:
+		return  # ignore the untoggle click
+	if _customer_active or not _spawn_timer.is_stopped():
+		# Reset button back to OFF — nothing is happening
+		open_button.button_pressed = false
+		open_button.text           = "OFF"
+		return
+	open_button.text = "ON"
+	_spawn_timer.start(randf_range(3.0, 10.0))
 
 
 func _spawn_customer() -> void:
-	if not _shop_open:
-		return
+	# Reset button to OFF now that the customer is arriving
+	open_button.button_pressed = false
+	open_button.text           = "OFF"
 
-	# Allow multiple customers to be active at once — removed _customer_active guard.
-	# Each customer queues their own order independently in GameManager.pending_orders.
 	var customer
 
 	if _spawn_girl_next:
@@ -88,20 +78,13 @@ func _spawn_customer() -> void:
 	customer.customer_left.connect(_on_customer_left, CONNECT_ONE_SHOT)
 
 	_customer_active = true
-	_close_shop()
 
 
 func _on_customer_left() -> void:
 	_customer_active = false
-	# HUD will already be up-to-date via stats_changed signal — no manual refresh needed
 
 
-func _close_shop() -> void:
-	_shop_open                 = false
-	open_button.button_pressed = false
-	open_button.text           = "OFF"
-
-
+# UI visibility during cutting / sewing
 func on_cutting_started() -> void:
 	enter_image.visible = false
 	hud_texture.visible = false
