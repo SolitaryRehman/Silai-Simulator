@@ -13,106 +13,115 @@ extends Node3D
 
 var sword_drawn: bool = false
 var is_animating: bool = false
+var is_transitioning: bool = false
 
-var left_arm_idx: int = -1
-var right_arm_idx: int = -1
+var current_button: int = -1
 
-# X axis pitch — NEGATIVE = arms tilt forward/up, POSITIVE = arms tilt back/down
-# If arms go behind instead of forward, flip the sign of your angle values
-var target_arm_angle: float = 0.0
-
-# Character rotation targets — lerped smoothly in _process
+# Rotation-only bases (normalized, no scale)
 var original_rotation: Basis
-var target_character_basis: Basis
-var is_facing_camera: bool = false
+var target_rotation: Basis
+
+# Scale saved once, never touched again
+var character_scale: Vector3
+
+const BUTTON_ANIMATIONS: Array[String] = [
+	"1st idle main",
+	"2nd idle main",
+	"3rd idle main",
+]
 
 
 func _ready():
-	original_rotation = character_1.basis
-	target_character_basis = character_1.basis
+	character_scale    = character_1.scale
+	original_rotation  = character_1.basis.orthonormalized()
+	target_rotation    = original_rotation
 
 	back_sword.visible = true
 	hand_sword.visible = false
 
-	left_arm_idx = general_skeleton.find_bone("LeftLowerArm")
-	right_arm_idx = general_skeleton.find_bone("RightLowerArm")
-
-	print("LeftLowerArm idx: ", left_arm_idx)
-	print("RightLowerArm idx: ", right_arm_idx)
-
 	animation_player.play("idle_2/mixamo_com")
 
-	# Draw sword on first hover
 	continue_button.mouse_entered.connect(_on_any_button_hovered)
 	new_game_button.mouse_entered.connect(_on_any_button_hovered)
 	game_options_button.mouse_entered.connect(_on_any_button_hovered)
 	quit_game_button.mouse_entered.connect(_on_any_button_hovered)
 
-	# Arm angles — tweak the numbers to taste
-	# If arms go BEHIND instead of FORWARD, negate all four values
-	continue_button.mouse_entered.connect(func(): aim_arms_normal(-30.0))
-	new_game_button.mouse_entered.connect(func(): aim_arms_normal(-10.0))
-	game_options_button.mouse_entered.connect(func(): aim_arms_normal(10.0))
-	quit_game_button.mouse_entered.connect(func(): aim_arms_and_face_camera(30.0))
+	continue_button.mouse_entered.connect(func():     _on_button_hovered(0))
+	new_game_button.mouse_entered.connect(func():     _on_button_hovered(1))
+	game_options_button.mouse_entered.connect(func(): _on_button_hovered(2))
+	quit_game_button.mouse_entered.connect(func():    _on_button_hovered(3))
 
 	continue_button.pressed.connect(_on_continue_pressed)
 	game_options_button.pressed.connect(_on_game_options_pressed)
 	quit_game_button.pressed.connect(_on_quit_pressed)
 
 
-# ─── PROCESS ────────────────────────────────────────────────────────────────
+# ─── SMOOTH CHARACTER ROTATION ───────────────────────────────────────────────
 
 func _process(delta):
-	# Smoothly rotate character toward target basis — fixes the normalization error
-	var current = character_1.basis.orthonormalized()
-	var target  = target_character_basis.orthonormalized()
-	character_1.basis = current.slerp(target, delta * 6.0)
+	# Slerp rotation only (both normalized = no scale = no quaternion error)
+	var current_rot = character_1.basis.orthonormalized()
+	var new_rot     = current_rot.slerp(target_rotation, delta * 6.0)
+	# Reapply scale manually after slerp
+	character_1.basis = Basis(
+		new_rot.x * character_scale.x,
+		new_rot.y * character_scale.y,
+		new_rot.z * character_scale.z
+	)
 
-	# Smoothly move arms
+
+# ─── BUTTON HOVER TRANSITION ─────────────────────────────────────────────────
+
+func _on_button_hovered(button_idx: int):
 	if not sword_drawn:
 		return
-	if left_arm_idx == -1 or right_arm_idx == -1:
+	if button_idx == current_button:
+		return
+	if is_transitioning:
 		return
 
-	# Rotating around X axis (pitch).
-	# If arms go behind the character, change Vector3.RIGHT → Vector3.LEFT
-	var arm_target = Quaternion(Vector3.RIGHT, deg_to_rad(target_arm_angle))
+	if button_idx == 3:
+		face_camera()
+	else:
+		target_rotation = original_rotation
 
-	var current_l = general_skeleton.get_bone_pose_rotation(left_arm_idx)
-	var current_r = general_skeleton.get_bone_pose_rotation(right_arm_idx)
-
-	general_skeleton.set_bone_pose_rotation(left_arm_idx, current_l.slerp(arm_target, delta * 5.0))
-	general_skeleton.set_bone_pose_rotation(right_arm_idx, current_r.slerp(arm_target, delta * 5.0))
+	var from := current_button
+	current_button = button_idx
+	_play_transition_sequence(from, button_idx)
 
 
-# ─── AIM FUNCTIONS ──────────────────────────────────────────────────────────
-
-func aim_arms_normal(angle_x: float):
-	if not sword_drawn:
+func _play_transition_sequence(from: int, to: int):
+	if from == -1:
 		return
-	target_arm_angle = angle_x
-	# Restore original facing — _process lerps toward this every frame
-	target_character_basis = original_rotation
+
+	is_transitioning = true
+
+	if to > from:
+		for i in range(from, to):
+			animation_player.play(BUTTON_ANIMATIONS[i])
+			await animation_player.animation_finished
+	else:
+		for i in range(from - 1, to - 1, -1):
+			animation_player.play_backwards(BUTTON_ANIMATIONS[i])
+			await animation_player.animation_finished
+
+	is_transitioning = false
 
 
-func aim_arms_and_face_camera(angle_x: float):
-	if not sword_drawn:
-		return
-	target_arm_angle = angle_x
+# ─── FACE CAMERA ─────────────────────────────────────────────────────────────
 
-	# Build a facing basis toward the camera
+func face_camera():
 	var dir = camera_3d.global_position - character_1.global_position
 	dir.y = 0
 	if dir.length() > 0.01:
-		# look_at temporarily so we can grab its resulting basis
 		var saved = character_1.basis
+		# look_at the camera directly so the character faces it
 		character_1.look_at(character_1.global_position - dir, Vector3.UP)
-		target_character_basis = character_1.basis.orthonormalized()
-		# Restore immediately — _process will lerp to target smoothly
-		character_1.basis = saved
+		target_rotation = character_1.basis.orthonormalized()
+		character_1.basis = saved  # restore while slerp smoothly transitions
 
 
-# ─── HOVER ──────────────────────────────────────────────────────────────────
+# ─── HOVER (sword draw) ───────────────────────────────────────────────────────
 
 func _on_any_button_hovered():
 	if sword_drawn or is_animating:
@@ -129,10 +138,11 @@ func draw_sword_sequence():
 	await animation_player.animation_finished
 	sword_drawn = true
 	is_animating = false
+	current_button = 0
 	animation_player.play("sword_before_attack_idle/sword_before_idle_mixamo_com")
 
 
-# ─── BUTTON CLICKS ──────────────────────────────────────────────────────────
+# ─── BUTTON CLICKS ───────────────────────────────────────────────────────────
 
 func _on_continue_pressed():
 	get_tree().change_scene_to_file("res://scenes/shop.tscn")
