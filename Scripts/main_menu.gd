@@ -148,6 +148,16 @@ func draw_sword_sequence():
 # ─── BUTTON CLICKS ───────────────────────────────────────────────────────────
 
 func _on_continue_pressed():
+	var black_rect = ColorRect.new()
+	black_rect.color = Color(0, 0, 0, 0)
+	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$CanvasLayer.add_child(black_rect)
+
+	var tween = create_tween()
+	tween.tween_property(black_rect, "color", Color(0, 0, 0, 1), 1.5)\
+		.set_trans(Tween.TRANS_LINEAR)
+
+	await tween.finished
 	get_tree().change_scene_to_file("res://scenes/shop.tscn")
 
 
