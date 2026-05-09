@@ -280,7 +280,7 @@ func _build_area_row(area: Dictionary) -> HBoxContainer:
 
 	var rev_lbl := Label.new()
 	var rev: float = float(area.get("Area_revenue", 0.0))
-	rev_lbl.text = "%.0f coins" % rev
+	rev_lbl.text = str(int(rev)) + " coins" #round up now fixed to round down
 	rev_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rev_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	hbox.add_child(rev_lbl)
