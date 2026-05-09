@@ -37,9 +37,9 @@ var _order_canvas:       CanvasLayer   = null
 var _dress_list_vbox:    VBoxContainer = null
 var _cust_name_lbl:      Label         = null
 var _cust_type_lbl:      Label         = null
-var _fabric_summary_lbl: Label         = null
-var _xp_lbl:             Label         = null
-var _coin_lbl:           Label         = null
+#var _fabric_summary_lbl: Label         = null
+#var _xp_lbl:             Label         = null
+#var _coin_lbl:           Label         = null
 var _custom_accept_btn:  Button        = null
 
 signal customer_left
@@ -185,21 +185,21 @@ func _build_order_ui() -> void:
 	summary_row.add_theme_constant_override("separation", 18)
 	root.add_child(summary_row)
 
-	_fabric_summary_lbl = Label.new()
-	_fabric_summary_lbl.add_theme_font_size_override("font_size", 13)
-	_fabric_summary_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
-	_fabric_summary_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	summary_row.add_child(_fabric_summary_lbl)
-
-	_xp_lbl = Label.new()
-	_xp_lbl.add_theme_font_size_override("font_size", 14)
-	_xp_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
-	summary_row.add_child(_xp_lbl)
-
-	_coin_lbl = Label.new()
-	_coin_lbl.add_theme_font_size_override("font_size", 14)
-	_coin_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-	summary_row.add_child(_coin_lbl)
+	#_fabric_summary_lbl = Label.new()
+	#_fabric_summary_lbl.add_theme_font_size_override("font_size", 13)
+	#_fabric_summary_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
+	#_fabric_summary_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	#summary_row.add_child(_fabric_summary_lbl)
+#
+	#_xp_lbl = Label.new()
+	#_xp_lbl.add_theme_font_size_override("font_size", 14)
+	#_xp_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+	#summary_row.add_child(_xp_lbl)
+#
+	#_coin_lbl = Label.new()
+	#_coin_lbl.add_theme_font_size_override("font_size", 14)
+	#_coin_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	#summary_row.add_child(_coin_lbl)
 
 	root.add_child(HSeparator.new())
 
@@ -388,9 +388,9 @@ func _open_order_ui() -> void:
 			sp.add_theme_constant_override("separation", 6)
 			_dress_list_vbox.add_child(sp)
 
-	_fabric_summary_lbl.text = "📦  " + _current_order.get("fabric_used", "—")
-	_xp_lbl.text             = "✨  XP: +" + str(_current_order.get("xp_reward", 0))
-	_coin_lbl.text           = "🪙  ~" + str(_current_order.get("coin_reward", 0))
+	#_fabric_summary_lbl.text = "📦  " + _current_order.get("fabric_used", "—")
+	#_xp_lbl.text             = "✨  XP: +" + str(_current_order.get("xp_reward", 0))
+	#_coin_lbl.text           = "🪙  ~" + str(_current_order.get("coin_reward", 0))
 
 	if _custom_accept_btn != null:
 		_custom_accept_btn.disabled = false
@@ -424,8 +424,8 @@ func _accept_order() -> void:
 		var derived_price: float = Database.calculate_order_price(oid)
 		_current_order["coin_reward"] = int(derived_price)
 
-		if _coin_lbl != null:
-			_coin_lbl.text = "🪙  " + str(int(derived_price)) + " (at dispatch)"
+		#if _coin_lbl != null:
+			#_coin_lbl.text = "🪙  " + str(int(derived_price)) + " (at dispatch)"
 
 		_show_price_popup(derived_price)
 
