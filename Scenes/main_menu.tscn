@@ -27,7 +27,6 @@
 [ext_resource type="AnimationLibrary" uid="uid://dy1olb1im75xo" path="res://Resources/sword_before_attack_idle.res" id="13_ujm45"]
 [ext_resource type="AnimationLibrary" uid="uid://crd8a8rqrx68d" path="res://Resources/sword_draw.res" id="14_aj2v6"]
 [ext_resource type="PackedScene" uid="uid://ouk3lstv37hy" path="res://Assets/Models/Tailor Shop/Pencil Cup/pencil_cup_and_pencils.glb" id="14_hkdq0"]
-[ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="15_vj5y7"]
 [ext_resource type="PackedScene" uid="uid://havu2s38ea2s" path="res://Assets/Models/Tailor Shop/Book/book_open.glb" id="15_xcoo4"]
 [ext_resource type="PackedScene" uid="uid://byg303usa6j7r" path="res://Scenes/chandelier.tscn" id="16_jw7lb"]
 [ext_resource type="PackedScene" uid="uid://cun15a86gbcja" path="res://Scenes/cone_lamp.tscn" id="17_6vfk8"]
@@ -695,12 +694,57 @@ blend_shape_mode = 0
 
 [sub_resource type="Animation" id="Animation_6vfk8"]
 resource_name = "1st idle main"
+length = 0.5
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:RightUpperArm")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.3373904, 0.72175395, -0.5831303, -0.15873867, 0.5, 1, -0.29733703, 0.7027322, -0.6393375, -0.0948985)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:LeftUpperArm")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.2856596, 0.72774905, -0.60576755, 0.14773488, 0.5, 1, 0.24367428, 0.70155674, -0.6650229, 0.07864827)
 
 [sub_resource type="Animation" id="Animation_msuys"]
 resource_name = "2nd idle main"
+length = 0.5
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:RightUpperArm")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.29733703, 0.7027322, -0.6393375, -0.0948985, 0.5, 1, 0.24967693, -0.6740466, 0.6948329, 0.02301863)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:LeftUpperArm")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.24367428, 0.70155674, -0.6650229, 0.07864827, 0.5, 1, -0.20754512, -0.6746611, 0.7080143, -0.02175354)
 
 [sub_resource type="Animation" id="Animation_aylim"]
 resource_name = "3rd idle main"
+length = 0.5
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:RightUpperArm")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.24967693, 0.6740466, -0.6948329, -0.02301863, 0.5, 1, 0.23829044, -0.66635144, 0.70650715, 0.006414078)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:LeftUpperArm")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.20754512, 0.6746611, -0.7080143, 0.02175354, 0.5, 1, -0.19703743, -0.6661662, 0.7192827, -0.005600966)
 
 [sub_resource type="Animation" id="Animation_nr48c"]
 resource_name = "A_TPose"
@@ -11972,6 +12016,20 @@ tracks/58/keys = PackedFloat32Array(0, 1, -0.0036596581, 0.9950068, 0.09974173, 
 
 [sub_resource type="Animation" id="Animation_1xund"]
 length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:RightUpperArm")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.3373904, 0.72175395, -0.5831303, -0.15873867)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:LeftUpperArm")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.2856596, 0.72774905, -0.60576755, 0.14773488)
 
 [sub_resource type="Animation" id="Animation_pivkv"]
 resource_name = "Roll"
@@ -19647,9 +19705,9 @@ bones/7/name = "RightUpperArm"
 bones/7/parent = 5
 bones/7/rest = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.4836056e-07, 0.12824997, -1.0554918e-06)
 bones/7/enabled = true
-bones/7/position = Vector3(5.772172e-07, 0.12825021, 4.5682057e-08)
+bones/7/position = Vector3(1.3795242e-06, 0.12825012, 9.2980906e-07)
 bones/7/rotation = Quaternion(-0.3373904, 0.72175395, -0.5831303, -0.15873867)
-bones/7/scale = Vector3(0.99999976, 1.0000011, 0.9999994)
+bones/7/scale = Vector3(0.99999994, 1.000002, 0.99999946)
 bones/8/name = "hlp_uArm_R_Upper"
 bones/8/parent = 7
 bones/8/rest = Transform3D(-7.1995178e-06, -9.4279185e-06, 1, -1, 5.9008944e-06, -7.1398754e-06, -5.9604436e-06, -0.99999994, -9.487566e-06, 3.3138105e-07, 0.045144215, 2.0410965e-07)
@@ -19836,9 +19894,9 @@ bones/34/name = "LeftUpperArm"
 bones/34/parent = 32
 bones/34/rest = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -4.023941e-07, 0.12824997, 7.292284e-07)
 bones/34/enabled = true
-bones/34/position = Vector3(-1.7045148e-06, 0.12824973, 1.7939549e-06)
-bones/34/rotation = Quaternion(0.2477633, 0.7043606, -0.6597163, 0.08522846)
-bones/34/scale = Vector3(1.0000004, 1.0000021, 0.99999994)
+bones/34/position = Vector3(-2.461568e-06, 0.1282496, 2.7065298e-06)
+bones/34/rotation = Quaternion(0.2856596, 0.72774905, -0.60576755, 0.14773488)
+bones/34/scale = Vector3(1.0000005, 1.000003, 0.9999996)
 bones/35/name = "hlp_uArm_L_Upper"
 bones/35/parent = 34
 bones/35/rest = Transform3D(7.741805e-08, -4.8175925e-06, -1, 1, -6.0796565e-06, 1.370488e-07, -6.139274e-06, -0.99999994, 4.8771963e-06, 4.4071458e-10, 0.045144226, -2.2245132e-07)
@@ -20660,7 +20718,7 @@ bones/151/rotation = Quaternion(-0.009676599, 0.9998919, 0.010886521, 0.00202980
 bones/151/scale = Vector3(1, 1, 1)
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Character_1/armor/GeneralSkeleton" unique_id=1177534813]
-transform = Transform3D(-0.47976324, -0.85637444, -0.190918, 0.22871388, -0.3321377, 0.91508275, -0.8470636, 0.3953569, 0.35521176, -0.06538248, 0.90079385, 0.37082624)
+transform = Transform3D(-0.47976324, -0.85637444, -0.19091797, 0.22871405, -0.332138, 0.9150836, -0.84706384, 0.39535683, 0.3552117, -0.06538248, 0.9007948, 0.37082624)
 bone_name = "hlp_hand_R2"
 bone_idx = 12
 use_external_skeleton = true
@@ -20687,13 +20745,6 @@ libraries/idle_2 = ExtResource("12_uu0lx")
 libraries/sword_before_attack_idle = ExtResource("13_ujm45")
 libraries/sword_draw = ExtResource("14_aj2v6")
 autoplay = &"idle_2/mixamo_com"
-
-[node name="InteractionLabel" type="Label3D" parent="Character_1" unique_id=1779848516]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6712202, 0)
-billboard = 1
-text = "interact"
-font = ExtResource("15_vj5y7")
-outline_size = 6
 
 [node name="floor" type="Node3D" parent="." unique_id=35274475]
 metadata/_edit_lock_ = true
