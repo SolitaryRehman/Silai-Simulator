@@ -1,8 +1,7 @@
 # berserk_armor.gd
 extends CharacterBody3D
 
-
-@onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
+@onready var animation_player: AnimationPlayer = $armor/GeneralSkeleton/AnimationPlayer
 @onready var interaction_label: Label3D        = $InteractionLabel
 @onready var order_ui: Panel                   = $CanvasLayer/OrderUI
 @onready var close_button: Button              = $CanvasLayer/OrderUI/CloseButton

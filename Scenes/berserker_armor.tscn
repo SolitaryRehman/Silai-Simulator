@@ -11,9 +11,9 @@
 [ext_resource type="Texture2D" uid="uid://cyhcf4gd3sqbv" path="res://Assets/Characters/Berserker Armor/source/armor_012.png" id="7_glldy"]
 [ext_resource type="Texture2D" uid="uid://dwpn2pxhi1wee" path="res://Assets/Characters/Berserker Armor/source/armor_009.png" id="8_a7ehe"]
 [ext_resource type="Texture2D" uid="uid://kimd7yq3l2ax" path="res://Assets/Images/menu for customer/customer menu.png" id="11_4ija5"]
-[ext_resource type="AnimationLibrary" uid="uid://dy1olb1im75xo" path="res://Resources/sword_before_attack_idle.res" id="11_glldy"]
+[ext_resource type="AnimationLibrary" path="res://Resources/sword_before_attack_idle.res" id="11_glldy"]
 [ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="12_18b7t"]
-[ext_resource type="AnimationLibrary" uid="uid://crd8a8rqrx68d" path="res://Resources/sword_draw.res" id="12_a7ehe"]
+[ext_resource type="AnimationLibrary" path="res://Resources/sword_draw.res" id="12_a7ehe"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mkbid"]
 radius = 0.24609375
