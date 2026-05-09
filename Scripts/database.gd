@@ -65,18 +65,169 @@ const COLOR_POOL: Array = [
 const XP_RANGES: Dictionary   = { 1: [50, 120],  2: [130, 250], 3: [260, 400] }
 const COIN_RANGES: Dictionary = { 1: [100, 300], 2: [320, 550], 3: [570, 900] }
 
-# DRESS_PARTS_TEMPLATE — keys must match dress_display.to_lower().replace(" ","_")
-# Each entry: [part_name, quantity_metres]
-# Each part will get its OWN randomly assigned fabric + color (fixes 1:M / M:M violations).
-const DRESS_PARTS_TEMPLATE: Dictionary = {
-	"t-shirt":     [["Front Panel",1.5],["Back Panel",1.5],["Sleeve",0.5],["Collar",0.2]],
-	"frock":       [["Bodice",1.0],["Skirt",2.0],["Sleeve",0.5],["Neckband",0.3]],
-	"bishop_gown": [["Bodice",1.2],["Skirt",2.5],["Bishop Sleeve",0.8],["Collar",0.3]],
-	"pants":       [["Front Panel",1.5],["Back Panel",1.5],["Waistband",0.3],["Pocket",0.2]],
-	"jacket":      [["Front Panel",1.2],["Back Panel",1.2],["Sleeve",0.7],["Lining",0.8]],
-	"maxi":        [["Bodice",1.0],["Skirt",3.0],["Sleeve",0.5],["Hem",0.3]],
-	"lehenga":     [["Skirt",2.5],["Blouse",1.0],["Dupatta",2.0],["Waistband",0.3]],
-}
+
+
+# Uzair change: DRESS_PARTS_TEMPLATE replaced by get_dress_parts(dress_key, customer).
+# Quantities are now calculated from the customer's stored measurements rather
+# than hardcoded values.  The dict is kept as an empty stub so any external
+# code that checks .has() on it does not crash; get_dress_parts() is the
+# single source of truth for part names and quantities.
+const DRESS_PARTS_TEMPLATE: Dictionary = {}
+
+# Uzair change: new function — replaces static DRESS_PARTS_TEMPLATE with
+# per-customer measurement-based quantity formulas.
+# Returns Array of [part_name, quantity_metres] for a given dress key and
+# customer measurement dictionary.
+# All stored measurements are in inches; output quantities are in metres,
+# snapped to the nearest 0.05 m.
+#
+# Formula for LINEAR / STRIP parts (collars, waistbands, dupatta):
+#   quantity = length_in × 0.0254 × ease
+#   These pieces are narrow enough to always fit within the fabric width,
+#   so only their length determines how much fabric to unroll.
+#
+# Formula for PANEL parts (sleeves, bodices, jacket panels, trouser legs):
+#   quantity = (panel_width_in / FABRIC_WIDTH_IN) × panel_height_in × 0.0254 × ease
+#   Dividing by fabric width gives the number of fabric lengths needed for
+#   that panel, then multiplying by height converts to linear metres.
+#
+# Formula for GATHERED SKIRT parts:
+#   total_fabric_width = waist × gather_ratio
+#   num_lengths = ceil(total_fabric_width / FABRIC_WIDTH_IN)
+#   quantity = num_lengths × skirt_height_in × 0.0254 × ease
+#   Skirts are wider than one fabric width when gathered, so multiple lengths
+#   are stitched side by side — ceil() gives the correct number of cuts.
+
+func get_dress_parts(dress_key: String, customer: Dictionary) -> Array:
+	var chest:    float = float(customer.get("Chest",          38.0))
+	var shoulder: float = float(customer.get("Shoulder",       16.0))
+	var sleeve:   float = float(customer.get("Sleeve_length",  24.0))
+	var collar:   float = float(customer.get("Collar_size",    15.0))
+	var waist:    float = float(customer.get("Waist",          32.0))
+	var trouser:  float = float(customer.get("Trouser_length", 40.0))
+
+	const FABRIC_WIDTH := 60.0  # inches — standard fabric roll width
+
+	# Linear inches → metres with ease, snapped to nearest 0.05 m.
+	# Used for strips and sleeves whose width fits within one fabric width.
+	var to_m: Callable = func(inches: float, ease: float = 1.15) -> float:
+		return snappedf(inches * 0.0254 * ease, 0.05)
+
+	# Panel quantity: how many metres of fabric to unroll for one panel.
+	# panel_w / FABRIC_WIDTH = fraction of fabric width the panel occupies,
+	# × panel_h converts that fraction to a linear length in inches, × 0.0254
+	# converts to metres.
+	var panel_m: Callable = func(panel_w: float, panel_h: float, ease: float = 1.15) -> float:
+		return snappedf((panel_w / FABRIC_WIDTH) * panel_h * 0.0254 * ease, 0.05)
+
+	# Gathered skirt quantity: skirt fabric is wider than one roll width, so
+	# ceil(total_width / FABRIC_WIDTH) lengths are cut and stitched together.
+	var skirt_m: Callable = func(waist_in: float, gather_ratio: float, height_in: float, ease: float = 1.20) -> float:
+		var total_width: float = waist_in * gather_ratio
+		var num_lengths: float = ceil(total_width / FABRIC_WIDTH)
+		return snappedf(num_lengths * height_in * 0.0254 * ease, 0.05)
+
+	match dress_key:
+
+		"t-shirt":
+			# body_length: torso ≈ 78 % of sleeve (shoulder-to-wrist)
+			var body_length := sleeve * 0.78
+			var panel_w     := (chest / 2.0) + 2.0   # half-chest + side seam ease
+			return [
+				["Front Panel", panel_m.call(panel_w, body_length)],
+				["Back Panel",  panel_m.call(panel_w, body_length)],
+				# Sleeve width scales with chest size; panel formula accounts for arm girth
+				["Sleeve",      panel_m.call((chest / 4.0) + 3.0, sleeve + 2.0)],
+				# Collar strip must go around the full neckline (= collar circumference);
+				["Collar",      to_m.call(collar)],
+			]
+
+		"frock":
+			# bodice_length: frock bodice ends at waist ≈ 65 % of sleeve
+			var bodice_length := sleeve * 0.65
+			# skirt_length: knee-length ≈ 65 % of trouser length
+			var skirt_length  := trouser * 0.65
+			return [
+				["Bodice",   panel_m.call(chest / 2.0 + 2.0, bodice_length)],
+				# Skirt gathered at 3× waist; skirt_m handles multi-length cutting
+				["Skirt",    skirt_m.call(waist, 3.0, skirt_length)],
+				# 3/4 sleeve width scales with chest; panel formula models realistic sleeve area
+				["Sleeve",   panel_m.call((chest / 4.5) + 3.0, sleeve * 0.75)],
+				# Neckband goes around the full neckline, cut at 85 % to stretch snug
+				["Neckband", to_m.call(collar * 0.85)],
+			]
+
+		"bishop_gown":
+			var bodice_length := sleeve * 0.65
+			# skirt_length: floor-length ≈ 105 % of trouser (just past ankle)
+			var skirt_length  := trouser * 1.05
+			return [
+				["Bodice",        panel_m.call(chest / 2.0 + 2.5, bodice_length)],
+				# Moderate gather (2.5×)
+				["Skirt",         skirt_m.call(waist, 2.5, skirt_length)],
+				# Bishop sleeves are intentionally wide/puffy; larger width and ease model volume
+				["Bishop Sleeve", panel_m.call((chest / 3.5) + 5.0, sleeve + 6.0, 1.25)],
+				# Collar goes around full neckline, cut at 85 % to stretch snug
+				["Collar",        to_m.call(collar * 0.85)],
+			]
+
+		"pants":
+			var panel_w := (waist / 2.0) + 3.0   # half-waist + ease
+			return [
+				["Front Panel", panel_m.call(panel_w, trouser)],
+				# Back panel 2 in wider for seat room
+				["Back Panel",  panel_m.call(panel_w + 2.0, trouser)],
+				# Waistband: straight strip, no shaping — ease 1.05 for hemming only
+				["Waistband",   to_m.call(waist + 4.0, 1.05)],
+				# Standard pocket bag ≈ 12 in linear
+				["Pocket",      to_m.call(12.0)],
+			]
+
+		"jacket":
+			# Jacket body reaches mid-hip ≈ 85 % of sleeve
+			var body_length := sleeve * 0.85
+			var panel_w     := (chest / 2.0) + 3.0   # more ease than a shirt
+			return [
+				# ease 1.20 — jackets need extra for interfacing
+				["Front Panel", panel_m.call(panel_w, body_length, 1.20)],
+				["Back Panel",  panel_m.call(panel_w, body_length, 1.20)],
+				# Jacket sleeves are bulky structured panels; width scales with chest size
+				["Sleeve",      panel_m.call((chest / 3.8) + 4.0, sleeve + 3.0, 1.20)],
+				# Lining mirrors the full shell panel width
+				["Lining",      panel_m.call(chest + 4.0, body_length, 1.10)],
+			]
+
+		"maxi":
+			var bodice_length := sleeve * 0.65
+			# skirt_length: just past ankle ≈ 115 % of trouser
+			var skirt_length  := trouser * 1.15
+			return [
+				["Bodice", panel_m.call(chest / 2.0 + 2.0, bodice_length)],
+				# Moderate flare (2.5×)
+				["Skirt",  skirt_m.call(waist, 2.5, skirt_length)],
+				# Sleeve width scales with chest size; panel formula accounts for arm girth
+				["Sleeve", panel_m.call((chest / 4.0) + 3.0, sleeve + 2.0)],
+				# Hem facing: a narrow strip ~3 in tall at the hem circumference
+				["Hem",    panel_m.call(waist * 2.5, 3.0)],
+			]
+
+		"lehenga":
+			# Full-length skirt = trouser length
+			var skirt_length := trouser * 1.0
+			return [
+				# Pleated/gathered (2.8×)
+				["Skirt",     skirt_m.call(waist, 2.8, skirt_length)],
+				# Crop blouse: 55 % of sleeve gives ~14 in — realistic crop length
+				["Blouse",    panel_m.call(chest / 2.0 + 2.0, sleeve * 0.55)],
+				# Dupatta: rectangular, no shaping — ease 1.05 for hemming only
+				["Dupatta",   to_m.call(shoulder * 5.5, 1.05)],
+				# Waistband: straight strip, no shaping — ease 1.05 for hemming only
+				["Waistband", to_m.call(waist + 6.0, 1.05)],
+			]
+
+	push_warning("Database: get_dress_parts() — unknown dress key '%s'." % dress_key)
+	return []
+
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -633,7 +784,7 @@ func _insert_full_customer(data: Dictionary) -> void:
 #  SECTION 9 — ORDER FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 
-## Step 1 of Accept flow: create the Order row. Returns new OrderID.
+# Step 1 of Accept flow: create the Order row. Returns new OrderID.
 func create_order_record(customer_id: int) -> int:
 	var order_date:     String = Time.get_datetime_string_from_system()
 	var receiving_date: String = _compute_receiving_date(customer_id)
@@ -656,8 +807,8 @@ func _compute_receiving_date(customer_id: int) -> String:
 	return "%04d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
 
 
-## Step 2 of Accept flow: insert all dresses with per-part fabrics and colors.
-## CHANGE 6: each part in each dress gets its own randomly assigned fabric + color.
+# Step 2 of Accept flow: insert all dresses with per-part fabrics and colors.
+# CHANGE 6: each part in each dress gets its own randomly assigned fabric + color.
 func attach_all_dresses_to_order(order_id: int, order_data: Dictionary) -> void:
 	var dresses: Array = order_data.get("dresses", [])
 	if dresses.is_empty():
@@ -668,8 +819,8 @@ func attach_all_dresses_to_order(order_id: int, order_data: Dictionary) -> void:
 	print("Database: %d dress(es) attached to Order %d." % [dresses.size(), order_id])
 
 
-## Internal — inserts one Dress + per-part Dress_Parts + unique Dress_Colors.
-## CHANGE 6: dress_dict["parts"] is an array of {part_name, fabric, color, quantity}.
+# Internal — inserts one Dress + per-part Dress_Parts + unique Dress_Colors.
+# CHANGE 6: dress_dict["parts"] is an array of {part_name, fabric, color, quantity}.
 func _attach_single_dress(order_id: int, dress_dict: Dictionary) -> void:
 	var dress_display: String = dress_dict.get("dress", "T-Shirt")
 
@@ -714,8 +865,8 @@ func _attach_single_dress(order_id: int, dress_dict: Dictionary) -> void:
 		# trg_deduct_fabric_stock fires automatically per INSERT above
 
 
-## CHANGE 1: Only valid statuses are 'Pending', 'Completed', 'Delivered'.
-## Called by GameManager at workflow stage transitions.
+# CHANGE 1: Only valid statuses are 'Pending', 'Completed', 'Delivered'.
+# Called by GameManager at workflow stage transitions.
 func update_order_status(order_id: int, new_status: String) -> void:
 	if not new_status in ["Pending", "Completed", "Delivered"]:
 		push_warning("Database: Invalid order status '%s' — ignored." % new_status)
@@ -726,9 +877,9 @@ func update_order_status(order_id: int, new_status: String) -> void:
 	)
 
 
-## CHANGE 4: Derived attribute — total price computed from Dress_Parts × Fabric costs.
-## Called right after attach_all_dresses_to_order() to show player the price on accept.
-## Applies VIP discount via correlated subquery.  Returns 0.0 if no parts found.
+# CHANGE 4: Derived attribute — total price computed from Dress_Parts × Fabric costs.
+# Called right after attach_all_dresses_to_order() to show player the price on accept.
+# Applies VIP discount via correlated subquery.  Returns 0.0 if no parts found.
 func calculate_order_price(order_id: int) -> float:
 	db.query_with_bindings("""
 		SELECT ROUND(
@@ -752,8 +903,8 @@ func calculate_order_price(order_id: int) -> float:
 	return float(db.query_result[0]["price"])
 
 
-## CHANGE 1: Sets Order_status to 'Completed' (no more intermediate states).
-## CHANGE 4: No Total_price is stored — it is always derived on demand.
+# CHANGE 1: Sets Order_status to 'Completed' (no more intermediate states).
+# CHANGE 4: No Total_price is stored — it is always derived on demand.
 func finalize_order(order_id: int) -> void:
 	if order_id <= 0:
 		push_error("Database: finalize_order() — invalid order_id: %d" % order_id)
@@ -766,7 +917,7 @@ func finalize_order(order_id: int) -> void:
 	print("Database: Order %d finalized → Completed. Calculated price = %.2f coins." % [order_id, price])
 
 
-## CHANGE 3: Marks a single order as Delivered + Paid.
+# CHANGE 3: Marks a single order as Delivered + Paid.
 func deliver_order(order_id: int) -> void:
 	db.query_with_bindings("""
 		UPDATE "Order"
@@ -778,8 +929,8 @@ func deliver_order(order_id: int) -> void:
 	print("Database: Order %d → Delivered / Paid." % order_id)
 
 
-## CHANGE 3: Delivers ALL completed-unpaid orders in a given Sector+City.
-## Returns a dict {count, revenue} for the HUD feedback label.
+# CHANGE 3: Delivers ALL completed-unpaid orders in a given Sector+City.
+# Returns a dict {count, revenue} for the HUD feedback label.
 func deliver_orders_for_area(city: String) -> Dictionary:
 	# First aggregate the revenue (derived from parts) before updating
 	db.query_with_bindings("""
@@ -862,17 +1013,26 @@ func get_player_data() -> Dictionary:
 #  SECTION 11 — UTILITY / QUERY HELPERS
 # ──────────────────────────────────────────────────────────────────────────────
 
-## CHANGE 6: Each dress now carries a "parts" array with per-part fabric + color.
-## This is the SINGLE SOURCE OF TRUTH for all order randomization.
+# CHANGE 6: Each dress now carries a "parts" array with per-part fabric + color.
+# This is the SINGLE SOURCE OF TRUTH for all order randomization.
 func generate_random_dress_order(customer_name: String) -> Dictionary:
 	var num_dresses: int = randi_range(1, 3)
 	var dresses: Array   = []
 	var total_metres: float = 0.0
 
+	# Uzair change: fetch customer measurements from DB so get_dress_parts()
+	# can calculate quantities per customer instead of using hardcoded values.
+	# get_or_create_customer() will have already been called before this in
+	# normal flow, so the row is guaranteed to exist.
+	db.query_with_bindings("SELECT * FROM Customer WHERE Name = ?;", [customer_name])
+	var customer_data: Dictionary = {} if db.query_result.is_empty() \
+									   else db.query_result[0].duplicate()
+
 	for _i in range(num_dresses):
 		var dress_type: String = DRESS_POOL[randi() % DRESS_POOL.size()]
 		var key: String        = dress_type.to_lower().replace(" ", "_")
-		var template: Array    = DRESS_PARTS_TEMPLATE.get(key, [])
+		# Uzair change: call get_dress_parts() instead of reading DRESS_PARTS_TEMPLATE
+		var template: Array = get_dress_parts(key, customer_data)
 
 		var parts: Array = []
 		for p in template:
@@ -904,8 +1064,8 @@ func generate_random_dress_order(customer_name: String) -> Dictionary:
 	}
 
 
-## CHANGE 2+5: Returns full dress breakdown for a given order from DB.
-## Used by GameManager for session persistence and for the dress-by-dress cutting loop.
+# CHANGE 2+5: Returns full dress breakdown for a given order from DB.
+# Used by GameManager for session persistence and for the dress-by-dress cutting loop.
 func get_dresses_for_order(order_id: int) -> Array:
 	db.query_with_bindings("""
 		SELECT
@@ -943,8 +1103,8 @@ func get_rude_delay(customer_id: int) -> int:
 	return int(db.query_result[0]["Time_delay"])
 
 
-## CHANGE 1+2: Returns orders with status 'Pending' — used for cutting table selection
-## and session persistence (CHANGE 5).
+# CHANGE 1+2: Returns orders with status 'Pending' — used for cutting table selection
+# and session persistence (CHANGE 5).
 func get_pending_orders() -> Array:
 	db.query("""
 		SELECT
@@ -973,8 +1133,8 @@ func get_pending_orders() -> Array:
 	return db.query_result.duplicate()
 
 
-## CHANGE 3: Top areas with completed-but-undelivered orders.
-## CHANGE 4: Revenue is derived from Dress_Parts × Fabric (no stored Total_price).
+# CHANGE 3: Top areas with completed-but-undelivered orders.
+# CHANGE 4: Revenue is derived from Dress_Parts × Fabric (no stored Total_price).
 func get_top_delivery_areas(limit: int = 5) -> Array:
 	db.query_with_bindings("""
 		SELECT
@@ -1013,7 +1173,7 @@ func get_dress_cost_breakdown(dress_id: int) -> Array:
 	return db.query_result.duplicate()
 
 
-## CHANGE 1: Includes both Completed and Delivered in history.
+# CHANGE 1: Includes both Completed and Delivered in history.
 func get_order_history() -> Array:
 	db.query("""
 		SELECT * FROM v_order_summary
@@ -1023,7 +1183,7 @@ func get_order_history() -> Array:
 	return db.query_result.duplicate()
 
 
-## CHANGE 4: Earnings derived from parts — no stored Total_price.
+# CHANGE 4: Earnings derived from parts — no stored Total_price.
 func get_total_earnings() -> float:
 	db.query("""
 		SELECT ROUND(COALESCE(SUM(
