@@ -35,6 +35,17 @@ func _ready() -> void:
 	_refresh_hud()
 
 	sewing_machine.sewing_complete.connect(_on_sewing_complete)
+	
+	 # ── Fade in from black ─────────────────────────────────────────────
+	var black_rect = ColorRect.new()
+	black_rect.color = Color(0, 0, 0, 1)
+	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$PauseCanvas.add_child(black_rect)
+
+	var tween = create_tween()
+	tween.tween_property(black_rect, "color", Color(0, 0, 0, 0), 1.0)\
+		.set_trans(Tween.TRANS_LINEAR)
+	tween.tween_callback(black_rect.queue_free)
 
 
 # HUD
