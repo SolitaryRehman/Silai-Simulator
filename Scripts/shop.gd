@@ -12,9 +12,11 @@ extends Node3D
 @export var customer_scene_berserker: PackedScene
 @export var customer_scene_girl:      PackedScene
 
+
 var _shop_open:       bool  = false
 var _customer_active: bool  = false
 var _spawn_girl_next: bool  = false
+
 
 var _spawn_timer: Timer
 
@@ -38,7 +40,7 @@ func _ready() -> void:
 	open_button.toggle_mode    = true
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
-	open_button.toggled.connect(_on_btn_toggled)
+	open_button.toggled.connect( _on_btn_toggled)  # use toggled instead of pressed
 
 	_spawn_timer          = Timer.new()
 	_spawn_timer.one_shot = true
@@ -49,14 +51,27 @@ func _ready() -> void:
 	_refresh_hud()
 
 	sewing_machine.sewing_complete.connect(_on_sewing_complete)
+	
+	 # ── Fade in from black ─────────────────────────────────────────────
+	var black_rect = ColorRect.new()
+	black_rect.color = Color(0, 0, 0, 1)
+	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$PauseCanvas.add_child(black_rect)
+
+	var tween = create_tween()
+	tween.tween_property(black_rect, "color", Color(0, 0, 0, 0), 1.0)\
+		.set_trans(Tween.TRANS_LINEAR)
+	tween.tween_callback(black_rect.queue_free)
 
 	_build_delivery_button()
 	_build_delivery_panel()
 
 
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  HUD
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 func _refresh_hud() -> void:
 	level_label.text  = "Lv " + str(GameManager.player_level)
@@ -70,6 +85,7 @@ func _refresh_hud() -> void:
 			total_undelivered += int(a.get("Pending_deliveries", 0))
 		_pending_badge.text    = str(total_undelivered) if total_undelivered > 0 else ""
 		_pending_badge.visible = total_undelivered > 0
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -328,9 +344,11 @@ func _on_btn_toggled(pressed: bool) -> void:
 		_spawn_timer.stop()
 
 
+
 func _spawn_customer() -> void:
-	if not _shop_open:
-		return
+	# Reset button to OFF now that the customer is arriving
+	open_button.button_pressed = false
+	open_button.text           = "OFF"
 
 	var customer
 
@@ -354,11 +372,11 @@ func _spawn_customer() -> void:
 	customer.customer_left.connect(_on_customer_left, CONNECT_ONE_SHOT)
 
 	_customer_active = true
-	_close_shop()
 
 
 func _on_customer_left() -> void:
 	_customer_active = false
+
 
 
 func _close_shop() -> void:
@@ -367,6 +385,7 @@ func _close_shop() -> void:
 	open_button.text           = "OFF"
 
 
+# UI visibility during cutting / sewing
 func on_cutting_started() -> void:
 	enter_image.visible = false
 	hud_texture.visible = false

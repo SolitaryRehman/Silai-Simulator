@@ -1,11 +1,13 @@
 # berserk_armor.gd
 extends CharacterBody3D
 
+
 @onready var animation_player: AnimationPlayer = $UAL1_Standard/AnimationPlayer
 @onready var interaction_label: Label3D        = $InteractionLabel
 @onready var order_ui: Panel                   = $CanvasLayer/OrderUI
 @onready var close_button: Button              = $CanvasLayer/OrderUI/CloseButton
 @onready var accept_button: Button             = $CanvasLayer/OrderUI/AcceptButton
+
 
 @export var move_speed:         float   = 1.50
 @export var target_z:           float   = 10.0

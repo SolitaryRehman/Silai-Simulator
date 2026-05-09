@@ -40,7 +40,7 @@
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://byg303usa6j7r" path="res://Scenes/chandelier.tscn" id="37_4lu2m"]
-[ext_resource type="PackedScene" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
+[ext_resource type="PackedScene" uid="uid://cun15a86gbcja" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
 [ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
@@ -49,12 +49,12 @@
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
-[sub_resource type="Sky" id="Sky_fdj0q"]
+[sub_resource type="Sky" id="Sky_4lu2m"]
 sky_material = SubResource("ProceduralSkyMaterial_hvvn1")
 
 [sub_resource type="Environment" id="Environment_k6jq0"]
 background_mode = 2
-sky = SubResource("Sky_fdj0q")
+sky = SubResource("Sky_4lu2m")
 tonemap_mode = 2
 glow_enabled = true
 
@@ -420,6 +420,13 @@ transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, -1.1
 
 [node name="Cone_lamp8" parent="lights/lamps" unique_id=340164343 instance=ExtResource("37_5menp")]
 transform = Transform3D(-5, 0, -4.371139e-07, 0, 5, 0, 4.371139e-07, 0, -5, 6.4485197, 0.6816745, 14.997131)
+
+[node name="SpotLight3D" type="SpotLight3D" parent="lights" unique_id=286259942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.581347, 2.0202844, 12.272686)
+light_color = Color(1, 1, 0.827451, 1)
+light_energy = 3.0
+spot_range = 7.8987184
+spot_angle = 19.1446
 
 [node name="sewing_machine" parent="." unique_id=259510592 instance=ExtResource("31_0icju")]
 transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-08, 0.62555724, 1.1914588, 13.216177)
