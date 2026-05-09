@@ -1,11 +1,14 @@
 extends Node3D
 
 @onready var camera_3d: Camera3D = $Camera3D
+
 @onready var character_1: CharacterBody3D = $Character_1
 @onready var animation_player: AnimationPlayer = $Character_1/armor/GeneralSkeleton/AnimationPlayer
-@onready var back_sword: Node3D = $Character_1/armor/back_sword
+
 @onready var general_skeleton: Skeleton3D = %GeneralSkeleton
+@onready var back_sword: Node3D = $Character_1/armor/GeneralSkeleton/BoneAttachment3D2/back_sword
 @onready var hand_sword: Node3D = $Character_1/armor/GeneralSkeleton/BoneAttachment3D/hand_sword
+
 @onready var continue_button: Button = $CanvasLayer/TextureRect/ContinueButton
 @onready var new_game_button: Button = $CanvasLayer/TextureRect/NewGameButton
 @onready var game_options_button: Button = $CanvasLayer/TextureRect/GameOptionsButton
@@ -132,7 +135,7 @@ func _on_any_button_hovered():
 
 func draw_sword_sequence():
 	animation_player.play("sword_draw/mixamo_com")
-	await get_tree().create_timer(0.3).timeout
+	await get_tree().create_timer(0.2).timeout
 	back_sword.visible = false
 	hand_sword.visible = true
 	await animation_player.animation_finished
@@ -163,7 +166,32 @@ func _on_quit_pressed():
 
 func quit_sequence():
 	animation_player.play("Sword_Attack")
+
+	# ── 1. Lunge forward 1 metre in 0.3s ──────────────────────────────
+	var forward = -character_1.global_transform.basis.z.normalized()
+	var start_pos = character_1.global_position
+	var end_pos   = start_pos - forward * 1.0
+	var lunge_tween = create_tween()
+	lunge_tween.tween_property(character_1, "global_position", end_pos, 0.3)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
 	await animation_player.animation_finished
-	animation_player.play("Sword_Idle")
-	await get_tree().create_timer(2.0).timeout
+
+	# ── 2. Camera tilts upward (death fall effect) ─────────────────────
+	var cam_tween = create_tween()
+	cam_tween.tween_property(camera_3d, "rotation_degrees:x", 60.0, 1.0)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+
+	# ── 3. Red overlay fades in over 1.5s at the same time ─────────────
+	var red_rect = ColorRect.new()
+	red_rect.color = Color(1, 0, 0, 0)
+	red_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$CanvasLayer.add_child(red_rect)
+
+	var red_tween = create_tween()
+	red_tween.tween_property(red_rect, "color", Color(1, 0, 0, 1), 1.5)\
+		.set_trans(Tween.TRANS_LINEAR)
+
+	await red_tween.finished
+
 	get_tree().quit()

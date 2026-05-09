@@ -19642,13 +19642,9 @@ transform = Transform3D(-1.299873, 0.018150833, -1.1362864e-07, 0.018147485, 1.2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Character_1" unique_id=440710399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7729267, 0)
-visible = false
 shape = SubResource("CapsuleShape3D_mkbid")
 
 [node name="armor" type="Node3D" parent="Character_1" unique_id=240617341]
-
-[node name="back_sword" parent="Character_1/armor" unique_id=1153956172 instance=ExtResource("3_6dk6o")]
-transform = Transform3D(0.5212577, -0.78292435, 0.33958843, 0.84905046, 0.51589584, -0.11386353, -0.08604577, 0.3476795, 0.933656, -0.14605999, 1.4780546, -0.22182131)
 
 [node name="GeneralSkeleton" type="Skeleton3D" parent="Character_1/armor" unique_id=1078129686]
 unique_name_in_owner = true
@@ -20726,6 +20722,14 @@ external_skeleton = NodePath("..")
 
 [node name="hand_sword" parent="Character_1/armor/GeneralSkeleton/BoneAttachment3D" unique_id=512648735 instance=ExtResource("3_6dk6o")]
 transform = Transform3D(0.87489533, 0.19078414, 0.44515634, -0.47975, 0.46732453, 0.7425973, -0.06635678, -0.8632567, 0.5003878, -0.061681747, -0.0024080276, 0.050849438)
+
+[node name="BoneAttachment3D2" type="BoneAttachment3D" parent="Character_1/armor/GeneralSkeleton" unique_id=1051828001]
+transform = Transform3D(0.9888686, -0.09519433, -0.1143543, 0.011422581, 0.8148555, -0.57955146, 0.14835225, 0.5717941, 0.8068724, -0.0041371696, 1.0849679, 0.05405087)
+bone_name = "UpperChest"
+bone_idx = 4
+
+[node name="back_sword" parent="Character_1/armor/GeneralSkeleton/BoneAttachment3D2" unique_id=1153956172 instance=ExtResource("3_6dk6o")]
+transform = Transform3D(0.6172893, -1.1562805, 0.72936237, 0.9703475, 0.93430054, 0.65993047, -0.96300554, 0.20024456, 1.132485, -0.46013355, 0.55870724, -0.6636443)
 
 [node name="blank" type="MeshInstance3D" parent="Character_1/armor/GeneralSkeleton" unique_id=1946483345]
 mesh = SubResource("ArrayMesh_qa0xd")
