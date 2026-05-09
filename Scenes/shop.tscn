@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://dovf2o0jnkq4m" path="res://Scenes/wooden_floor_1.tscn" id="1_2shtd"]
 [ext_resource type="Script" uid="uid://dm1tlxke3j5q2" path="res://Scripts/shop.gd" id="1_8crsr"]
 [ext_resource type="PackedScene" uid="uid://b4w7viiskfogt" path="res://Scenes/wall_1.tscn" id="1_a0mxf"]
+[ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="2_4lu2m"]
+[ext_resource type="PackedScene" uid="uid://cip6keq7fer0j" path="res://Scenes/girl_1.tscn" id="3_54a3j"]
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://Scenes/proto_controller.tscn" id="3_io27d"]
 [ext_resource type="PackedScene" uid="uid://bjsokr4gllj0e" path="res://Scenes/ceiling_1.tscn" id="4_fdj0q"]
 [ext_resource type="PackedScene" uid="uid://cp1idox80gijh" path="res://Scenes/door_1.tscn" id="5_k6jq0"]
@@ -37,12 +39,10 @@
 [ext_resource type="PackedScene" uid="uid://bqerwahfv8dng" path="res://Assets/Models/Tailor Shop/Yarn/pink/dont_know_the_name_lets_call_it_yarn.glb" id="32_t7de3"]
 [ext_resource type="PackedScene" uid="uid://bbq415mpx7b78" path="res://Assets/Models/Tailor Shop/Yarn/rainbow/yarn_ball (1).glb" id="33_hvvn1"]
 [ext_resource type="PackedScene" uid="uid://cp6bhbca0e88k" path="res://Scenes/cutting_table.tscn" id="36_hvvn1"]
-[ext_resource type="PackedScene" uid="uid://cdesw02lovp80" path="res://Scenes/berserker_armor.tscn" id="37_1bx8h"]
 [ext_resource type="PackedScene" uid="uid://byg303usa6j7r" path="res://Scenes/chandelier.tscn" id="37_4lu2m"]
 [ext_resource type="PackedScene" path="res://Scenes/cone_lamp.tscn" id="37_5menp"]
 [ext_resource type="Script" uid="uid://eu5yeohhb1f6" path="res://Scripts/pause_canvas.gd" id="38_3ujtm"]
 [ext_resource type="Texture2D" uid="uid://b5le5tbhju8pn" path="res://Assets/Images/Pause menu/pause menu.png" id="39_ecslm"]
-[ext_resource type="PackedScene" uid="uid://cip6keq7fer0j" path="res://Scenes/girl_1.tscn" id="39_rjsrv"]
 [ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
 [ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="41_8crsr"]
 [ext_resource type="Texture2D" uid="uid://2cefvmc0u51h" path="res://Assets/Images/Levels and XP and coins/level_xp_coins.png" id="44_2x7ys"]
@@ -88,8 +88,8 @@ glow_enabled = true
 
 [node name="shop" type="Node3D" unique_id=1902384018]
 script = ExtResource("1_8crsr")
-customer_scene_berserker = ExtResource("37_1bx8h")
-customer_scene_girl = ExtResource("39_rjsrv")
+customer_scene_berserker = ExtResource("2_4lu2m")
+customer_scene_girl = ExtResource("3_54a3j")
 
 [node name="ProtoController" parent="." unique_id=384047026 instance=ExtResource("3_io27d")]
 transform = Transform3D(0.9985835, 0, 0.053207427, 0, 1, 0, -0.053207427, 0, 0.9985835, 9.455302, 0, 13.697959)
