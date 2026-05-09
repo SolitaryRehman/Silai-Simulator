@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Silai Simulator"
-run/main_scene="uid://cuhff3io32mmo"
+run/main_scene="uid://bqc0ht1qr4av5"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 

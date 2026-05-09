@@ -74,9 +74,9 @@ func _ready() -> void:
 
 
 func _refresh_hud() -> void:
-	level_label.text  = "Lv " + str(GameManager.player_level)
+	level_label.text  = str(GameManager.player_level)
 	xp_label.text     = str(GameManager.player_xp) + " XP"
-	coins_label.text  = str(GameManager.player_coins) + " 🪙"
+	coins_label.text  = str(GameManager.player_coins)
 
 	if _pending_badge != null:
 		var areas: Array = Database.get_top_delivery_areas(10)
@@ -238,12 +238,10 @@ func _open_delivery_panel() -> void:
 	_dispatch_feedback_lbl.text = ""
 	_refresh_delivery_table()
 	_delivery_layer.visible = true
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
 func _close_delivery_panel() -> void:
 	_delivery_layer.visible = false
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _refresh_delivery_table() -> void:
