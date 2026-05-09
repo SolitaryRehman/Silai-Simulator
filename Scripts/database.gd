@@ -248,7 +248,6 @@ var active_dress_id:    int = -1
 func _ready() -> void:
 	_open_db()
 	_create_tables()       # CREATE IF NOT EXISTS — new schema, no Total_price
-	_migrate_database()    # CHANGE 1+4: remove Total_price, update status values
 	_drop_triggers()       # Always regenerate so they stay current
 	_create_triggers()
 	_drop_views()          # Always regenerate so calculated-price view stays current
@@ -413,66 +412,6 @@ func _create_tables() -> void:
 		);
 	""")
 	print("Database: All tables created / verified.")
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-#  SECTION 4b — MIGRATION
-#  CHANGE 1+4: Removes legacy Total_price column and maps old order statuses.
-# ──────────────────────────────────────────────────────────────────────────────
-
-func _migrate_database() -> void:
-	# Detect whether the old Order table still has a Total_price column
-	db.query("PRAGMA table_info(\"Order\");")
-	var has_total_price := false
-	for col in db.query_result:
-		if col["name"] == "Total_price":
-			has_total_price = true
-			break
-
-	if not has_total_price:
-		return   # Already on current schema — nothing to do
-
-	print("Database: Migrating Order table (removing Total_price, updating statuses)...")
-
-	# FK must be off while we swap tables
-	db.query("PRAGMA foreign_keys = OFF;")
-
-	# New table without Total_price, with updated CHECK constraint
-	db.query("""
-		CREATE TABLE "Order_new" (
-			OrderID         INTEGER PRIMARY KEY AUTOINCREMENT,
-			CustomerID      INTEGER NOT NULL,
-			Order_date      TEXT    NOT NULL,
-			Receiving_date  TEXT    NOT NULL,
-			Payment_status  TEXT    NOT NULL DEFAULT 'Unpaid'
-			                CHECK(Payment_status IN ('Unpaid','Paid')),
-			Order_status    TEXT    NOT NULL DEFAULT 'Pending'
-			                CHECK(Order_status IN ('Pending','Completed','Delivered')),
-			FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
-		);
-	""")
-
-	# Copy rows, mapping legacy statuses to the new three-state model
-	db.query("""
-		INSERT INTO "Order_new"
-		    (OrderID, CustomerID, Order_date, Receiving_date, Payment_status, Order_status)
-		SELECT
-		    OrderID, CustomerID, Order_date, Receiving_date, Payment_status,
-		    CASE Order_status
-		        WHEN 'Cutting'   THEN 'Pending'
-		        WHEN 'Sewing'    THEN 'Pending'
-		        WHEN 'Cancelled' THEN 'Completed'
-		        WHEN 'Completed' THEN 'Completed'
-		        WHEN 'Delivered' THEN 'Delivered'
-		        ELSE                  'Pending'
-		    END
-		FROM "Order";
-	""")
-
-	db.query("DROP TABLE \"Order\";")
-	db.query("ALTER TABLE \"Order_new\" RENAME TO \"Order\";")
-	db.query("PRAGMA foreign_keys = ON;")
-	print("Database: Migration complete.")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -929,7 +868,7 @@ func deliver_order(order_id: int) -> void:
 	print("Database: Order %d → Delivered / Paid." % order_id)
 
 
-# CHANGE 3: Delivers ALL completed-unpaid orders in a given Sector+City.
+# CHANGE 3: Delivers ALL completed-unpaid orders in a given City.
 # Returns a dict {count, revenue} for the HUD feedback label.
 func deliver_orders_for_area(city: String) -> Dictionary:
 	# First aggregate the revenue (derived from parts) before updating
