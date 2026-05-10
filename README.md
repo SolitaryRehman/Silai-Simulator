@@ -1,5 +1,144 @@
 <div align="center">
 
+
+# Silai Simulator — Setup & Running Guide
+
+A 3D tailoring simulator built in Godot 4, using SQLite for persistent data storage.
+
+---
+
+## Requirements
+
+- [Godot 4.x](https://godotengine.org/download) (standard version, not .NET/Mono)
+- [DB Browser for SQLite](https://sqlitebrowser.org/dl/)
+- Git (or just download the repo as a ZIP)
+
+---
+
+## Step 1 — Install Godot
+
+1. Go to https://godotengine.org/download
+2. Download **Godot Engine** for your OS (Windows/macOS/Linux) — standard version
+3. Extract the downloaded archive
+4. Run the `Godot` executable — no installation needed, it is a standalone program
+
+---
+
+## Step 2 — Install DB Browser for SQLite
+
+1. Go to https://sqlitebrowser.org/dl/
+2. Download and run the installer for your OS
+3. Follow the installer steps (next → next → finish)
+4. Launch **DB Browser for SQLite** to confirm it opens correctly
+
+---
+
+## Step 3 — Get the Project from GitHub
+
+**Option A — Git clone (recommended):**
+```
+git clone https://github.com/SolitaryRehman/Silai-Simulator.git
+```
+
+**Option B — Download ZIP:**
+1. Go to https://github.com/SolitaryRehman/Silai-Simulator
+2. Click the green **Code** button → **Download ZIP**
+3. Extract the ZIP to a folder of your choice
+
+---
+
+## Step 4 — Enable the SQLite Plugin in Godot
+
+The game requires the **godot-sqlite plugin by 2shady4u**. It is already included in the repository under `addons/`. You just need to enable it:
+
+1. Open Godot and import the project (see Step 5)
+2. In the top menu go to **Project → Project Settings**
+3. Click the **Plugins** tab
+4. Find **SQLite** in the list and set its status to **Enabled**
+5. Close Project Settings
+
+---
+
+## Step 5 — Import the Project into Godot
+
+1. Open Godot — the **Project Manager** window will appear
+2. Click **Import**
+3. Navigate to and Select the folder where you cloned/extracted the repository
+4. Click **Open** then **Import & Edit**
+5. The project will open in the Godot editor
+
+---
+
+## Step 6 — Run the Game
+
+1. In the Godot editor, make sure the main scene is set to `main_menu.tscn`
+   - If prompted on first run, select `main_menu.tscn` as the main scene
+2. Press **F5** (or click the ▶ Play button in the top-right of the editor)
+3. The game window will open with the **Main Menu**
+
+---
+
+## Step 7 — Main Menu Options
+
+| Option | Description |
+|---|---|
+| **New Game** | Starts a fresh game session |
+| **Continue** | Loads any pending orders from the existing database |
+| **Game Options** | To be implemented as future imporvement |
+| **Quit Game** | Exits the application |
+
+---
+
+## Step 8 — Playing the Game
+
+### Controls
+
+| Key / Input | Action |
+|---|---|
+| **W A S D** | Move the player character |
+| **Mouse** | Look around / rotate camera |
+| **E** | Interact with customers and objects |
+| **ESC** | Open the **in-game pause menu** (separate from the main menu) |
+
+### Gameplay Loop
+
+1. **Open the shop** — find and toggle the shop OPEN button on the HUD
+2. **Wait for a customer** — a customer character will walk in after a few seconds
+3. **Interact (E)** — walk up to the customer and press E to view their order
+4. The order panel shows each dress, its parts, the fabric, and color for each part
+5. **Accept the order** — click *Accept Order* to confirm; a price popup will appear showing the estimated total
+6. The customer leaves and the order enters your **pending queue**
+7. **Go to the cutting table** — interact with it to begin cutting the fabric for the order
+8. **Sew the garment** — interact with the sewing machine to complete the garment
+9. **Dispatch orders** — click the **🚚 Dispatch Orders** button on the HUD to deliver completed orders by city and collect your coins and XP
+
+---
+
+## Viewing the Database
+
+The game database is saved as `silai_simulator.db` in the project root folder.
+
+To inspect it:
+1. Open **DB Browser for SQLite**
+2. Click **Open Database**
+3. Navigate to the project folder and select `silai_simulator.db`
+4. Use the **Browse Data** tab to view relations and views
+
+> The database is created automatically the first time you run the game. If you want a completely fresh start, close the game and delete `silai_simulator.db` from the project folder, then run again.
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| *"SQLite: FATAL — could not open"* error | Make sure the SQLite plugin is enabled in Project Settings → Plugins |
+| Game opens but no customers appear | Toggle the shop button to **ON** and wait a few seconds |
+| Database looks empty in DB Browser | Make sure to open the file *after* running the game at least once |
+| Plugin not found / errors on import | Confirm the `addons/` folder is present in the cloned/extracted project |
+
+- End of Setup & Running Guide
+
 # 🧵 Silai Simulator
 
 ### A 3D Tailoring & Shop Simulation Game
