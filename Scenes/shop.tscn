@@ -442,56 +442,56 @@ transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-
 script = ExtResource("38_3ujtm")
 
 [node name="TextureRect" type="TextureRect" parent="PauseCanvas" unique_id=2033594718]
-offset_left = 683.0
-offset_top = 189.0
-offset_right = 1909.0
-offset_bottom = 1174.0
+offset_left = 413.0
+offset_top = 110.0
+offset_right = 1277.0
+offset_bottom = 827.0
 texture = ExtResource("39_ecslm")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="ResumeButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1754216025]
 layout_mode = 0
-offset_left = 411.0
-offset_top = 351.0
-offset_right = 815.0
-offset_bottom = 407.0
+offset_left = 286.0
+offset_top = 250.0
+offset_right = 575.0
+offset_bottom = 306.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_wdw6i")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_8crsr")
 
 [node name="SaveButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1271127817]
 layout_mode = 0
-offset_left = 411.0
-offset_top = 440.0
-offset_right = 816.0
-offset_bottom = 500.0
+offset_left = 286.0
+offset_top = 316.0
+offset_right = 575.0
+offset_bottom = 369.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_rjsrv")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_2x7ys")
 
 [node name="LoadButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=1818530474]
 layout_mode = 0
-offset_left = 413.0
-offset_top = 532.0
-offset_right = 817.0
-offset_bottom = 592.0
+offset_left = 288.0
+offset_top = 380.0
+offset_right = 576.0
+offset_bottom = 434.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_5menp")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_4lu2m")
 
 [node name="OptionsButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=510749474]
 layout_mode = 0
-offset_left = 411.0
-offset_top = 623.0
-offset_right = 817.0
-offset_bottom = 679.0
+offset_left = 289.0
+offset_top = 445.0
+offset_right = 576.0
+offset_bottom = 497.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_54a3j")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_vcmnq")
 
 [node name="QuitButton" type="Button" parent="PauseCanvas/TextureRect" unique_id=711193461]
 layout_mode = 0
-offset_left = 414.0
-offset_top = 716.0
-offset_right = 816.0
-offset_bottom = 772.0
+offset_left = 288.0
+offset_top = 511.0
+offset_right = 577.0
+offset_bottom = 564.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_n8j25")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_oscnn")
 
