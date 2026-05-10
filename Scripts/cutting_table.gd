@@ -373,7 +373,7 @@ func _animate_cut_split() -> void:
 func _on_cutting_complete() -> void:
 	GameManager.complete_cutting()   # CHANGE 1: no DB status written
 	_cut_done       = true
-	cut_button.text = "NEXT →"
+	cut_button.text = "NEXT"
 	cut_ui.visible  = true
 	_dress_progress_label.visible = true
 	_dress_info_label.visible     = true
