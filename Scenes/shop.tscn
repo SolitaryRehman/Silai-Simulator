@@ -46,6 +46,7 @@
 [ext_resource type="Texture2D" uid="uid://dtqa0rb2173tt" path="res://Assets/Images/Next button/next button.png" id="40_wdw6i"]
 [ext_resource type="FontFile" uid="uid://bedo8dv1nk40s" path="res://Assets/Fonts/Saturday.otf" id="41_8crsr"]
 [ext_resource type="Texture2D" uid="uid://2cefvmc0u51h" path="res://Assets/Images/Levels and XP and coins/level_xp_coins.png" id="44_2x7ys"]
+[ext_resource type="AudioStream" uid="uid://c1o5liptwwkvu" path="res://Assets/sounds/Music/Wet Hands.mp3" id="47_54a3j"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hvvn1"]
 
@@ -572,3 +573,8 @@ offset_bottom = 192.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
+
+[node name="WetHands" type="AudioStreamPlayer" parent="." unique_id=1856855194]
+stream = ExtResource("47_54a3j")
+autoplay = true
+bus = &"music"

@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" uid="uid://cun15a86gbcja" path="res://Scenes/cone_lamp.tscn" id="17_6vfk8"]
 [ext_resource type="Texture2D" uid="uid://fobewtyvx67n" path="res://Assets/Images/Main Menu/Gemini_Generated_Image_75ruct75ruct75ru.png" id="19_mkpwh"]
 [ext_resource type="FontFile" uid="uid://dkg03tm0lt8vq" path="res://Assets/Fonts/AlfaqixDiode-SemiBold.otf" id="20_4nkqq"]
+[ext_resource type="AudioStream" uid="uid://c8t4qqcgr5b24" path="res://Assets/sounds/Music/Orbit.mp3" id="33_6vfk8"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1xund"]
 
@@ -21052,3 +21053,8 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_jw7lb")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_6vfk8")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_1xund")
 text = "Quit Game"
+
+[node name="Orbit" type="AudioStreamPlayer" parent="." unique_id=323528302]
+stream = ExtResource("33_6vfk8")
+autoplay = true
+bus = &"music"
