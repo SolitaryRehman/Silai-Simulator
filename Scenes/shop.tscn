@@ -496,10 +496,10 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_n8j25")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_oscnn")
 
 [node name="EnterImage" type="TextureRect" parent="PauseCanvas" unique_id=2122213617]
-offset_left = -7.0
-offset_top = 524.0
-offset_right = 268.0
-offset_bottom = 663.0
+offset_left = -30.0
+offset_top = 525.0
+offset_right = 245.0
+offset_bottom = 664.0
 texture = ExtResource("40_wdw6i")
 expand_mode = 1
 stretch_mode = 5
@@ -513,20 +513,20 @@ offset_bottom = 100.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("41_8crsr")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxEmpty_lv45t")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_l0nv7")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_0plxm")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_enlih")
 toggle_mode = true
-text = "Off"
+text = "OFF"
 
 [node name="Label" type="Label" parent="PauseCanvas/EnterImage" unique_id=1381235294]
 layout_mode = 0
-offset_left = 7.0
-offset_top = -52.0
-offset_right = 284.0
-offset_bottom = 8.0
+offset_left = -5.0
+offset_top = -50.0
+offset_right = 272.0
+offset_bottom = 10.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 text = "Allow Customers"
@@ -556,9 +556,9 @@ vertical_alignment = 1
 
 [node name="XPLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=856671221]
 layout_mode = 0
-offset_left = 349.0
+offset_left = 346.0
 offset_top = 48.0
-offset_right = 643.0
+offset_right = 640.0
 offset_bottom = 91.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
@@ -566,10 +566,10 @@ vertical_alignment = 1
 
 [node name="CoinLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=35122923]
 layout_mode = 0
-offset_left = 349.0
-offset_top = 107.0
-offset_right = 643.0
-offset_bottom = 150.0
+offset_left = 346.0
+offset_top = 111.0
+offset_right = 640.0
+offset_bottom = 154.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
