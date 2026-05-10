@@ -1,6 +1,7 @@
 # cutting_table.gd
 extends Area3D
 
+# grab all the nodes we need upfront
 @onready var prompt_label: Label3D       = $PromptLabel
 @onready var fabric_mesh: MeshInstance3D = $fabric_plane
 @onready var table_camera: Camera3D      = $table_camera
@@ -14,7 +15,7 @@ extends Area3D
 @onready var cut_ui: CanvasLayer         = $cut_ui
 @onready var cut_button: Button          = $cut_ui/TextureRect/cut_button
 
-# CHANGE 6: Toggle selector panels hidden — per-part fabric/color comes from DB
+# these toggles are hidden now — fabric/color come from the DB per dress part
 @onready var dress_img:   TextureRect = $cut_ui/DressImg
 @onready var fabric_img:  TextureRect = $cut_ui/FabricImg
 @onready var color_img:   TextureRect = $cut_ui/ColorImg
@@ -25,27 +26,28 @@ extends Area3D
 @onready var color_left:  Button      = $cut_ui/ColorImg/Button
 @onready var color_right: Button      = $cut_ui/ColorImg/Button2
 
-# ── Saved transforms ──────────────────────────────────────────────────────────
+# we save these at startup so we can always tween back to the right spot
 var _table_cam_global_pos:  Vector3
 var _table_cam_global_rot:  Vector3
 var _sewing_cam_global_pos: Vector3
 var _sewing_cam_global_rot: Vector3
 
+# same idea for the fabric pieces — needed to reset them between cuts
 var _front_piece_init_rot: Vector3
 var _back_piece_init_rot:  Vector3
 var _front_piece_init_pos: Vector3
 var _back_piece_init_pos:  Vector3
 
-# ── Runtime ───────────────────────────────────────────────────────────────────
+# who's standing at the table right now, and whether the cut already happened
 var player_ref: CharacterBody3D = null
 var _cut_done:  bool            = false
 
-# ── Order-selection panel (programmatic) ─────────────────────────────────────
+# the order picker panel built entirely in code
 var _order_select_layer: CanvasLayer   = null
 var _order_select_panel: Panel         = null
 var _order_list_vbox:    VBoxContainer = null
 
-# ── Dress-progress labels inside cut_ui ──────────────────────────────────────
+# floating labels that show which dress we're on during cutting/sewing
 var _dress_progress_label: Label = null
 var _dress_info_label:     Label = null
 
@@ -54,6 +56,7 @@ func _ready():
 	connect("body_entered", _on_body_entered)
 	connect("body_exited",  _on_body_exited)
 
+	# snapshot starting transforms so we can reset later
 	_front_piece_init_rot = front_piece.rotation_degrees
 	_back_piece_init_rot  = back_piece.rotation_degrees
 	_front_piece_init_pos = front_piece.position
@@ -64,12 +67,13 @@ func _ready():
 	_sewing_cam_global_pos = sewing_camera.global_position
 	_sewing_cam_global_rot = sewing_camera.rotation_degrees
 
+	# nothing should be active until the player walks up
 	table_camera.current  = false
 	sewing_camera.current = false
 	front_piece.visible   = false
 	back_piece.visible    = false
 
-	# CHANGE 6: Hide toggle selectors — dress/fabric/color chosen per-part by DB
+	# hide the old toggle selectors — not used anymore
 	dress_img.visible  = false
 	fabric_img.visible = false
 	color_img.visible  = false
@@ -84,10 +88,13 @@ func _ready():
 
 
 # ── Dress progress labels ─────────────────────────────────────────────────────
+
 func _build_dress_progress_labels() -> void:
+	# top label — shows "Dress 1 / 3 — T-Shirt" etc.
 	_dress_progress_label = Label.new()
 	_dress_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_dress_progress_label.add_theme_font_size_override("font_size", 22)
+	# bright gold so it's readable over anything
 	_dress_progress_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2))
 	_dress_progress_label.add_theme_constant_override("outline_size", 4)
 	_dress_progress_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
@@ -97,6 +104,7 @@ func _build_dress_progress_labels() -> void:
 	_dress_progress_label.visible  = false
 	cut_ui.add_child(_dress_progress_label)
 
+	# second line — shows fabric and colour info for this dress
 	_dress_info_label = Label.new()
 	_dress_info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_dress_info_label.add_theme_font_size_override("font_size", 15)
@@ -110,6 +118,7 @@ func _build_dress_progress_labels() -> void:
 	cut_ui.add_child(_dress_info_label)
 
 
+# refresh the progress labels to match whatever dress we're currently on
 func _update_dress_progress() -> void:
 	if GameManager.order_dresses.is_empty():
 		_dress_progress_label.visible = false
@@ -124,19 +133,21 @@ func _update_dress_progress() -> void:
 	_dress_info_label.visible     = true
 
 
-# ── Order-selection panel (programmatic) ─────────────────────────────────────
+# ── Order-selection panel ─────────────────────────────────────────────────────
+
 func _build_order_select_panel() -> void:
+	# sits on layer 8 so it floats above the game but below the cut UI
 	_order_select_layer = CanvasLayer.new()
 	_order_select_layer.layer = 8
 	add_child(_order_select_layer)
 
-	# Semi-dark overlay covering full screen
+	# dim the background so the panel is easy to read
 	var overlay := ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.60)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_order_select_layer.add_child(overlay)
 
-	# ── Main panel — wider and taller than before ─────────────────────────────
+	# main panel — centered, big enough to show several orders comfortably
 	_order_select_panel = Panel.new()
 	_order_select_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_order_select_panel.custom_minimum_size = Vector2(860, 580)
@@ -152,7 +163,7 @@ func _build_order_select_panel() -> void:
 	root_vbox.offset_bottom = -16
 	_order_select_panel.add_child(root_vbox)
 
-	# Title
+	# gold title at the top
 	var title := Label.new()
 	title.text = "✂   SELECT ORDER TO WORK ON"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -166,7 +177,7 @@ func _build_order_select_panel() -> void:
 	sep.add_theme_constant_override("separation", 6)
 	root_vbox.add_child(sep)
 
-	# Scrollable order list
+	# order rows get added here dynamically when the panel opens
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root_vbox.add_child(scroll)
@@ -176,7 +187,7 @@ func _build_order_select_panel() -> void:
 	_order_list_vbox.add_theme_constant_override("separation", 10)
 	scroll.add_child(_order_list_vbox)
 
-	# Close button
+	# close sends the player back to free roam and recaptures the mouse
 	var close_btn := Button.new()
 	close_btn.text = "✕   Close  (back to roaming)"
 	close_btn.add_theme_font_size_override("font_size", 17)
@@ -188,6 +199,7 @@ func _build_order_select_panel() -> void:
 
 
 func _open_order_select_panel() -> void:
+	# clear old rows before repopulating
 	for child in _order_list_vbox.get_children():
 		child.queue_free()
 
@@ -208,13 +220,14 @@ func _open_order_select_panel() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
+# player hit Close without picking — put the mouse back in captured mode
 func _close_order_select_and_recapture() -> void:
 	_order_select_layer.visible = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _build_order_row(row: Dictionary) -> PanelContainer:
-	# Wrap each row in a PanelContainer so it gets a subtle card background
+	# each order gets a dark card so rows are visually separated
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -230,15 +243,15 @@ func _build_order_row(row: Dictionary) -> PanelContainer:
 	hbox.add_theme_constant_override("separation", 14)
 	card.add_child(hbox)
 
-	# ── Left: order info ──────────────────────────────────────────────────────
 	var info_vbox := VBoxContainer.new()
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_vbox.add_theme_constant_override("separation", 4)
 
+	# pick an icon based on customer type
 	var ctype: String = row.get("Customer_Type", "Normal")
 	var icon:  String = "⭐" if ctype == "VIP" else ("⚠" if ctype == "Rude" else "👤")
 
-	# Order ID + customer name + city
+	# order number, customer name, and city all on one line
 	var id_lbl := Label.new()
 	id_lbl.text = "Order #%d   %s %s  —  %s" % [
 		row.get("OrderID", 0), icon, row.get("Customer_Name", "?"), row.get("City", "?")
@@ -247,14 +260,14 @@ func _build_order_row(row: Dictionary) -> PanelContainer:
 	id_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95))
 	info_vbox.add_child(id_lbl)
 
-	# Dress count + types
+	# how many dresses and what types
 	var dress_lbl := Label.new()
 	dress_lbl.text = "  %d dress(es):  %s" % [int(row.get("Dress_count", 0)), row.get("Dresses", "—")]
 	dress_lbl.add_theme_font_size_override("font_size", 15)
 	dress_lbl.add_theme_color_override("font_color", Color(0.72, 0.88, 1.0))
 	info_vbox.add_child(dress_lbl)
 
-	# Due date
+	# due date in grey so it doesn't compete with the main info
 	var date_lbl := Label.new()
 	date_lbl.text = "  Due: %s" % row.get("Receiving_date", "?")
 	date_lbl.add_theme_font_size_override("font_size", 13)
@@ -263,7 +276,7 @@ func _build_order_row(row: Dictionary) -> PanelContainer:
 
 	hbox.add_child(info_vbox)
 
-	# ── Right: action button ──────────────────────────────────────────────────
+	# the actual button to start working on this order
 	var btn := Button.new()
 	btn.text = "Work on This  →"
 	btn.add_theme_font_size_override("font_size", 16)
@@ -276,6 +289,7 @@ func _build_order_row(row: Dictionary) -> PanelContainer:
 
 
 func _on_order_selected(order_id: int) -> void:
+	# hide the panel first, then try to activate the order
 	_order_select_layer.visible = false
 
 	if not GameManager.set_active_order(order_id):
@@ -288,6 +302,8 @@ func _on_order_selected(order_id: int) -> void:
 
 
 # ── Button dispatcher ─────────────────────────────────────────────────────────
+
+# same button does CUT then flips to NEXT once the cut is done
 func _on_cut_button_pressed() -> void:
 	if _cut_done:
 		_go_to_sewing()
@@ -296,11 +312,13 @@ func _on_cut_button_pressed() -> void:
 
 
 # ── Main interaction ──────────────────────────────────────────────────────────
+
 func _process(_delta) -> void:
 	if player_ref == null:
 		return
 
 	if Input.is_action_just_pressed("interact"):
+		# no active order — open the picker if there's anything to pick from
 		if GameManager.current_order.is_empty():
 			if GameManager.pending_orders.is_empty():
 				print("CuttingTable: No pending orders.")
@@ -308,6 +326,7 @@ func _process(_delta) -> void:
 			_open_order_select_panel()
 			return
 
+		# order already selected and waiting to be cut
 		if GameManager.current_order.get("status") == "pending_cut":
 			_start_cutting()
 		return
@@ -317,16 +336,20 @@ func _process(_delta) -> void:
 
 
 # ── Cutting flow ──────────────────────────────────────────────────────────────
+
 func _start_cutting(snap_camera_to_player: bool = true) -> void:
 	get_parent().on_cutting_started()
 	GameManager.current_state = GameManager.GameState.CUTTING
+	# lock the player in place so they can't walk away mid-cut
 	player_ref.lock_for_minigame()
 	prompt_label.visible = false
 
+	# hide the old toggle selectors — not used anymore
 	dress_img.visible  = false
 	fabric_img.visible = false
 	color_img.visible  = false
 
+	# show the fabric and outlines, hide the already-cut pieces
 	fabric_mesh.visible   = true
 	front_outline.visible = true
 	back_outline.visible  = true
@@ -338,6 +361,7 @@ func _start_cutting(snap_camera_to_player: bool = true) -> void:
 	_dress_info_label.visible     = true
 	cut_ui.visible = true
 
+	# snap from the player camera or just slide back to the cut position
 	if snap_camera_to_player:
 		await _switch_to_table_camera()
 	else:
@@ -345,14 +369,17 @@ func _start_cutting(snap_camera_to_player: bool = true) -> void:
 
 
 func _do_cut() -> void:
+	# start fresh — reset any leftover piece state
 	_reset_pieces()
 
+	# pull the current dress details from the GameManager list
 	var dress_row: Dictionary = {}
 	if not GameManager.order_dresses.is_empty():
 		dress_row = GameManager.order_dresses[GameManager.current_dress_index]
 
 	var dress_type:   String = dress_row.get("Dress_type", "T-Shirt")
 	var clothing_key: String = dress_type.to_lower().replace(" ", "_")
+	# fall back to tshirt if the config doesn't know this type
 	if ClothingConfig.get_config(clothing_key).is_empty():
 		clothing_key = "tshirt"
 
@@ -363,26 +390,29 @@ func _do_cut() -> void:
 	_dress_info_label.visible     = true
 	cut_ui.visible = false
 
+	# hide the flat fabric — the cut pieces take over from here
 	fabric_mesh.visible   = false
 	front_outline.visible = false
 	back_outline.visible  = false
 
+	# spawn both pieces at the fabric's position then animate them apart
 	var center: Vector3         = fabric_mesh.global_position
 	front_piece.global_position = center
 	back_piece.global_position  = center
-	back_piece.position.z      += 0.002
+	back_piece.position.z      += 0.002   # tiny offset so they don't z-fight
 	front_piece.visible = true
 	back_piece.visible  = true
 	_animate_cut_split()
 
 
 func _animate_cut_split() -> void:
+	# slide the pieces apart, flip the back one, then bring them back together
 	var t1 := create_tween().set_parallel(true)
 	t1.tween_property(front_piece, "position:z",         0.18, 0.30).set_ease(Tween.EASE_OUT)
 	t1.tween_property(back_piece,  "position:z",        -0.18, 0.30).set_ease(Tween.EASE_OUT)
 	t1.tween_property(back_piece,  "rotation_degrees:y", 90.0, 0.45).set_ease(Tween.EASE_IN_OUT)
 	await t1.finished
-	await get_tree().create_timer(0.95).timeout
+	await get_tree().create_timer(0.95).timeout   # brief pause so the player can see the result
 	var t2 := create_tween().set_parallel(true)
 	t2.tween_property(front_piece, "position:z", 0.000, 0.25).set_ease(Tween.EASE_IN)
 	t2.tween_property(back_piece,  "position:z", 0.002, 0.25).set_ease(Tween.EASE_IN)
@@ -392,6 +422,7 @@ func _animate_cut_split() -> void:
 
 func _on_cutting_complete() -> void:
 	GameManager.complete_cutting()
+	# flip the button to NEXT so the player knows to move on to sewing
 	_cut_done       = true
 	cut_button.text = "NEXT"
 	cut_ui.visible  = true
@@ -400,16 +431,19 @@ func _on_cutting_complete() -> void:
 
 
 # ── Sewing handoff ────────────────────────────────────────────────────────────
+
 func _go_to_sewing() -> void:
 	cut_ui.visible                = false
 	_dress_progress_label.visible = false
 	_dress_info_label.visible     = false
 
+	# tag the pieces so the sewing machine can find them
 	front_piece.add_to_group("sewing_pieces")
 	back_piece.add_to_group("sewing_pieces")
 	_switch_to_sewing_camera()
 	await _move_pieces_to_sewing()
 
+	# hand the pieces off to the sewing machine and wait for it to finish
 	var sm: Node = get_tree().get_first_node_in_group("sewing_machine")
 	if sm == null:
 		push_error("CuttingTable: sewing_machine group not found!")
@@ -418,8 +452,8 @@ func _go_to_sewing() -> void:
 	sm.sewing_complete.connect(_on_sewing_complete, CONNECT_ONE_SHOT)
 
 
-# ── CHANGE 2: loop per dress or finalize ──────────────────────────────────────
 func _on_sewing_complete() -> void:
+	# reset the button and pieces ready for the next dress
 	_cut_done       = false
 	cut_button.text = "CUT"
 
@@ -432,6 +466,7 @@ func _on_sewing_complete() -> void:
 	var next: int = GameManager.current_dress_index + 1
 
 	if next < GameManager.order_dresses.size():
+		# more dresses to do — loop back to cutting
 		GameManager.current_dress_index = next
 		print("CuttingTable: dress %d done → starting %d/%d"
 			  % [next, next + 1, GameManager.order_dresses.size()])
@@ -445,6 +480,7 @@ func _on_sewing_complete() -> void:
 		cut_ui.visible = true
 		GameManager.current_order["status"] = "pending_cut"
 	else:
+		# all dresses done — release the player and finalize the order
 		_dress_progress_label.visible = false
 		_dress_info_label.visible     = false
 		await _switch_to_player_camera()
@@ -455,6 +491,8 @@ func _on_sewing_complete() -> void:
 
 
 # ── Camera helpers ────────────────────────────────────────────────────────────
+
+# snap from wherever the player is standing and smoothly slide to the table view
 func _switch_to_table_camera() -> void:
 	var pc: Camera3D = player_ref.get_node("Head/Camera3D")
 	table_camera.global_position  = pc.global_position
@@ -466,6 +504,7 @@ func _switch_to_table_camera() -> void:
 	await t.finished
 
 
+# used when coming back from sewing — just slide back to the cut position
 func _return_camera_to_cut_pos() -> void:
 	var t := create_tween().set_parallel(true)
 	t.tween_property(table_camera, "global_position",  _table_cam_global_pos, 0.5).set_ease(Tween.EASE_IN_OUT)
@@ -473,6 +512,7 @@ func _return_camera_to_cut_pos() -> void:
 	await t.finished
 
 
+# slide back to the player's head camera when leaving the minigame
 func _switch_to_player_camera() -> void:
 	var pc: Camera3D = player_ref.get_node("Head/Camera3D")
 	var t := create_tween().set_parallel(true)
@@ -483,6 +523,7 @@ func _switch_to_player_camera() -> void:
 	table_camera.current = false
 
 
+# pan over to the sewing machine position before handing off
 func _switch_to_sewing_camera() -> void:
 	var t := create_tween().set_parallel(true)
 	t.tween_property(table_camera, "global_position",  _sewing_cam_global_pos, 0.7).set_ease(Tween.EASE_IN_OUT)
@@ -490,6 +531,7 @@ func _switch_to_sewing_camera() -> void:
 	await t.finished
 
 
+# fly both pieces over to the sewing machine and rotate them to face the right way
 func _move_pieces_to_sewing() -> void:
 	var sewing_pos := Vector3(0.66, 1.28, 13.8)
 	var fr := front_piece.rotation_degrees; fr.y += 270.0
@@ -503,6 +545,8 @@ func _move_pieces_to_sewing() -> void:
 
 
 # ── Area detection ────────────────────────────────────────────────────────────
+
+# player walked in — store a reference and show the prompt if there's work to do
 func _on_body_entered(body) -> void:
 	if body.is_in_group("player"):
 		player_ref = body
@@ -510,12 +554,14 @@ func _on_body_entered(body) -> void:
 			prompt_label.visible = true
 
 
+# player walked away — clear the reference and hide the prompt
 func _on_body_exited(body) -> void:
 	if body.is_in_group("player"):
 		player_ref = null
 		prompt_label.visible = false
 
 
+# player cancelled mid-cut — clean everything up and return to free roam
 func _on_cutting_cancelled() -> void:
 	cut_ui.visible = false
 	_dress_progress_label.visible = false
@@ -534,6 +580,7 @@ func _on_cutting_cancelled() -> void:
 	GameManager.current_state = GameManager.GameState.FREE_ROAM
 
 
+# put both pieces back to where they started and hide them
 func _reset_pieces() -> void:
 	front_piece.rotation_degrees = _front_piece_init_rot
 	back_piece.rotation_degrees  = _back_piece_init_rot
