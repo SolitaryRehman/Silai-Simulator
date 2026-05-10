@@ -498,22 +498,22 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_oscnn")
 [node name="EnterImage" type="TextureRect" parent="PauseCanvas" unique_id=2122213617]
 offset_left = -7.0
 offset_top = 524.0
-offset_right = 407.0
-offset_bottom = 743.0
+offset_right = 268.0
+offset_bottom = 663.0
 texture = ExtResource("40_wdw6i")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="OpenButton" type="Button" parent="PauseCanvas/EnterImage" unique_id=501910841]
 layout_mode = 0
-offset_left = 172.0
-offset_top = 78.0
-offset_right = 242.0
-offset_bottom = 138.0
+offset_left = 103.0
+offset_top = 40.0
+offset_right = 173.0
+offset_bottom = 100.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("41_8crsr")
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 32
 theme_override_styles/normal = SubResource("StyleBoxEmpty_lv45t")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_l0nv7")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_0plxm")
@@ -523,31 +523,31 @@ text = "Off"
 
 [node name="Label" type="Label" parent="PauseCanvas/EnterImage" unique_id=1381235294]
 layout_mode = 0
-offset_left = 53.0
-offset_top = -49.0
-offset_right = 330.0
-offset_bottom = 11.0
+offset_left = 7.0
+offset_top = -52.0
+offset_right = 284.0
+offset_bottom = 8.0
 theme_override_fonts/font = ExtResource("41_8crsr")
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 32
 text = "Allow Customers"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HudTexture" type="TextureRect" parent="PauseCanvas" unique_id=1555158573]
-offset_left = -92.0
-offset_top = -16.0
-offset_right = 392.0
-offset_bottom = 229.0
+offset_left = -53.0
+offset_top = 4.0
+offset_right = 293.0
+offset_bottom = 203.0
 texture = ExtResource("44_2x7ys")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="LevelLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=1041698482]
 layout_mode = 0
-offset_left = 160.0
-offset_top = 41.0
-offset_right = 326.0
-offset_bottom = 200.0
+offset_left = 121.0
+offset_top = 36.0
+offset_right = 225.0
+offset_bottom = 160.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 100
 text = "1"
@@ -556,20 +556,20 @@ vertical_alignment = 1
 
 [node name="XPLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=856671221]
 layout_mode = 0
-offset_left = 458.0
-offset_top = 68.0
-offset_right = 752.0
-offset_bottom = 111.0
+offset_left = 349.0
+offset_top = 48.0
+offset_right = 643.0
+offset_bottom = 91.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1
 
 [node name="CoinLabel" type="Label" parent="PauseCanvas/HudTexture" unique_id=35122923]
 layout_mode = 0
-offset_left = 458.0
-offset_top = 149.0
-offset_right = 752.0
-offset_bottom = 192.0
+offset_left = 349.0
+offset_top = 107.0
+offset_right = 643.0
+offset_bottom = 150.0
 theme_override_fonts/font = ExtResource("41_8crsr")
 theme_override_font_sizes/font_size = 32
 vertical_alignment = 1

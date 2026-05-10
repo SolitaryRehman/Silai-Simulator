@@ -19604,6 +19604,8 @@ _data = {
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4nkqq"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_msuys"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ehtkc"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6dk6o"]
@@ -19611,6 +19613,8 @@ _data = {
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jr6u5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6m47u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aylim"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_84iac"]
 
@@ -19620,6 +19624,8 @@ _data = {
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tt8ml"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y82t1"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fmarx"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hkdq0"]
@@ -19627,6 +19633,8 @@ _data = {
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xcoo4"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jw7lb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bmhhk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6vfk8"]
 
@@ -20990,66 +20998,70 @@ fov = 72.30223
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=403211801]
 
 [node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=2090331496]
-offset_left = 378.0
-offset_top = 328.0
-offset_right = 1291.0
-offset_bottom = 887.0
+offset_left = 150.0
+offset_top = 158.0
+offset_right = 872.0
+offset_bottom = 619.0
 texture = ExtResource("19_mkpwh")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="ContinueButton" type="Button" parent="CanvasLayer/TextureRect" unique_id=904263497]
 layout_mode = 0
-offset_left = 172.0
-offset_top = 86.0
-offset_right = 909.0
-offset_bottom = 157.0
+offset_left = 128.0
+offset_top = 68.0
+offset_right = 722.0
+offset_bottom = 139.0
 theme_override_fonts/font = ExtResource("20_4nkqq")
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxEmpty_mkpwh")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_4nkqq")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_msuys")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_ehtkc")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_6dk6o")
 text = "Continue"
 
 [node name="NewGameButton" type="Button" parent="CanvasLayer/TextureRect" unique_id=408785765]
 layout_mode = 0
-offset_left = 110.0
-offset_top = 196.0
-offset_right = 847.0
-offset_bottom = 269.0
+offset_left = 86.0
+offset_top = 162.0
+offset_right = 670.0
+offset_bottom = 215.0
 theme_override_fonts/font = ExtResource("20_4nkqq")
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxEmpty_jr6u5")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_6m47u")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_aylim")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_84iac")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_5n0dv")
 text = "New Game"
 
 [node name="GameOptionsButton" type="Button" parent="CanvasLayer/TextureRect" unique_id=1175917601]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 296.0
-offset_right = 747.0
-offset_bottom = 370.0
+offset_left = 8.0
+offset_top = 247.0
+offset_right = 589.0
+offset_bottom = 308.0
 theme_override_fonts/font = ExtResource("20_4nkqq")
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxEmpty_ne6ao")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tt8ml")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_y82t1")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_fmarx")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hkdq0")
 text = "Game Options"
 
 [node name="QuitGameButton" type="Button" parent="CanvasLayer/TextureRect" unique_id=2559733]
 layout_mode = 0
-offset_left = 74.0
-offset_top = 404.0
-offset_right = 787.0
-offset_bottom = 484.0
+offset_left = 48.0
+offset_top = 332.0
+offset_right = 622.0
+offset_bottom = 392.0
 theme_override_fonts/font = ExtResource("20_4nkqq")
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxEmpty_xcoo4")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_jw7lb")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_bmhhk")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_6vfk8")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_1xund")
 text = "Quit Game"
