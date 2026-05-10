@@ -33,10 +33,8 @@ var _sewing_cam_global_pos: Vector3
 var _sewing_cam_global_rot: Vector3
 
 # same idea for the fabric pieces — needed to reset them between cuts
-var _front_piece_init_rot: Vector3
-var _back_piece_init_rot:  Vector3
-var _front_piece_init_pos: Vector3
-var _back_piece_init_pos:  Vector3
+var _front_piece_init_xform: Transform3D
+var _back_piece_init_xform:  Transform3D
 
 # who's standing at the table right now, and whether the cut already happened
 var player_ref: CharacterBody3D = null
@@ -57,10 +55,8 @@ func _ready():
 	connect("body_exited",  _on_body_exited)
 
 	# snapshot starting transforms so we can reset later
-	_front_piece_init_rot = front_piece.rotation_degrees
-	_back_piece_init_rot  = back_piece.rotation_degrees
-	_front_piece_init_pos = front_piece.position
-	_back_piece_init_pos  = back_piece.position
+	_front_piece_init_xform = front_piece.global_transform
+	_back_piece_init_xform  = back_piece.global_transform
 
 	_table_cam_global_pos  = table_camera.global_position
 	_table_cam_global_rot  = table_camera.rotation_degrees
@@ -369,17 +365,14 @@ func _start_cutting(snap_camera_to_player: bool = true) -> void:
 
 
 func _do_cut() -> void:
-	# start fresh — reset any leftover piece state
 	_reset_pieces()
 
-	# pull the current dress details from the GameManager list
 	var dress_row: Dictionary = {}
 	if not GameManager.order_dresses.is_empty():
 		dress_row = GameManager.order_dresses[GameManager.current_dress_index]
 
 	var dress_type:   String = dress_row.get("Dress_type", "T-Shirt")
 	var clothing_key: String = dress_type.to_lower().replace(" ", "_")
-	# fall back to tshirt if the config doesn't know this type
 	if ClothingConfig.get_config(clothing_key).is_empty():
 		clothing_key = "tshirt"
 
@@ -390,18 +383,24 @@ func _do_cut() -> void:
 	_dress_info_label.visible     = true
 	cut_ui.visible = false
 
-	# hide the flat fabric — the cut pieces take over from here
 	fabric_mesh.visible   = false
 	front_outline.visible = false
 	back_outline.visible  = false
 
-	# spawn both pieces at the fabric's position then animate them apart
 	var center: Vector3         = fabric_mesh.global_position
 	front_piece.global_position = center
 	back_piece.global_position  = center
-	back_piece.position.z      += 0.002   # tiny offset so they don't z-fight
+	back_piece.position.z      += 0.002
+
 	front_piece.visible = true
 	back_piece.visible  = true
+
+	# Wait one frame so any leftover deferred ops from the sewing machine
+	# can't stomp our visibility right after we set it.
+	await get_tree().process_frame
+	front_piece.visible = true   # reaffirm after the frame
+	back_piece.visible  = true
+
 	_animate_cut_split()
 
 
@@ -453,12 +452,19 @@ func _go_to_sewing() -> void:
 
 
 func _on_sewing_complete() -> void:
-	# reset the button and pieces ready for the next dress
 	_cut_done       = false
 	cut_button.text = "CUT"
 
 	front_piece.remove_from_group("sewing_pieces")
 	back_piece.remove_from_group("sewing_pieces")
+
+	# If sewing machine took ownership of the pieces, return them here
+	# so their parent visibility can never block them during the next cut.
+	if front_piece.get_parent() != self:
+		front_piece.reparent(self, true)   # true = keep global transform
+	if back_piece.get_parent() != self:
+		back_piece.reparent(self, true)
+
 	_reset_pieces()
 	front_piece.visible = false
 	back_piece.visible  = false
@@ -582,11 +588,7 @@ func _on_cutting_cancelled() -> void:
 
 # put both pieces back to where they started and hide them
 func _reset_pieces() -> void:
-	front_piece.rotation_degrees = _front_piece_init_rot
-	back_piece.rotation_degrees  = _back_piece_init_rot
-	front_piece.position         = _front_piece_init_pos
-	back_piece.position          = _back_piece_init_pos
-	front_piece.scale            = Vector3.ONE
-	back_piece.scale             = Vector3.ONE
+	front_piece.global_transform = _front_piece_init_xform
+	back_piece.global_transform  = _back_piece_init_xform
 	front_piece.visible          = false
 	back_piece.visible           = false

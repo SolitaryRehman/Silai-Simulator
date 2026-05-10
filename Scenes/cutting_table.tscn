@@ -335,9 +335,9 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="cut_ui" unique_id=433234778]
-offset_left = 1413.0
+offset_left = 1363.0
 offset_top = 537.0
-offset_right = 1711.0
+offset_right = 1661.0
 offset_bottom = 713.0
 texture = ExtResource("7_in3w1")
 expand_mode = 1
