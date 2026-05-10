@@ -30,17 +30,14 @@ var _delivery_table_vbox:   VBoxContainer  = null
 var _dispatch_feedback_lbl: Label          = null
 
 # Fixed widths — must match between header and rows
-const COL_CITY_W:    float = 0.0   # EXPAND_FILL
-const COL_ORDERS_W:  float = 0.0   # EXPAND_FILL
-const COL_REV_W:     float = 0.0   # EXPAND_FILL
-const COL_ACTION_W:  float = 120.0 # fixed
+const COL_ACTION_W: float = 140.0
 
 
 func _ready() -> void:
 	open_button.toggle_mode    = true
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
-	open_button.toggled.connect( _on_btn_toggled)  # use toggled instead of pressed
+	open_button.toggled.connect(_on_btn_toggled)
 
 	_spawn_timer          = Timer.new()
 	_spawn_timer.one_shot = true
@@ -51,8 +48,8 @@ func _ready() -> void:
 	_refresh_hud()
 
 	sewing_machine.sewing_complete.connect(_on_sewing_complete)
-	
-	 # ── Fade in from black ─────────────────────────────────────────────
+
+	# ── Fade in from black ────────────────────────────────────────────────────
 	var black_rect = ColorRect.new()
 	black_rect.color = Color(0, 0, 0, 1)
 	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -67,16 +64,14 @@ func _ready() -> void:
 	_build_delivery_panel()
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 #  HUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-
 func _refresh_hud() -> void:
-	level_label.text  = str(GameManager.player_level)
-	xp_label.text     = str(GameManager.player_xp) + " XP"
-	coins_label.text  = str(GameManager.player_coins)
+	level_label.text = str(GameManager.player_level)
+	xp_label.text    = str(GameManager.player_xp) + " XP"
+	coins_label.text = str(GameManager.player_coins)
 
 	if _pending_badge != null:
 		var areas: Array = Database.get_top_delivery_areas(10)
@@ -85,7 +80,6 @@ func _refresh_hud() -> void:
 			total_undelivered += int(a.get("Pending_deliveries", 0))
 		_pending_badge.text    = str(total_undelivered) if total_undelivered > 0 else ""
 		_pending_badge.visible = total_undelivered > 0
-
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -136,98 +130,102 @@ func _build_delivery_panel() -> void:
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_delivery_layer.add_child(overlay)
 
-	# Main panel
+	# ── Main panel — larger than before ───────────────────────────────────────
 	_delivery_panel = Panel.new()
 	_delivery_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_delivery_panel.custom_minimum_size = Vector2(700, 480)
-	_delivery_panel.position = Vector2(-350, -240)
+	_delivery_panel.custom_minimum_size = Vector2(860, 560)
+	_delivery_panel.position            = Vector2(-430, -280)
 	_delivery_layer.add_child(_delivery_panel)
 
 	var root_vbox := VBoxContainer.new()
 	root_vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root_vbox.add_theme_constant_override("separation", 10)
-	root_vbox.offset_left   =  14
-	root_vbox.offset_top    =  14
-	root_vbox.offset_right  = -14
-	root_vbox.offset_bottom = -14
+	root_vbox.add_theme_constant_override("separation", 12)
+	root_vbox.offset_left   =  18
+	root_vbox.offset_top    =  16
+	root_vbox.offset_right  = -18
+	root_vbox.offset_bottom = -16
 	_delivery_panel.add_child(root_vbox)
 
-	# ── Title row ──
+	# ── Title row ─────────────────────────────────────────────────────────────
 	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 10)
 	root_vbox.add_child(title_row)
 
 	var title_lbl := Label.new()
-	title_lbl.text = "🚚  DELIVERY DISPATCH"
+	title_lbl.text                 = "🚚  DELIVERY DISPATCH"
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_font_size_override("font_size", 26)
 	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25))
+	title_lbl.add_theme_constant_override("outline_size", 3)
+	title_lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
 	title_row.add_child(title_lbl)
 
 	var refresh_btn := Button.new()
-	refresh_btn.text = "↻ Refresh"
-	refresh_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	refresh_btn.text               = "↻  Refresh"
+	refresh_btn.custom_minimum_size = Vector2(110, 40)
+	refresh_btn.add_theme_font_size_override("font_size", 15)
+	refresh_btn.process_mode       = Node.PROCESS_MODE_ALWAYS
 	refresh_btn.pressed.connect(_refresh_delivery_table)
 	title_row.add_child(refresh_btn)
 
 	var close_btn := Button.new()
-	close_btn.text = "✕ Close"
-	close_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	close_btn.text               = "✕  Close"
+	close_btn.custom_minimum_size = Vector2(110, 40)
+	close_btn.add_theme_font_size_override("font_size", 15)
+	close_btn.process_mode       = Node.PROCESS_MODE_ALWAYS
 	close_btn.pressed.connect(_close_delivery_panel)
 	title_row.add_child(close_btn)
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Subtitle ──
+	# ── Subtitle ──────────────────────────────────────────────────────────────
 	var sub_lbl := Label.new()
-	sub_lbl.text = "Top cities with completed orders awaiting delivery (Order_status = 'Completed', Payment_status = 'Unpaid')"
-	sub_lbl.add_theme_font_size_override("font_size", 11)
+	sub_lbl.text = "Top cities with completed orders awaiting delivery  (Order_status = 'Completed', Payment_status = 'Unpaid')"
+	sub_lbl.add_theme_font_size_override("font_size", 13)
 	sub_lbl.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
 	sub_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
 	root_vbox.add_child(sub_lbl)
 
-	# ── Column headers ──
+	# ── Column headers ────────────────────────────────────────────────────────
 	var header_hbox := HBoxContainer.new()
 	header_hbox.add_theme_constant_override("separation", 4)
 	root_vbox.add_child(header_hbox)
 
-	# The first three headers expand to fill; Action header is fixed-width
-	# to align exactly with the Dispatch button in each row.
 	for col_text in ["City", "Orders", "Est. Revenue"]:
 		var h := Label.new()
 		h.text = col_text
-		h.add_theme_font_size_override("font_size", 13)
-		h.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+		h.add_theme_font_size_override("font_size", 15)
+		h.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 		h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_hbox.add_child(h)
 
-	# Action header — fixed width matching the dispatch button
 	var action_h := Label.new()
 	action_h.text = "Action"
-	action_h.add_theme_font_size_override("font_size", 13)
-	action_h.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	action_h.custom_minimum_size = Vector2(COL_ACTION_W, 0)
+	action_h.add_theme_font_size_override("font_size", 15)
+	action_h.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	action_h.custom_minimum_size   = Vector2(COL_ACTION_W, 0)
 	action_h.size_flags_horizontal = Control.SIZE_SHRINK_END
 	header_hbox.add_child(action_h)
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Scrollable table ──
+	# ── Scrollable table ──────────────────────────────────────────────────────
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root_vbox.add_child(scroll)
 
 	_delivery_table_vbox = VBoxContainer.new()
 	_delivery_table_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_delivery_table_vbox.add_theme_constant_override("separation", 6)
+	_delivery_table_vbox.add_theme_constant_override("separation", 8)
 	scroll.add_child(_delivery_table_vbox)
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Feedback label ──
+	# ── Feedback label ────────────────────────────────────────────────────────
 	_dispatch_feedback_lbl = Label.new()
-	_dispatch_feedback_lbl.text = ""
+	_dispatch_feedback_lbl.text               = ""
 	_dispatch_feedback_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_dispatch_feedback_lbl.add_theme_font_size_override("font_size", 14)
+	_dispatch_feedback_lbl.add_theme_font_size_override("font_size", 16)
 	_dispatch_feedback_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	root_vbox.add_child(_dispatch_feedback_lbl)
 
@@ -245,7 +243,6 @@ func _close_delivery_panel() -> void:
 
 
 func _refresh_delivery_table() -> void:
-	# Clear old rows
 	for child in _delivery_table_vbox.get_children():
 		child.queue_free()
 
@@ -253,8 +250,9 @@ func _refresh_delivery_table() -> void:
 
 	if areas.is_empty():
 		var empty_lbl := Label.new()
-		empty_lbl.text = "No completed orders awaiting delivery."
-		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty_lbl.text                  = "No completed orders awaiting delivery."
+		empty_lbl.horizontal_alignment  = HORIZONTAL_ALIGNMENT_CENTER
+		empty_lbl.add_theme_font_size_override("font_size", 16)
 		empty_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 		_delivery_table_vbox.add_child(empty_lbl)
 		return
@@ -263,39 +261,56 @@ func _refresh_delivery_table() -> void:
 		_delivery_table_vbox.add_child(_build_area_row(area))
 
 
-func _build_area_row(area: Dictionary) -> HBoxContainer:
+func _build_area_row(area: Dictionary) -> PanelContainer:
+	# Card background — same style used in cutting_table rows
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var style := StyleBoxFlat.new()
+	style.bg_color     = Color(0.14, 0.16, 0.22, 0.92)
+	style.border_color = Color(0.35, 0.40, 0.60, 0.70)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(10)
+	card.add_theme_stylebox_override("panel", style)
+
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 4)
+	card.add_child(hbox)
 
 	var city_lbl := Label.new()
-	city_lbl.text = area.get("City", "—")
+	city_lbl.text                  = area.get("City", "—")
 	city_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	city_lbl.add_theme_font_size_override("font_size", 17)
+	city_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95))
 	hbox.add_child(city_lbl)
 
 	var count_lbl := Label.new()
-	count_lbl.text = str(area.get("Pending_deliveries", 0)) + " order(s)"
+	count_lbl.text                  = str(area.get("Pending_deliveries", 0)) + " order(s)"
 	count_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	count_lbl.add_theme_font_size_override("font_size", 17)
 	count_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25))
 	hbox.add_child(count_lbl)
 
 	var rev_lbl := Label.new()
 	var rev: float = float(area.get("Area_revenue", 0.0))
-	rev_lbl.text = str(int(rev)) + " coins" #round up now fixed to round down
+	rev_lbl.text                  = str(int(rev)) + " coins"
 	rev_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rev_lbl.add_theme_font_size_override("font_size", 17)
 	rev_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	hbox.add_child(rev_lbl)
 
-	# Fixed-width dispatch button — matches Action header width
 	var dispatch_btn := Button.new()
-	dispatch_btn.text = "Dispatch →"
-	dispatch_btn.custom_minimum_size = Vector2(COL_ACTION_W, 0)
+	dispatch_btn.text               = "Dispatch  →"
+	dispatch_btn.custom_minimum_size = Vector2(COL_ACTION_W, 44)
+	dispatch_btn.add_theme_font_size_override("font_size", 15)
 	dispatch_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
-	dispatch_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	dispatch_btn.process_mode          = Node.PROCESS_MODE_ALWAYS
 	var city_str: String = area.get("City", "")
 	dispatch_btn.pressed.connect(func(): _dispatch_area(city_str))
 	hbox.add_child(dispatch_btn)
 
-	return hbox
+	return card
 
 
 # ── Dispatch all completed orders for a city ──────────────────────────────────
@@ -303,9 +318,9 @@ func _dispatch_area(city: String) -> void:
 	if city.is_empty():
 		return
 
-	var result: Dictionary = Database.deliver_orders_for_area(city)
-	var count:  int        = result.get("count",   0)
-	var revenue: float     = result.get("revenue", 0.0)
+	var result:  Dictionary = Database.deliver_orders_for_area(city)
+	var count:   int        = result.get("count",   0)
+	var revenue: float      = result.get("revenue", 0.0)
 
 	if count == 0:
 		_dispatch_feedback_lbl.text = "No eligible orders found for %s." % city
@@ -342,9 +357,7 @@ func _on_btn_toggled(pressed: bool) -> void:
 		_spawn_timer.stop()
 
 
-
 func _spawn_customer() -> void:
-	# Reset button to OFF now that the customer is arriving
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
 
@@ -374,7 +387,6 @@ func _spawn_customer() -> void:
 
 func _on_customer_left() -> void:
 	_customer_active = false
-
 
 
 func _close_shop() -> void:
