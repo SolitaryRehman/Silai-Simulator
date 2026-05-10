@@ -344,7 +344,7 @@ func _dispatch_area(city: String) -> void:
 
 	_dispatch_feedback_lbl.text = (
 		"✅  Dispatched %d order(s) to %s  |  +%d XP  |  +%.0f coins!"
-		% [count, city, xp_reward, revenue]
+		% [count, city, xp_reward, int(revenue)]
 	)
 	_dispatch_feedback_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 
