@@ -186,17 +186,17 @@ Unlike a typical 2D simulation, Silai Simulator places the player inside a **ful
 
 ```
 Customer walks into the 3D shop (animated character)
-             ↓
+			 ↓
 Order placed at the counter — clothing type, colors, measurements recorded
-             ↓
+			 ↓
 Player moves to the cutting table → selects fabric from inventory
-             ↓
+			 ↓
 Dress parts (collar, body, sleeves, ...) assembled using the sewing machine
-             ↓
+			 ↓
 Completed dress delivered to customer
-             ↓
+			 ↓
 Coins + XP awarded → Player levels up → Machines & ShopItems unlock
-             ↓
+			 ↓
 Shop expands, orders get harder, cycle continues
 ```
 
@@ -283,22 +283,22 @@ func get_pending_orders() -> Array:
             o.OrderID,
             c.Name                             AS Customer_Name,
             c.City,
-            GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
+			GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
             COUNT(d.DressID)                   AS Dress_count,
             o.Order_date,
             o.Receiving_date,
             o.Order_status,
             CASE
-                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
-                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-                ELSE                               'Normal'
+				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+				ELSE                               'Normal'
             END                                AS Customer_Type
         FROM "Order"    o
         JOIN  Customer  c  ON c.CustomerID = o.CustomerID
         LEFT JOIN Dress d  ON d.OrderID    = o.OrderID
         LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
         LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
-        WHERE o.Order_status = 'Pending'
+		WHERE o.Order_status = 'Pending'
         GROUP BY o.OrderID
         ORDER BY o.OrderID ASC;
     """)
@@ -376,10 +376,10 @@ func _create_tables() -> void:
             ItemID        INTEGER PRIMARY KEY AUTOINCREMENT,
             Item_name     TEXT    NOT NULL UNIQUE,
             Price         REAL    NOT NULL CHECK(Price >= 0),
-            Unlock_Status TEXT    NOT NULL DEFAULT 'Locked'
-                          CHECK(Unlock_Status IN ('Locked','Unlocked')),
-            Use_Status    TEXT    NOT NULL DEFAULT 'Not In Use'
-                          CHECK(Use_Status IN ('In Use','Not In Use'))
+			Unlock_Status TEXT    NOT NULL DEFAULT 'Locked'
+						  CHECK(Unlock_Status IN ('Locked','Unlocked')),
+			Use_Status    TEXT    NOT NULL DEFAULT 'Not In Use'
+						  CHECK(Use_Status IN ('In Use','Not In Use'))
         );
     """)
     db.query("""
@@ -406,10 +406,10 @@ func _create_tables() -> void:
             CustomerID      INTEGER NOT NULL,
             Order_date      TEXT    NOT NULL,
             Receiving_date  TEXT    NOT NULL,
-            Payment_status  TEXT    NOT NULL DEFAULT 'Unpaid'
-                            CHECK(Payment_status IN ('Unpaid','Paid')),
-            Order_status    TEXT    NOT NULL DEFAULT 'Pending'
-                            CHECK(Order_status IN ('Pending','Completed','Delivered')),
+			Payment_status  TEXT    NOT NULL DEFAULT 'Unpaid'
+							CHECK(Payment_status IN ('Unpaid','Paid')),
+			Order_status    TEXT    NOT NULL DEFAULT 'Pending'
+							CHECK(Order_status IN ('Pending','Completed','Delivered')),
             FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
         );
     """)
@@ -566,7 +566,7 @@ func create_order_record(customer_id: int) -> int:
     db.query_with_bindings("""
         INSERT INTO "Order"
             (CustomerID, Order_date, Receiving_date, Payment_status, Order_status)
-        VALUES (?, ?, ?, 'Unpaid', 'Pending');
+		VALUES (?, ?, ?, 'Unpaid', 'Pending');
     """, [customer_id, order_date, receiving_date])
     db.query("SELECT last_insert_rowid() AS id;")
     active_order_id = int(db.query_result[0]["id"])
@@ -586,22 +586,22 @@ func get_pending_orders() -> Array:
             o.OrderID,
             c.Name                             AS Customer_Name,
             c.City,
-            GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
+			GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
             COUNT(d.DressID)                   AS Dress_count,
             o.Order_date,
             o.Receiving_date,
             o.Order_status,
             CASE
-                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
-                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-                ELSE                               'Normal'
+				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+				ELSE                               'Normal'
             END                                AS Customer_Type
         FROM "Order"    o
         JOIN  Customer  c  ON c.CustomerID = o.CustomerID
         LEFT JOIN Dress d  ON d.OrderID    = o.OrderID
         LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
         LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
-        WHERE o.Order_status = 'Pending'
+		WHERE o.Order_status = 'Pending'
         GROUP BY o.OrderID
         ORDER BY o.OrderID ASC;
     """)
@@ -610,7 +610,7 @@ func get_pending_orders() -> Array:
 # ── UPDATE: Mark order completed after sewing is done ────────────────────────
 func finalize_order(order_id: int) -> void:
     db.query_with_bindings(
-        "UPDATE \"Order\" SET Order_status = 'Completed' WHERE OrderID = ?;",
+		"UPDATE \"Order\" SET Order_status = 'Completed' WHERE OrderID = ?;",
         [order_id]
     )
     var price: float = calculate_order_price(order_id)
@@ -620,10 +620,10 @@ func finalize_order(order_id: int) -> void:
 func deliver_order(order_id: int) -> void:
     db.query_with_bindings("""
         UPDATE "Order"
-        SET    Order_status   = 'Delivered',
-               Payment_status = 'Paid'
+		SET    Order_status   = 'Delivered',
+			   Payment_status = 'Paid'
         WHERE  OrderID      = ?
-          AND  Order_status = 'Completed';
+		  AND  Order_status = 'Completed';
     """, [order_id])
 
 # ── UPDATE: Reward player with coins and XP ───────────────────────────────────
@@ -709,10 +709,10 @@ Dress_Parts bridges Dress ↔ Fabric
 
 ```
 CustomerID               → Name, House, Street, Sector, City, Collar_size,
-                           Chest, Shoulder, Sleeve_length, Trouser_length, Waist
+						   Chest, Shoulder, Sleeve_length, Trouser_length, Waist
 OrderID                  → CustomerID, Order_date, Receiving_date,
-                           Payment_status, Order_status
-                           [Total_price is DERIVED, not stored]
+						   Payment_status, Order_status
+						   [Total_price is DERIVED, not stored]
 DressID                  → OrderID, Dress_type
 FabricID                 → Fabric_type, Unit_cost, Stock_quantity
 ItemID                   → Item_name, Price, Unlock_Status, Use_Status
@@ -741,7 +741,7 @@ PlayerID                 → Username, Level, Coins, Current_xp
 ```gdscript
 # LEFT JOIN: Full dress breakdown for a given order (colors + fabrics per dress)
 func get_dresses_for_order(order_id: int) -> Array:
-    db.query_with_bindings("""
+	db.query_with_bindings("""
         SELECT
             d.DressID,
             d.Dress_type,
@@ -755,23 +755,23 @@ func get_dresses_for_order(order_id: int) -> Array:
         WHERE d.OrderID = ?
         GROUP BY d.DressID, d.Dress_type
         ORDER BY d.DressID ASC;
-    """, [order_id])
-    return db.query_result.duplicate()
+	""", [order_id])
+	return db.query_result.duplicate()
 
 # JOIN with ISA: Order summary including VIP discount and Rude delay
 func get_order_details(order_id: int) -> Dictionary:
-    db.query_with_bindings("SELECT * FROM v_order_summary WHERE OrderID = ?;", [order_id])
-    if db.query_result.is_empty(): return {}
-    return db.query_result[0].duplicate()
+	db.query_with_bindings("SELECT * FROM v_order_summary WHERE OrderID = ?;", [order_id])
+	if db.query_result.is_empty(): return {}
+	return db.query_result[0].duplicate()
 
 # JOIN: Full dress cost breakdown with per-part fabric costs
 func get_dress_cost_breakdown(dress_id: int) -> Array:
-    db.query_with_bindings("SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;", [dress_id])
-    return db.query_result.duplicate()
+	db.query_with_bindings("SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;", [dress_id])
+	return db.query_result.duplicate()
 
 # JOIN: Top delivery areas — completed but undelivered orders, revenue derived from parts
 func get_top_delivery_areas(limit: int = 5) -> Array:
-    db.query_with_bindings("""
+	db.query_with_bindings("""
         SELECT
             c.City,
             COUNT(DISTINCT o.OrderID)  AS Pending_deliveries,
@@ -783,7 +783,7 @@ func get_top_delivery_areas(limit: int = 5) -> Array:
                     0.0
                 ))
             ), 0.0), 2)                AS Area_revenue
-        FROM "Order"     o
+		FROM "Order"     o
         JOIN Customer    c  ON c.CustomerID = o.CustomerID
         JOIN Dress       d  ON d.OrderID    = o.OrderID
         JOIN Dress_Parts dp ON dp.DressID   = d.DressID
@@ -793,8 +793,8 @@ func get_top_delivery_areas(limit: int = 5) -> Array:
         GROUP BY c.City
         ORDER BY Pending_deliveries DESC
         LIMIT ?;
-    """, [limit])
-    return db.query_result.duplicate()
+	""", [limit])
+	return db.query_result.duplicate()
 ```
 
 ---
@@ -838,14 +838,14 @@ ROUND(COALESCE(SUM(
 func deliver_orders_for_area(city: String) -> Dictionary:
     db.query_with_bindings("""
         UPDATE "Order"
-        SET    Order_status   = 'Delivered',
-               Payment_status = 'Paid'
+		SET    Order_status   = 'Delivered',
+			   Payment_status = 'Paid'
         WHERE  OrderID IN (
             SELECT o2.OrderID FROM "Order" o2
             JOIN   Customer c2 ON c2.CustomerID = o2.CustomerID
             WHERE c2.City = ?
-              AND  o2.Order_status   = 'Completed'
-              AND  o2.Payment_status = 'Unpaid'
+			  AND  o2.Order_status   = 'Completed'
+			  AND  o2.Payment_status = 'Unpaid'
         );
     """, [city])
 
@@ -866,8 +866,8 @@ db.query_with_bindings("""
     JOIN Dress_Parts dp ON dp.DressID = d.DressID
     JOIN Fabric    f  ON  f.FabricID  = dp.FabricID
     WHERE c.City = ?
-      AND o.Order_status   = 'Completed'
-      AND o.Payment_status = 'Unpaid';
+	  AND o.Order_status   = 'Completed'
+	  AND o.Payment_status = 'Unpaid';
 """, [city])
 ```
 
@@ -930,9 +930,9 @@ func _create_views() -> void:
             c.Name                              AS Customer_Name,
             c.City,
             CASE
-                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
-                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-                ELSE                               'Normal'
+				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+				ELSE                               'Normal'
             END                                 AS Customer_Type,
             COALESCE(v.Discount_rate, 0)        AS Discount_pct,
             COALESCE(r.Time_delay,    0)        AS Delay_days,
@@ -988,9 +988,9 @@ func _create_views() -> void:
             c.CustomerID,
             c.Name,
             CASE
-                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
-                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
-                ELSE                               'Normal'
+				WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+				WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+				ELSE                               'Normal'
             END                                                       AS Customer_Type,
             COUNT(DISTINCT o.OrderID)                                 AS Total_orders,
             ROUND(COALESCE(SUM(
@@ -1016,7 +1016,7 @@ func _create_views() -> void:
         JOIN Fabric     f  ON  f.FabricID   = dp.FabricID
         LEFT JOIN VIP   v  ON  v.CustomerID = c.CustomerID
         LEFT JOIN Rude  r  ON  r.CustomerID = c.CustomerID
-        WHERE o.Order_status IN ('Completed','Delivered')
+		WHERE o.Order_status IN ('Completed','Delivered')
         GROUP BY c.CustomerID, c.Name;
     """)
     print("Database: Views created / verified.")
@@ -1113,230 +1113,6 @@ Player (standalone — tracks progression; Level derived via trigger from Curren
 
 ---
 
-## 🏗 Workflow Architecture
-
-```
-┌───────────────────────────────────────────────────────────────────┐
-│                       GODOT ENGINE (3D)                           │
-│                                                                   │
-│   ┌──────────────────────┐  signals  ┌───────────────────────┐   │
-│   │    3D Game Scenes    │ ─────────>│   GDScript Files      │   │
-│   │                      │           │                       │   │
-│   │  • ShopScene.tscn    │ <─────────│  • ShopScene.gd       │   │
-│   │  • Customer3D.tscn   │  UI/scene │  • CustomerManager.gd │   │
-│   │  • OrderBoard.tscn   │  updates  │  • OrderSystem.gd     │   │
-│   │  • CuttingTable.tscn │           │  • InventorySystem.gd │   │
-│   │  • SewingMachine.tscn│           │  • RewardSystem.gd    │   │
-│   │  • HUD.tscn          │           │  • HUD.gd             │   │
-│   └──────────────────────┘           └──────────┬────────────┘   │
-│                                                  │                │
-│                                        Database.*() calls         │
-│                                                  │                │
-│                                                  ▼                │
-│                                   ┌──────────────────────────┐   │
-│                                   │       database.gd         │   │
-│                                   │  (Autoload Singleton)    │   │
-│                                   │                          │   │
-│                                   │  _open_db()              │   │
-│                                   │  _create_tables()        │   │
-│                                   │  _drop/create_triggers() │   │
-│                                   │  _drop/create_views()    │   │
-│                                   │  _prefill_data()         │   │
-│                                   │  + all CRUD functions    │   │
-│                                   └─────────────┬────────────┘   │
-│                                                 │                 │
-└─────────────────────────────────────────────────┼─────────────────┘
-                                                  │ SQL via godot-sqlite
-                                                  ▼
-                                   ┌──────────────────────────┐
-                                   │    silai_simulator.db    │
-                                   │   (SQLite Database)      │
-                                   │                          │
-                                   │  Customer / VIP / Rude   │
-                                   │  Customer_Phone          │
-                                   │  Order                   │
-                                   │  Dress / Dress_Color     │
-                                   │  Dress_Parts             │
-                                   │  Fabric                  │
-                                   │  ShopItems / Machine     │
-                                   │  Player                  │
-                                   └──────────────────────────┘
-```
-
-### Design Principles
-
-- **GUI scenes** contain nodes and layout only — no business logic, no SQL.
-- **GDScript system files** handle gameplay events and call `Database.*` functions.
-- **`database.gd`** is the single point of contact with SQLite — no other script writes SQL.
-- **Triggers** enforce data integrity at the database level, independent of GDScript.
-- **Views** pre-join tables so UI scripts receive clean, ready-to-use data arrays.
-
----
-
-## 🔄 Functional Flow
-
-### Complete Order Lifecycle — Step by Step
-
-```
-STEP 1 — CUSTOMER ARRIVES
-═══════════════════════════
-CustomerManager.gd spawns a 3D character, calls get_or_create_customer().
-
-  Database.get_or_create_customer("Ayesha")
-  → SELECT * FROM Customer WHERE Name = 'Ayesha'   (not found → create)
-  → INSERT INTO Customer (Name, House, Street, Sector, City,
-        Collar_size, Chest, Shoulder, Sleeve_length, Trouser_length, Waist)
-        VALUES (...)
-  → Returns: CustomerID = 7, customer_type = "VIP"
-
-  Because "Ayesha" is in VIP_NAMES:
-  → INSERT OR IGNORE INTO VIP (CustomerID, Discount_rate) VALUES (7, 18.0)
-
-────────────────────────────────────────────────────────────────────
-STEP 2 — ORDER PLACED AT THE COUNTER
-═══════════════════════════════════════
-generate_random_dress_order() builds the order dict; create_order_record() saves it.
-
-  Database.create_order_record(7)
-  → INSERT INTO "Order" (CustomerID, Order_date, Receiving_date,
-        Payment_status, Order_status) VALUES (7, '2026-05-10T...', '2026-05-13', 'Unpaid', 'Pending')
-  → Returns: OrderID = 42
-    (Receiving_date = today + BASE_RECEIVING_DAYS; no delay for VIP)
-
-  Database.attach_all_dresses_to_order(42, order_data)
-  → INSERT INTO Dress (OrderID, Dress_type) VALUES (42, 'Frock')
-    → DressID = 18
-  → INSERT OR IGNORE INTO Dress_Color (DressID, Color) VALUES (18, 'Crimson Red')
-  → INSERT OR IGNORE INTO Dress_Parts (DressID, Part_name, FabricID, Quantity_used)
-        VALUES (18, 'Bodice', 3, 0.25), (18, 'Skirt', 6, 1.65), ...
-    ★ trg_deduct_fabric_stock fires on each Dress_Parts INSERT:
-      UPDATE Fabric SET Stock_quantity = Stock_quantity - <Quantity_used>
-      WHERE FabricID = <FabricID>
-
-────────────────────────────────────────────────────────────────────
-STEP 3 — PRICE SHOWN TO PLAYER
-════════════════════════════════
-Called right after attach_all_dresses_to_order() to display price on the accept screen.
-
-  Database.calculate_order_price(42)
-  → SUM(Unit_cost × Quantity_used) × (1 − 0.18)   [VIP 18% discount]
-  → Returns: 198.45
-
-────────────────────────────────────────────────────────────────────
-STEP 4 — PLAYER AT THE CUTTING TABLE / SEWING MACHINE
-═══════════════════════════════════════════════════════
-Player navigates to the 3D workstations. Pending order is loaded for display.
-
-  Database.get_pending_orders()
-  → Returns all orders WHERE Order_status = 'Pending'
-
-  Database.get_dresses_for_order(42)
-  → Returns dress rows with Colors and Fabrics for the order board
-
-────────────────────────────────────────────────────────────────────
-STEP 5 — ORDER COMPLETED
-══════════════════════════
-Player finishes sewing. finalize_order() advances status to Completed.
-
-  Database.finalize_order(42)
-  → UPDATE "Order" SET Order_status = 'Completed' WHERE OrderID = 42
-  → calculate_order_price(42) called internally for the print log
-
-────────────────────────────────────────────────────────────────────
-STEP 6 — DELIVERY & REWARDS
-══════════════════════════════
-Player delivers at the counter. deliver_order() or deliver_orders_for_area() is called.
-
-  Database.deliver_order(42)
-  → UPDATE "Order" SET Order_status = 'Delivered', Payment_status = 'Paid'
-    WHERE OrderID = 42 AND Order_status = 'Completed'
-
-  Database.add_player_rewards(xp, coins)
-  → UPDATE Player SET Current_xp = Current_xp + xp, Coins = Coins + coins
-    WHERE PlayerID = 1
-  ★ trg_player_level_up fires:
-    UPDATE Player SET Level = MAX(1, (NEW.Current_xp / 500) + 1)
-    WHERE PlayerID = NEW.PlayerID
-
-────────────────────────────────────────────────────────────────────
-STEP 7 — HUD UPDATES IN REAL TIME
-════════════════════════════════════
-HUD.gd queries player data each cycle:
-
-  Database.get_player_data()
-  → SELECT PlayerID, Username, Level, Coins, Current_xp,
-           (Level * 500) - Current_xp AS xp_to_next_level
-    FROM Player WHERE PlayerID = 1
-  → { Level:3, Coins:850, Current_xp:1225, xp_to_next_level:275 }
-
-  3D HUD overlay updates: level badge, coin counter, XP progress bar.
-
-────────────────────────────────────────────────────────────────────
-STEP 8 — SESSION ENDS
-═══════════════════════
-SQLite commits all changes to silai_simulator.db on disk.
-Next launch: database.gd opens the same file.
-Every customer, order, fabric level, and coin is exactly as left.
-```
-
----
-
-## 📁 File Structure
-
-```
-Silai-Simulator/
-│
-├── project.godot                      # Godot 4 project configuration
-├── silai_simulator.db                 # SQLite database (auto-created on first launch)
-│
-├── addons/
-│   └── godot-sqlite/                  # GDExtension SQLite plugin
-│       ├── bin/                       # Native binaries (Win/Linux/macOS)
-│       └── godot-sqlite.gdextension
-│
-├── autoloads/
-│   └── database.gd                    # ★ Singleton — ALL SQL lives here
-│                                      #   _open_db(), _create_tables(),
-│                                      #   _drop/create_triggers(),
-│                                      #   _drop/create_views(),
-│                                      #   _prefill_data(),
-│                                      #   + all public CRUD functions
-│
-├── scenes/
-│   ├── shop/
-│   │   ├── ShopScene.tscn             # Main 3D shop environment
-│   │   └── ShopScene.gd              # Core loop — spawn, order flow
-│   ├── customer/
-│   │   ├── Customer3D.tscn           # Animated 3D customer character
-│   │   └── CustomerManager.gd        # Customer generation + DB insert
-│   ├── workstations/
-│   │   ├── CuttingTable.tscn         # 3D cutting table
-│   │   ├── CuttingTable.gd           # Dress_Parts insert, fabric deduction
-│   │   ├── SewingMachine.tscn        # 3D sewing machine
-│   │   └── SewingMachine.gd          # Machine unlock check, order progress
-│   ├── ui/
-│   │   ├── OrderBoard.tscn           # 3D in-world order board
-│   │   ├── OrderBoard.gd             # Queries get_pending_orders()
-│   │   ├── HUD.tscn                  # Coins, XP, Level overlay
-│   │   └── HUD.gd                    # Queries get_player_data()
-│   └── main_menu/
-│       ├── MainMenu.tscn
-│       └── MainMenu.gd
-│
-├── scripts/
-│   ├── OrderSystem.gd                # Order + Dress creation, status transitions
-│   ├── InventorySystem.gd            # Fabric stock queries, low-stock alerts
-│   ├── RewardSystem.gd               # Coin/XP calculation, player update calls
-│   └── LevelSystem.gd                # Level-up detection, ShopItems unlock
-│
-└── assets/
-    ├── models/                       # 3D shop and character models (.glb)
-    ├── textures/                     # Material textures
-    ├── animations/                   # Customer walk/idle animations
-    └── fonts/
-```
-
----
 
 ## ⚙ Advanced Query System
 
@@ -1357,7 +1133,7 @@ func get_total_earnings() -> float:
         JOIN Dress       d  ON d.OrderID    = o.OrderID
         JOIN Dress_Parts dp ON dp.DressID   = d.DressID
         JOIN Fabric      f  ON  f.FabricID  = dp.FabricID
-        WHERE o.Order_status IN ('Completed','Delivered');
+		WHERE o.Order_status IN ('Completed','Delivered');
     """)
     return float(db.query_result[0]["earnings"])
 
@@ -1388,8 +1164,8 @@ func get_top_delivery_areas(limit: int = 5) -> Array:
         JOIN Dress       d  ON d.OrderID    = o.OrderID
         JOIN Dress_Parts dp ON dp.DressID   = d.DressID
         JOIN Fabric      f  ON  f.FabricID  = dp.FabricID
-        WHERE o.Order_status   = 'Completed'
-          AND o.Payment_status = 'Unpaid'
+		WHERE o.Order_status   = 'Completed'
+		  AND o.Payment_status = 'Unpaid'
         GROUP BY c.City
         ORDER BY Pending_deliveries DESC
         LIMIT ?;
@@ -1432,48 +1208,6 @@ func get_rude_delay(customer_id: int) -> int:
     if db.query_result.is_empty(): return 0
     return int(db.query_result[0]["Time_delay"])
 ```
-
----
-
-## 🧩 Software Engineering Concepts
-
-### Modular Programming
-
-Each game system is a self-contained script with a single clear responsibility:
-
-| Script | Does | Does Not |
-|---|---|---|
-| `database.gd` | All SQL: schema, triggers, views, CRUD | No scene logic, no game math |
-| `OrderSystem.gd` | Order state machine transitions | No SQL, no rendering |
-| `RewardSystem.gd` | Calculates coin/XP values | No DB calls, no UI updates |
-| `HUD.gd` | Reads `get_player_data()`, updates labels | No business logic |
-| `CuttingTable.gd` | Inserts `Dress_Parts` rows | No view rendering |
-
-### Separation of Frontend and Backend
-
-```
-FRONTEND (Scenes + UI Scripts)           BACKEND (System Scripts + database.gd)
-──────────────────────────────           ──────────────────────────────────────
-Render the 3D shop environment           Manage order lifecycle state machine
-Animate 3D customer characters           Generate customer data and measurements
-Display order cards and urgency flags    Execute all database queries
-Handle player movement and input         Calculate rewards, apply VIP discounts
-Show fabric stock levels visually        Enforce stock accuracy via triggers
-Update XP bar and level badge            Maintain schema, views, triggers
-```
-
-No frontend script contains SQL. No backend script touches scene nodes. All communication flows through function return values and Godot signals.
-
-### Scalability Considerations
-
-| Future Requirement | How the Architecture Handles It |
-|---|---|
-| Add a new dress type | Add a new `match` branch in `get_dress_parts()` — no schema change needed |
-| Add a new fabric | `INSERT` into `Fabric` — triggers and views adapt automatically |
-| New customer subclass (e.g. Loyal) | New ISA table with FK to `Customer` — existing queries unaffected |
-| Multiple save slots | Add `SaveSlot INTEGER` to `Player`, filter all queries by slot |
-| Leaderboard / multiplayer | `Player.Username UNIQUE` already exists — extend with a sync layer |
-| New machine category | Add to `ShopItems` + `Machine` — unlock system inherits it immediately |
 
 ---
 
