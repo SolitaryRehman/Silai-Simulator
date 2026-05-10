@@ -1,4 +1,3 @@
-# shop.gd
 extends Node3D
 
 @onready var enter_image: TextureRect    = $PauseCanvas/EnterImage
@@ -9,36 +8,47 @@ extends Node3D
 @onready var coins_label: Label          = $PauseCanvas/HudTexture/CoinLabel
 @onready var sewing_machine: StaticBody3D = $sewing_machine
 
+# the two customer types — assigned in the Inspector
 @export var customer_scene_berserker: PackedScene
 @export var customer_scene_girl:      PackedScene
 
 
+# tracks whether the shop sign is flipped to "open" by the player
 var _shop_open:       bool  = false
+# prevents a second customer from spawning before the first one leaves
 var _customer_active: bool  = false
+# alternates between the two customer types each visit
 var _spawn_girl_next: bool  = false
 
-
+# fires after a random delay to bring in the next customer
 var _spawn_timer: Timer
 
 # ── Delivery UI ───────────────────────────────────────────────────────────────
+# the bottom-center button that opens the delivery dispatch panel
 var _delivery_button:       Button         = null
+# small red number badge that shows total pending deliveries at a glance
 var _pending_badge:         Label          = null
 
+# the overlay layer that contains the whole dispatch panel
 var _delivery_layer:        CanvasLayer    = null
 var _delivery_panel:        Panel          = null
+# rows get rebuilt here every time the panel opens or refreshes
 var _delivery_table_vbox:   VBoxContainer  = null
+# shows success or error messages at the bottom of the panel after dispatching
 var _dispatch_feedback_lbl: Label          = null
 
-# Fixed widths — must match between header and rows
+# shared column width so the header and data rows line up perfectly
 const COL_ACTION_W: float = 140.0
 
 
 func _ready() -> void:
+	# toggle button starts in the OFF state — player has to manually open the shop
 	open_button.toggle_mode    = true
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
 	open_button.toggled.connect(_on_btn_toggled)
 
+	# one-shot timer so customers only arrive one at a time
 	_spawn_timer          = Timer.new()
 	_spawn_timer.one_shot = true
 	_spawn_timer.timeout.connect(_spawn_customer)
@@ -49,7 +59,7 @@ func _ready() -> void:
 
 	sewing_machine.sewing_complete.connect(_on_sewing_complete)
 
-	# ── Fade in from black ────────────────────────────────────────────────────
+	# same black-to-transparent fade-in used on the main menu
 	var black_rect = ColorRect.new()
 	black_rect.color = Color(0, 0, 0, 1)
 	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -64,29 +74,24 @@ func _ready() -> void:
 	_build_delivery_panel()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  HUD
-# ─────────────────────────────────────────────────────────────────────────────
-
 func _refresh_hud() -> void:
 	level_label.text = str(GameManager.player_level)
 	xp_label.text    = str(GameManager.player_xp) + " XP"
 	coins_label.text = str(GameManager.player_coins)
 
+	# update the badge count every time stats change
 	if _pending_badge != null:
 		var areas: Array = Database.get_top_delivery_areas(10)
 		var total_undelivered: int = 0
 		for a in areas:
 			total_undelivered += int(a.get("Pending_deliveries", 0))
+		# hide the badge entirely when there's nothing pending
 		_pending_badge.text    = str(total_undelivered) if total_undelivered > 0 else ""
 		_pending_badge.visible = total_undelivered > 0
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Delivery button
-# ─────────────────────────────────────────────────────────────────────────────
-
 func _build_delivery_button() -> void:
+	# anchor the button container to the bottom-center of the screen
 	var btn_container := Control.new()
 	btn_container.anchor_left   = 0.5
 	btn_container.anchor_right  = 0.5
@@ -106,6 +111,7 @@ func _build_delivery_button() -> void:
 	_delivery_button.pressed.connect(_open_delivery_panel)
 	btn_container.add_child(_delivery_button)
 
+	# the little red counter sits in the top-right corner of the button
 	_pending_badge = Label.new()
 	_pending_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_pending_badge.position = Vector2(-20, -6)
@@ -115,22 +121,19 @@ func _build_delivery_button() -> void:
 	btn_container.add_child(_pending_badge)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Delivery dispatch panel
-# ─────────────────────────────────────────────────────────────────────────────
-
 func _build_delivery_panel() -> void:
+	# layer 9 puts the panel above most other UI so it always reads on top
 	_delivery_layer = CanvasLayer.new()
 	_delivery_layer.layer = 9
 	add_child(_delivery_layer)
 
-	# Dark overlay
+	# dim the background so the panel feels like a proper modal
 	var overlay := ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.60)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_delivery_layer.add_child(overlay)
 
-	# ── Main panel — larger than before ───────────────────────────────────────
+	# center the panel on screen
 	_delivery_panel = Panel.new()
 	_delivery_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_delivery_panel.custom_minimum_size = Vector2(860, 560)
@@ -146,7 +149,7 @@ func _build_delivery_panel() -> void:
 	root_vbox.offset_bottom = -16
 	_delivery_panel.add_child(root_vbox)
 
-	# ── Title row ─────────────────────────────────────────────────────────────
+	# title row holds the heading plus refresh and close buttons on the right
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 10)
 	root_vbox.add_child(title_row)
@@ -178,7 +181,7 @@ func _build_delivery_panel() -> void:
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Subtitle ──────────────────────────────────────────────────────────────
+	# short description so the player knows exactly what this panel is showing
 	var sub_lbl := Label.new()
 	sub_lbl.text = "Top cities with completed orders awaiting delivery  (Order_status = 'Completed', Payment_status = 'Unpaid')"
 	sub_lbl.add_theme_font_size_override("font_size", 13)
@@ -186,7 +189,7 @@ func _build_delivery_panel() -> void:
 	sub_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
 	root_vbox.add_child(sub_lbl)
 
-	# ── Column headers ────────────────────────────────────────────────────────
+	# column headers — must visually align with the data rows below
 	var header_hbox := HBoxContainer.new()
 	header_hbox.add_theme_constant_override("separation", 4)
 	root_vbox.add_child(header_hbox)
@@ -199,6 +202,7 @@ func _build_delivery_panel() -> void:
 		h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_hbox.add_child(h)
 
+	# action column is pinned to a fixed width so the Dispatch button never shifts
 	var action_h := Label.new()
 	action_h.text = "Action"
 	action_h.add_theme_font_size_override("font_size", 15)
@@ -209,11 +213,12 @@ func _build_delivery_panel() -> void:
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Scrollable table ──────────────────────────────────────────────────────
+	# scroll container lets the list grow without blowing past the panel edges
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root_vbox.add_child(scroll)
 
+	# rows are cleared and rebuilt here every time the table refreshes
 	_delivery_table_vbox = VBoxContainer.new()
 	_delivery_table_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_delivery_table_vbox.add_theme_constant_override("separation", 8)
@@ -221,7 +226,7 @@ func _build_delivery_panel() -> void:
 
 	root_vbox.add_child(HSeparator.new())
 
-	# ── Feedback label ────────────────────────────────────────────────────────
+	# lives at the bottom — shows dispatch results or errors after the player clicks
 	_dispatch_feedback_lbl = Label.new()
 	_dispatch_feedback_lbl.text               = ""
 	_dispatch_feedback_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -229,10 +234,12 @@ func _build_delivery_panel() -> void:
 	_dispatch_feedback_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	root_vbox.add_child(_dispatch_feedback_lbl)
 
+	# start hidden — only shown when the player opens it
 	_delivery_layer.visible = false
 
 
 func _open_delivery_panel() -> void:
+	# clear last session's feedback message before showing fresh data
 	_dispatch_feedback_lbl.text = ""
 	_refresh_delivery_table()
 	_delivery_layer.visible = true
@@ -243,6 +250,7 @@ func _close_delivery_panel() -> void:
 
 
 func _refresh_delivery_table() -> void:
+	# wipe existing rows before rebuilding so stale data doesn't linger
 	for child in _delivery_table_vbox.get_children():
 		child.queue_free()
 
@@ -262,7 +270,7 @@ func _refresh_delivery_table() -> void:
 
 
 func _build_area_row(area: Dictionary) -> PanelContainer:
-	# Card background — same style used in cutting_table rows
+	# each city gets its own dark card so rows are visually separated
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -285,6 +293,7 @@ func _build_area_row(area: Dictionary) -> PanelContainer:
 	city_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95))
 	hbox.add_child(city_lbl)
 
+	# order count in gold to make it pop against the dark card
 	var count_lbl := Label.new()
 	count_lbl.text                  = str(area.get("Pending_deliveries", 0)) + " order(s)"
 	count_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -292,6 +301,7 @@ func _build_area_row(area: Dictionary) -> PanelContainer:
 	count_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25))
 	hbox.add_child(count_lbl)
 
+	# revenue in green so it reads as money at a glance
 	var rev_lbl := Label.new()
 	var rev: float = float(area.get("Area_revenue", 0.0))
 	rev_lbl.text                  = str(int(rev)) + " coins"
@@ -300,6 +310,7 @@ func _build_area_row(area: Dictionary) -> PanelContainer:
 	rev_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	hbox.add_child(rev_lbl)
 
+	# capture city in a local variable so the lambda closure doesn't go stale
 	var dispatch_btn := Button.new()
 	dispatch_btn.text               = "Dispatch  →"
 	dispatch_btn.custom_minimum_size = Vector2(COL_ACTION_W, 44)
@@ -313,7 +324,6 @@ func _build_area_row(area: Dictionary) -> PanelContainer:
 	return card
 
 
-# ── Dispatch all completed orders for a city ──────────────────────────────────
 func _dispatch_area(city: String) -> void:
 	if city.is_empty():
 		return
@@ -322,11 +332,13 @@ func _dispatch_area(city: String) -> void:
 	var count:   int        = result.get("count",   0)
 	var revenue: float      = result.get("revenue", 0.0)
 
+	# database found nothing eligible — tell the player instead of silently doing nothing
 	if count == 0:
 		_dispatch_feedback_lbl.text = "No eligible orders found for %s." % city
 		_dispatch_feedback_lbl.add_theme_color_override("font_color", Color(1.0, 0.5, 0.3))
 		return
 
+	# 75 XP per dispatched order — scales naturally with how busy the shop is
 	var xp_reward: int = count * 75
 	Database.add_player_rewards(xp_reward, int(revenue))
 
@@ -336,6 +348,7 @@ func _dispatch_area(city: String) -> void:
 	)
 	_dispatch_feedback_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 
+	# rebuild the table immediately so the dispatched city disappears or updates
 	_refresh_delivery_table()
 	GameManager._sync_stats()
 
@@ -343,14 +356,11 @@ func _dispatch_area(city: String) -> void:
 		  % [count, city, xp_reward, revenue])
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Shop toggle + customer spawning
-# ─────────────────────────────────────────────────────────────────────────────
-
 func _on_btn_toggled(pressed: bool) -> void:
 	_shop_open = pressed
 	if pressed:
 		open_button.text = "ON"
+		# random delay between 3–10 seconds keeps customer arrivals feeling natural
 		_spawn_timer.start(randf_range(3.0, 10.0))
 	else:
 		open_button.text = "OFF"
@@ -358,11 +368,13 @@ func _on_btn_toggled(pressed: bool) -> void:
 
 
 func _spawn_customer() -> void:
+	# flip the sign back to OFF — shop closes between each customer visit
 	open_button.button_pressed = false
 	open_button.text           = "OFF"
 
 	var customer
 
+	# alternate between the two customer types every visit
 	if _spawn_girl_next:
 		if customer_scene_girl == null:
 			printerr("Error: customer_scene_girl is not assigned in the Inspector!")
@@ -379,7 +391,9 @@ func _spawn_customer() -> void:
 	_spawn_girl_next = not _spawn_girl_next
 
 	add_child(customer)
+	# spawn point is just off to the side — the customer walks in from here
 	customer.global_position = Vector3(9.56, 0.0, -1.0)
+	# one-shot so we don't stack up callbacks if something goes wrong
 	customer.customer_left.connect(_on_customer_left, CONNECT_ONE_SHOT)
 
 	_customer_active = true
@@ -395,13 +409,14 @@ func _close_shop() -> void:
 	open_button.text           = "OFF"
 
 
-# UI visibility during cutting / sewing
 func on_cutting_started() -> void:
+	# hide the shop UI while the player is busy at the cutting table
 	enter_image.visible = false
 	hud_texture.visible = false
 
 
 func _on_sewing_complete() -> void:
+	# short pause so the garment pop-in animation finishes before the UI comes back
 	await get_tree().create_timer(0.6).timeout
 	enter_image.visible = true
 	hud_texture.visible = true
