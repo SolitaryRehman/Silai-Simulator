@@ -5,44 +5,40 @@ signal order_received(order_data)
 signal garment_sewn(garment_type)
 signal stats_changed
 
+# what the player is doing right now
 enum GameState {
 	FREE_ROAM,
-	CUTTING,   # kept for minigame flow — NOT written to DB anymore (CHANGE 1)
-	SEWING,    # kept for minigame flow — NOT written to DB anymore (CHANGE 1)
+	CUTTING,    # in the cutting minigame — not written to DB anymore
+	SEWING,     # in the sewing minigame — not written to DB anymore
 	DELIVERING
 }
 
 var current_state: GameState = GameState.FREE_ROAM
 
-# ── Multi-order queue ─────────────────────────────────────────────────────────
-# pending_orders: all accepted orders waiting to be worked on.
-#   Key   = db_order_id (int)
-#   Value = order_entry dict (type, status, full)
+# all accepted orders waiting to be worked on — keyed by db_order_id
 var pending_orders: Dictionary = {}
 
-# current_order: order actively being cut/sewn right now.
+# the one order actively being cut/sewn right now
 var current_order: Dictionary = {}
 
-# CHANGE 2: Dress-by-dress tracking within the active order.
-# order_dresses is loaded from DB via Database.get_dresses_for_order().
+# dress-by-dress tracking within the active order
 var order_dresses:       Array = []
 var current_dress_index: int   = 0
 
 var cut_pieces:   Array = []
 var is_piece_cut: bool  = false
 
-# ── HUD mirrors ───────────────────────────────────────────────────────────────
+# mirrors of the player's DB stats — used by the HUD
 var player_level: int = 1
 var player_xp:    int = 0
 var player_coins: int = 0
 
 
 func _ready() -> void:
-	# Load player stats from DB (Database AutoLoad runs before GameManager)
+	# pull the player's level/xp/coins from the DB straight away
 	_sync_stats()
 
-	# CHANGE 5: Load any 'Pending' orders that exist in the DB from a previous
-	# session so the player can continue working on them without re-accepting.
+	# restore any orders that were pending when the game was last closed
 	_load_pending_orders_from_db()
 
 	print("GameManager: Ready — Level %d | XP %d | Coins %d | Pending orders: %d"
@@ -50,14 +46,15 @@ func _ready() -> void:
 
 
 # ── Called by customer scripts on Accept ──────────────────────────────────────
+
 func receive_order(order: Dictionary) -> void:
 	var db_order_id: int = order.get("db_order_id", -1)
 
+	# store just enough info for the queue; the full order dict stays in "full"
 	var order_entry: Dictionary = {
-		# type = first dress type for quick reference; full list is in order_dresses from DB
 		"type":   order["dresses"][0]["dress"].to_lower().replace(" ", "_"),
 		"status": "pending_cut",
-		"full":   order   # carries db_order_id, dresses, xp/coin rewards
+		"full":   order
 	}
 
 	if db_order_id > 0:
@@ -68,8 +65,9 @@ func receive_order(order: Dictionary) -> void:
 		  % [db_order_id, pending_orders.size()])
 
 
-# ── CHANGE 2: Activate a specific pending order for cutting ───────────────────
-# Loads the dress list from DB so the cutting table can loop dress-by-dress.
+# ── Activate a specific pending order for cutting ─────────────────────────────
+
+# loads the dress list from DB so the cutting table can loop through them one by one
 func set_active_order(db_order_id: int) -> bool:
 	if not pending_orders.has(db_order_id):
 		push_warning("GameManager: set_active_order — ID %d not in queue." % db_order_id)
@@ -79,8 +77,7 @@ func set_active_order(db_order_id: int) -> bool:
 	cut_pieces.clear()
 	is_piece_cut = false
 
-	# Load dresses from DB — works for both current-session and restored orders
-	# Database.get_dresses_for_order() returns: DressID, Dress_type, Colors, Fabrics, Part_count
+	# fetch the full dress breakdown from DB — works for both new and restored orders
 	order_dresses       = Database.get_dresses_for_order(db_order_id)
 	current_dress_index = 0
 
@@ -89,7 +86,7 @@ func set_active_order(db_order_id: int) -> bool:
 	return true
 
 
-## Picks the lowest-ID pending order automatically (single-order convenience).
+# convenience helper — just grabs the lowest-ID order when only one at a time is needed
 func set_first_pending_order() -> bool:
 	if pending_orders.is_empty():
 		return false
@@ -98,25 +95,29 @@ func set_first_pending_order() -> bool:
 	return set_active_order(keys[0])
 
 
-# ── CHANGE 1: complete_cutting no longer writes 'Cutting' to DB ───────────────
+# ── Cutting complete ──────────────────────────────────────────────────────────
+
+# just flips local state — we no longer write 'Cutting' to the DB
 func complete_cutting() -> void:
 	is_piece_cut            = true
 	current_order["status"] = "pending_sew"
-	# Order stays 'Pending' in DB — no intermediate status written
-	emit_signal("garment_sewn", current_order.get("type", "t-shirt"))  # kept for compat
+	emit_signal("garment_sewn", current_order.get("type", "t-shirt"))   # kept for compatibility
 
 
-# ── CHANGE 1+2: complete_sewing called only after ALL dresses are done ────────
-# Finalizes the order in DB (Pending → Completed), rewards player, clears state.
+# ── Sewing complete ───────────────────────────────────────────────────────────
+
+# called only once ALL dresses in the order are done — then we finalize in DB
 func complete_sewing() -> void:
 	current_order["status"] = "complete"
 
 	var full:     Dictionary = current_order.get("full", {})
 	var order_id: int        = full.get("db_order_id", -1)
 
+	# remove from the local queue
 	if order_id > 0 and pending_orders.has(order_id):
 		pending_orders.erase(order_id)
 
+	# mark as Completed in the DB — payment happens later at dispatch
 	if order_id > 0:
 		Database.finalize_order(order_id)
 
@@ -126,6 +127,7 @@ func complete_sewing() -> void:
 	print("  Order ID: %d  |  Orders still pending: %d" % [order_id, pending_orders.size()])
 	print("═══════════════════════════════════════════════════════")
 
+	# wipe active order state so the table is ready for the next one
 	current_order       = {}
 	order_dresses       = []
 	current_dress_index = 0
@@ -134,31 +136,26 @@ func complete_sewing() -> void:
 	emit_signal("garment_sewn", "complete")
 
 
-# ── CHANGE 5: Session persistence — restore pending DB orders on startup ──────
-# Reads all 'Pending' orders from DB and rebuilds the pending_orders dict
-# so the player can continue working on them even after closing the game.
+# ── Session persistence ───────────────────────────────────────────────────────
+
+# runs at startup — reads all 'Pending' orders from DB and rebuilds the queue
+# so the player can continue from where they left off after closing the game
 func _load_pending_orders_from_db() -> void:
-	# Database.get_pending_orders() → SELECT where Order_status = 'Pending'
 	var db_rows: Array = Database.get_pending_orders()
 	var loaded: int    = 0
 
 	for row in db_rows:
 		var order_id: int = int(row["OrderID"])
+		# skip anything already in the queue from this session
 		if pending_orders.has(order_id):
-			continue   # Already in queue from this session — skip
+			continue
 
-		# Fetch the dress list for this order from DB
-		# Database.get_dresses_for_order() → SELECT Dress JOIN Dress_Parts JOIN Fabric
+		# grab the dress breakdown and estimate rewards since they're not stored in DB
 		var dresses_raw: Array = Database.get_dresses_for_order(order_id)
+		var xp_estimate: int   = 50 * max(dresses_raw.size(), 1)
+		var price: float       = Database.calculate_order_price(order_id)
 
-		# Estimate XP from dress count (original xp_reward not stored in DB)
-		var xp_estimate: int = 50 * max(dresses_raw.size(), 1)
-
-		# CHANGE 4: coin_reward = derived price from Dress_Parts × Fabric costs
-		# Database.calculate_order_price() runs the correlated-subquery derivation
-		var price: float = Database.calculate_order_price(order_id)
-
-		# Build a dresses array compatible with order_entry["full"]["dresses"]
+		# build a dresses array in the same format the rest of the code expects
 		var dresses_compat: Array = []
 		for d in dresses_raw:
 			dresses_compat.append({"dress": d.get("Dress_type", "T-Shirt"), "parts": []})
@@ -183,12 +180,14 @@ func _load_pending_orders_from_db() -> void:
 
 	if loaded > 0:
 		print("GameManager: %d order(s) restored from previous session." % loaded)
-		emit_signal("stats_changed")   # Refresh HUD to show pending count
+		# tell the HUD there's new stuff to show
+		emit_signal("stats_changed")
 
 
 # ── Stats sync ────────────────────────────────────────────────────────────────
+
+# pull the latest level/xp/coins from DB and update the HUD
 func _sync_stats() -> void:
-	# Database.get_player_data() → SELECT Level, Coins, Current_xp FROM Player
 	var data: Dictionary = Database.get_player_data()
 	player_level = data.get("Level",      1)
 	player_xp    = data.get("Current_xp", 0)
