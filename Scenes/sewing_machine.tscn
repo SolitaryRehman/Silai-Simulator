@@ -58,22 +58,22 @@ offset_bottom = 23.0
 grow_horizontal = 0
 
 [node name="TextureRect" type="TextureRect" parent="sew_ui" unique_id=1846574814]
-offset_left = -29.0
-offset_top = 188.0
-offset_right = 367.0
-offset_bottom = 503.0
+offset_left = -27.0
+offset_top = 216.0
+offset_right = 285.0
+offset_bottom = 442.0
 texture = ExtResource("4_lqahp")
 expand_mode = 2
 stretch_mode = 5
 
 [node name="store_button" type="Button" parent="sew_ui/TextureRect" unique_id=1958938120]
 layout_mode = 0
-offset_left = 161.0
-offset_top = 132.0
-offset_right = 241.0
-offset_bottom = 184.0
+offset_left = 116.0
+offset_top = 85.0
+offset_right = 197.0
+offset_bottom = 139.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxEmpty_m4wqb")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_qweer")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_k1by0")
