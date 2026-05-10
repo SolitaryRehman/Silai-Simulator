@@ -66,11 +66,11 @@ Shop expands, orders get harder, cycle continues
 | System | Description |
 |---|---|
 | **Customer Generation** | 3D characters with full measurement profiles: collar size, chest, shoulder, sleeve length, trouser length, waist |
-| **Order Management** | Each order tracks dress type, assigned fabrics, order/receiving dates, payment status, and completion status |
-| **Dress & Parts System** | Each dress is composed of named parts (e.g. collar, body, sleeves); each part references a fabric. `Quantity_used` is a **derived attribute** |
-| **VIP & Rude Customers** | Customer specialization — VIP customers get automatic discounts; Rude customers impose time penalties |
-| **Inventory System** | Fabrics tracked with type, unit cost, and stock quantity; stock depletes as parts are cut |
-| **Reward & Progression** | Orders earn Coins and XP; leveling up unlocks new ShopItems and Machines |
+| **Order Management** | Each order tracks dress type, assigned fabrics, order/receiving dates, payment status, and completion status (`Pending` → `Completed` → `Delivered`) |
+| **Dress & Parts System** | Each dress is composed of named parts (e.g. collar, body, sleeves); each part has its own fabric and color. `Total_price` is a **derived attribute** computed from `Dress_Parts × Fabric` costs |
+| **VIP & Rude Customers** | Customer specialization — VIP customers get automatic discounts; Rude customers impose time penalties on the receiving date |
+| **Inventory System** | Fabrics tracked with type, unit cost, and stock quantity; stock depletes automatically via trigger each time a dress part is inserted |
+| **Reward & Progression** | Orders earn Coins and XP; a trigger auto-calculates the player's level from accumulated XP |
 | **Persistent Storage** | All game state survives session restarts via the SQLite `.db` file |
 
 ---
@@ -111,26 +111,26 @@ The **[godot-sqlite](https://github.com/2shady4u/godot-sqlite)** GDExtension plu
 **Setup:**
 1. Install via Godot Asset Library → search `godot-sqlite`
 2. Enable under `Project → Project Settings → Plugins`
-3. Store the database at `user://` — Godot's writable app-data directory
+3. Store the database at `res://silai_simulator` — the path used in `database.gd`
 
 **`database.gd` — Connection & Initialization:**
 
 ```gdscript
 extends Node
 
-const PATH = "user://silai.db"
-var db : SQLite = SQLite.new()
+const DB_PATH := "res://silai_simulator"
+var db: SQLite = null
 
 func _ready() -> void:
-    db.path = PATH
-    db.open_db()
+    _open_db()
     _create_tables()
+    _drop_triggers()
     _create_triggers()
+    _drop_views()
     _create_views()
-    _create_indexes()
+    _prefill_data()
+    print("═══ Database: Fully initialized. ═══")
 ```
-
-> **Why `user://`?** The `res://` directory is read-only in exported builds. `user://` maps to the OS app-data folder, giving the database full read/write access on every platform including Android.
 
 ### Executing Queries from GDScript
 
@@ -140,13 +140,30 @@ All SQL lives in `database.gd`, registered as an **Autoload Singleton** (`Databa
 # All queries follow this pattern in database.gd
 func get_pending_orders() -> Array:
     db.query("""
-        SELECT o.OrderID, c.Name, o.Receiving_date, o.Total_price
-        FROM "Order" o
-        JOIN Customer c ON o.CustomerID = c.CustomerID
+        SELECT
+            o.OrderID,
+            c.Name                             AS Customer_Name,
+            c.City,
+            GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
+            COUNT(d.DressID)                   AS Dress_count,
+            o.Order_date,
+            o.Receiving_date,
+            o.Order_status,
+            CASE
+                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+                ELSE                               'Normal'
+            END                                AS Customer_Type
+        FROM "Order"    o
+        JOIN  Customer  c  ON c.CustomerID = o.CustomerID
+        LEFT JOIN Dress d  ON d.OrderID    = o.OrderID
+        LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
+        LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
         WHERE o.Order_status = 'Pending'
-        ORDER BY o.Receiving_date ASC;
+        GROUP BY o.OrderID
+        ORDER BY o.OrderID ASC;
     """)
-    return db.query_result   # Array[Dictionary] — column name → value
+    return db.query_result.duplicate()   # Array[Dictionary] — column name → value
 ```
 
 ---
@@ -165,11 +182,10 @@ The full schema is initialized on first launch via `_create_tables()` in `databa
 
 ```gdscript
 func _create_tables() -> void:
-
     db.query("""
         CREATE TABLE IF NOT EXISTS Customer (
             CustomerID      INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name            TEXT    NOT NULL,
+            Name            TEXT    NOT NULL UNIQUE,
             House           TEXT,
             Street          TEXT,
             Sector          TEXT,
@@ -182,172 +198,188 @@ func _create_tables() -> void:
             Waist           REAL
         );
     """)
-
     db.query("""
         CREATE TABLE IF NOT EXISTS Customer_Phone (
             CustomerID  INTEGER NOT NULL,
             PhoneNo     TEXT    NOT NULL,
             PRIMARY KEY (CustomerID, PhoneNo),
-            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+            ON DELETE CASCADE ON UPDATE CASCADE
         );
     """)
-
     db.query("""
         CREATE TABLE IF NOT EXISTS VIP (
             CustomerID    INTEGER PRIMARY KEY,
-            Discount_rate REAL    NOT NULL,
-            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+            Discount_rate REAL    NOT NULL
+                          CHECK(Discount_rate >= 0 AND Discount_rate <= 100),
+            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+            ON DELETE CASCADE ON UPDATE CASCADE
         );
     """)
-
     db.query("""
         CREATE TABLE IF NOT EXISTS Rude (
             CustomerID  INTEGER PRIMARY KEY,
-            Time_delay  INTEGER NOT NULL,
-            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE
+            Time_delay  INTEGER NOT NULL CHECK(Time_delay >= 0),
+            FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+            ON DELETE CASCADE ON UPDATE CASCADE
         );
     """)
-
+    db.query("""
+        CREATE TABLE IF NOT EXISTS Fabric (
+            FabricID        INTEGER PRIMARY KEY AUTOINCREMENT,
+            Fabric_type     TEXT    NOT NULL UNIQUE,
+            Unit_cost       REAL    NOT NULL CHECK(Unit_cost > 0),
+            Stock_quantity  INTEGER NOT NULL DEFAULT 100 CHECK(Stock_quantity >= 0)
+        );
+    """)
+    db.query("""
+        CREATE TABLE IF NOT EXISTS ShopItems (
+            ItemID        INTEGER PRIMARY KEY AUTOINCREMENT,
+            Item_name     TEXT    NOT NULL UNIQUE,
+            Price         REAL    NOT NULL CHECK(Price >= 0),
+            Unlock_Status TEXT    NOT NULL DEFAULT 'Locked'
+                          CHECK(Unlock_Status IN ('Locked','Unlocked')),
+            Use_Status    TEXT    NOT NULL DEFAULT 'Not In Use'
+                          CHECK(Use_Status IN ('In Use','Not In Use'))
+        );
+    """)
+    db.query("""
+        CREATE TABLE IF NOT EXISTS Machine (
+            ItemID  INTEGER PRIMARY KEY,
+            Type    TEXT    NOT NULL,
+            Speed   REAL    NOT NULL DEFAULT 1.0 CHECK(Speed > 0),
+            FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID)
+            ON DELETE CASCADE ON UPDATE CASCADE
+        );
+    """)
+    db.query("""
+        CREATE TABLE IF NOT EXISTS Player (
+            PlayerID    INTEGER PRIMARY KEY AUTOINCREMENT,
+            Username    TEXT    NOT NULL UNIQUE,
+            Level       INTEGER NOT NULL DEFAULT 1 CHECK(Level >= 1),
+            Coins       INTEGER NOT NULL DEFAULT 500 CHECK(Coins >= 0),
+            Current_xp  INTEGER NOT NULL DEFAULT 0 CHECK(Current_xp >= 0)
+        );
+    """)
     db.query("""
         CREATE TABLE IF NOT EXISTS "Order" (
             OrderID         INTEGER PRIMARY KEY AUTOINCREMENT,
             CustomerID      INTEGER NOT NULL,
-            Order_date      TEXT    NOT NULL DEFAULT (DATE('now')),
+            Order_date      TEXT    NOT NULL,
             Receiving_date  TEXT    NOT NULL,
             Payment_status  TEXT    NOT NULL DEFAULT 'Unpaid'
-                            CHECK(Payment_status IN ('Paid','Unpaid')),
+                            CHECK(Payment_status IN ('Unpaid','Paid')),
             Order_status    TEXT    NOT NULL DEFAULT 'Pending'
-                            CHECK(Order_status IN ('Pending','In Progress','Completed','Failed')),
-            Total_price     REAL    NOT NULL DEFAULT 0,
+                            CHECK(Order_status IN ('Pending','Completed','Delivered')),
             FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
         );
     """)
-
     db.query("""
         CREATE TABLE IF NOT EXISTS Dress (
             DressID     INTEGER PRIMARY KEY AUTOINCREMENT,
             OrderID     INTEGER NOT NULL,
             Dress_type  TEXT    NOT NULL,
-            FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID) ON DELETE CASCADE
+            FOREIGN KEY (OrderID) REFERENCES "Order"(OrderID)
+            ON DELETE CASCADE ON UPDATE CASCADE
         );
     """)
-
     db.query("""
         CREATE TABLE IF NOT EXISTS Dress_Color (
-            DressID INTEGER NOT NULL,
-            Color   TEXT    NOT NULL,
+            DressID  INTEGER NOT NULL,
+            Color    TEXT    NOT NULL,
             PRIMARY KEY (DressID, Color),
-            FOREIGN KEY (DressID) REFERENCES Dress(DressID) ON DELETE CASCADE
+            FOREIGN KEY (DressID) REFERENCES Dress(DressID)
+            ON DELETE CASCADE ON UPDATE CASCADE
         );
     """)
-
-    db.query("""
-        CREATE TABLE IF NOT EXISTS Fabric (
-            FabricID       INTEGER PRIMARY KEY AUTOINCREMENT,
-            Fabric_type    TEXT    NOT NULL,
-            Unit_cost      REAL    NOT NULL,
-            Stock_quantity INTEGER NOT NULL DEFAULT 0
-        );
-    """)
-
-    # Dress_Parts: weak entity + resolved M:N bridge (Dress ↔ Fabric)
-    # NOTE: Quantity_used is a DERIVED attribute — it is NOT stored here.
-    #       It is computed at query time via COUNT(Part_name) GROUP BY FabricID.
     db.query("""
         CREATE TABLE IF NOT EXISTS Dress_Parts (
-            DressID   INTEGER NOT NULL,
-            Part_name TEXT    NOT NULL,
-            FabricID  INTEGER NOT NULL,
-            PRIMARY KEY (DressID, Part_name),
-            FOREIGN KEY (DressID)  REFERENCES Dress(DressID)   ON DELETE CASCADE,
+            DressID        INTEGER NOT NULL,
+            Part_name      TEXT    NOT NULL,
+            FabricID       INTEGER NOT NULL,
+            Quantity_used  REAL    NOT NULL CHECK(Quantity_used > 0),
+            PRIMARY KEY (DressID, Part_name, FabricID),
+            FOREIGN KEY (DressID)  REFERENCES Dress(DressID)
+            ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (FabricID) REFERENCES Fabric(FabricID)
+            ON DELETE RESTRICT ON UPDATE CASCADE
         );
     """)
-
-    db.query("""
-        CREATE TABLE IF NOT EXISTS ShopItems (
-            ItemID        INTEGER PRIMARY KEY AUTOINCREMENT,
-            Item_name     TEXT    NOT NULL,
-            Price         REAL    NOT NULL,
-            Unlock_Status TEXT    NOT NULL DEFAULT 'Locked'
-                          CHECK(Unlock_Status IN ('Locked','Unlocked')),
-            Use_Status    TEXT    NOT NULL DEFAULT 'Inactive'
-                          CHECK(Use_Status IN ('Active','Inactive'))
-        );
-    """)
-
-    db.query("""
-        CREATE TABLE IF NOT EXISTS Machine (
-            ItemID  INTEGER PRIMARY KEY,
-            Type    TEXT    NOT NULL,
-            Speed   REAL    NOT NULL,
-            FOREIGN KEY (ItemID) REFERENCES ShopItems(ItemID) ON DELETE CASCADE
-        );
-    """)
-
-    db.query("""
-        CREATE TABLE IF NOT EXISTS Player (
-            PlayerID    INTEGER PRIMARY KEY AUTOINCREMENT,
-            Username    TEXT    NOT NULL UNIQUE,
-            Level       INTEGER NOT NULL DEFAULT 1,
-            Coins       REAL    NOT NULL DEFAULT 0,
-            Current_xp  INTEGER NOT NULL DEFAULT 0
-        );
-    """)
+    print("Database: All tables created / verified.")
 ```
 
 **Gameplay Relevance:** Adding a new fabric, dress type, or machine never requires a code change — only a new row in the appropriate table.
 
 ---
 
-### 2. Derived Attribute — `Quantity_used`
+### 2. Derived Attribute — `Total_Price`
 
 **Theory:** A derived attribute's value is **not stored** in the database — it is **computed on demand** from other stored data. Physically storing a derived value creates update anomalies: if the base data changes, the stored copy becomes stale and incorrect.
 
 **In This Project:**
 
-`Quantity_used` represents how many parts of a dress use a given fabric. Rather than storing this number, it is calculated at query time by counting the `Part_name` rows in `Dress_Parts` that share the same `FabricID` for a given dress.
+`Total_Price` represents the total cost of an order. Rather than storing this number, it is calculated at query time by summing `Unit_cost × Quantity_used` across every part in every dress belonging to the order, then applying the customer's VIP discount if applicable.
 
 ```sql
--- Quantity_used is derived: count of parts per fabric per dress
-SELECT
-    dp.FabricID,
-    f.Fabric_type,
-    COUNT(dp.Part_name)                AS Quantity_used,
-    COUNT(dp.Part_name) * f.Unit_cost  AS Fabric_cost
-FROM Dress_Parts dp
-JOIN Fabric f ON dp.FabricID = f.FabricID
-WHERE dp.DressID = 18
-GROUP BY dp.DressID, dp.FabricID;
+-- Total_price is derived: sum of (unit_cost × quantity_used) per part, with VIP discount
+SELECT ROUND(
+    COALESCE(SUM(f.Unit_cost * dp.Quantity_used), 0.0)
+    * (1.0 - COALESCE(
+        (SELECT v.Discount_rate / 100.0
+         FROM   VIP      v
+         JOIN   "Order"  o_v ON o_v.CustomerID = v.CustomerID
+         WHERE  o_v.OrderID = 18),
+        0.0
+    )),
+    2
+) AS Total_price
+FROM  Dress       d
+JOIN  Dress_Parts dp ON dp.DressID  = d.DressID
+JOIN  Fabric       f ON  f.FabricID = dp.FabricID
+WHERE d.OrderID = 18;
 ```
 
 In `database.gd`:
 
 ```gdscript
-func get_fabric_usage_for_dress(dress_id: int) -> Array:
-    db.query("""
-        SELECT
-            dp.FabricID,
-            f.Fabric_type,
-            f.Unit_cost,
-            COUNT(dp.Part_name)               AS Quantity_used,
-            COUNT(dp.Part_name) * f.Unit_cost AS Fabric_cost
-        FROM Dress_Parts dp
-        JOIN Fabric f ON dp.FabricID = f.FabricID
-        WHERE dp.DressID = %d
-        GROUP BY dp.FabricID;
-    """ % dress_id)
-    return db.query_result
+func calculate_order_price(order_id: int) -> float:
+    db.query_with_bindings("""
+        SELECT ROUND(
+            COALESCE(SUM(f.Unit_cost * dp.Quantity_used), 0.0)
+            * (1.0 - COALESCE(
+                (SELECT v.Discount_rate / 100.0
+                 FROM   VIP      v
+                 JOIN   "Order"  o_v ON o_v.CustomerID = v.CustomerID
+                 WHERE  o_v.OrderID = ?),
+                0.0
+            )),
+            2
+        ) AS price
+        FROM  Dress       d
+        JOIN  Dress_Parts dp ON dp.DressID  = d.DressID
+        JOIN  Fabric       f ON  f.FabricID = dp.FabricID
+        WHERE d.OrderID = ?;
+    """, [order_id, order_id])
+    if db.query_result.is_empty() or db.query_result[0]["price"] == null:
+        return 0.0
+    return float(db.query_result[0]["price"])
 ```
 
-**Example result for DressID = 18 (Shalwar Kameez using Cotton for body+collar, Silk for sleeves):**
+**Example result for OrderID = 18 (two dresses, customer is VIP with 15% discount):**
 
-| FabricID | Fabric_type | Unit_cost | Quantity_used | Fabric_cost |
-|---|---|---|---|---|
-| 3 | Cotton | 120.00 | 2 | 240.00 |
-| 5 | Silk | 200.00 | 1 | 200.00 |
+| Component | Detail | Cost |
+|---|---|---|
+| Dress 1 — Front Panel | Cotton × 0.20 m | 10.00 |
+| Dress 1 — Back Panel | Cotton × 0.20 m | 10.00 |
+| Dress 1 — Sleeve | Silk × 0.15 m | 22.50 |
+| Dress 1 — Collar | Lawn × 0.45 m | 27.00 |
+| Dress 2 — Bodice | Linen × 0.15 m | 12.00 |
+| Dress 2 — Skirt | Chiffon × 1.60 m | 192.00 |
+| **Subtotal** | | **273.50** |
+| **VIP Discount (15%)** | | **−41.03** |
+| **Total_price** | | **232.47** |
 
-**Why not store it?** If a part is added or removed from `Dress_Parts`, any stored `Quantity_used` would require a manual update — risking inconsistency. Deriving it at query time guarantees it is always accurate.
+**Why not store it?** If a part's `Quantity_used` changes, or fabric `Unit_cost` is updated, or the customer's VIP discount rate is modified, any stored `Total_price` would require a manual update — risking inconsistency. Deriving it at query time guarantees it is always accurate.
 
 ---
 
@@ -359,66 +391,111 @@ func get_fabric_usage_for_dress(dress_id: int) -> Array:
 
 ```gdscript
 # ── INSERT: New customer walks into the 3D shop ──────────────────────────────
-func add_customer(name: String, city: String, chest: float, waist: float,
-                  collar: float, shoulder: float, sleeve: float, trouser: float) -> int:
-    db.query("""
-        INSERT INTO Customer (Name, City, Chest, Waist, Collar_size, Shoulder, Sleeve_length, Trouser_length)
-        VALUES ('%s', '%s', %f, %f, %f, %f, %f, %f);
-    """ % [name, city, chest, waist, collar, shoulder, sleeve, trouser])
-    return db.last_insert_rowid
+func _insert_full_customer(data: Dictionary) -> void:
+    db.query_with_bindings("""
+        INSERT INTO Customer
+            (Name, House, Street, Sector, City,
+             Collar_size, Chest, Shoulder, Sleeve_length, Trouser_length, Waist)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """, [
+        data["Name"], data["House"], data["Street"], data["Sector"], data["City"],
+        data["Collar_size"], data["Chest"], data["Shoulder"],
+        data["Sleeve_length"], data["Trouser_length"], data["Waist"]
+    ])
+    db.query("SELECT last_insert_rowid() AS id;")
+    active_customer_id = int(db.query_result[0]["id"])
+
+    # Insert VIP or Rude specialization rows based on name lists
+    var name: String = data["Name"]
+    if name in VIP_NAMES:
+        var discount: float = float(randi_range(VIP_DISCOUNT_RANGE[0], VIP_DISCOUNT_RANGE[1]))
+        db.query_with_bindings(
+            "INSERT OR IGNORE INTO VIP (CustomerID, Discount_rate) VALUES (?, ?);",
+            [active_customer_id, discount]
+        )
+    elif name in RUDE_NAMES:
+        var delay: int = randi_range(RUDE_DELAY_RANGE[0], RUDE_DELAY_RANGE[1])
+        db.query_with_bindings(
+            "INSERT OR IGNORE INTO Rude (CustomerID, Time_delay) VALUES (?, ?);",
+            [active_customer_id, delay]
+        )
 
 # ── INSERT: Order placed at the counter ──────────────────────────────────────
-func create_order(customer_id: int, receiving_date: String, total_price: float) -> int:
-    db.query("""
-        INSERT INTO "Order" (CustomerID, Receiving_date, Total_price)
-        VALUES (%d, '%s', %f);
-    """ % [customer_id, receiving_date, total_price])
-    return db.last_insert_rowid
+func create_order_record(customer_id: int) -> int:
+    var order_date:     String = Time.get_datetime_string_from_system()
+    var receiving_date: String = _compute_receiving_date(customer_id)
+    db.query_with_bindings("""
+        INSERT INTO "Order"
+            (CustomerID, Order_date, Receiving_date, Payment_status, Order_status)
+        VALUES (?, ?, ?, 'Unpaid', 'Pending');
+    """, [customer_id, order_date, receiving_date])
+    db.query("SELECT last_insert_rowid() AS id;")
+    active_order_id = int(db.query_result[0]["id"])
+    return active_order_id
 
-# ── INSERT: Dress part cut at the cutting table ───────────────────────────────
-func add_dress_part(dress_id: int, part_name: String, fabric_id: int) -> void:
-    db.query("""
-        INSERT INTO Dress_Parts (DressID, Part_name, FabricID)
-        VALUES (%d, '%s', %d);
-    """ % [dress_id, part_name, fabric_id])
+# ── INSERT: per-part Dress_Parts (trigger fires on each insert) ──────────────
+db.query_with_bindings("""
+    INSERT OR IGNORE INTO Dress_Parts (DressID, Part_name, FabricID, Quantity_used)
+    VALUES (?, ?, ?, ?);
+""", [active_dress_id, part.get("part_name", "Part"), fabric_id, float(part.get("quantity", 1.0))])
+# trg_deduct_fabric_stock fires automatically per INSERT above
 
 # ── SELECT: Load all pending orders for the order board ──────────────────────
 func get_pending_orders() -> Array:
     db.query("""
-        SELECT o.OrderID, c.Name, o.Receiving_date, o.Total_price, o.Order_status
-        FROM "Order" o
-        JOIN Customer c ON o.CustomerID = c.CustomerID
+        SELECT
+            o.OrderID,
+            c.Name                             AS Customer_Name,
+            c.City,
+            GROUP_CONCAT(d.Dress_type, ', ')   AS Dresses,
+            COUNT(d.DressID)                   AS Dress_count,
+            o.Order_date,
+            o.Receiving_date,
+            o.Order_status,
+            CASE
+                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+                ELSE                               'Normal'
+            END                                AS Customer_Type
+        FROM "Order"    o
+        JOIN  Customer  c  ON c.CustomerID = o.CustomerID
+        LEFT JOIN Dress d  ON d.OrderID    = o.OrderID
+        LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
+        LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
         WHERE o.Order_status = 'Pending'
-        ORDER BY o.Receiving_date ASC;
+        GROUP BY o.OrderID
+        ORDER BY o.OrderID ASC;
     """)
-    return db.query_result
+    return db.query_result.duplicate()
 
-# ── UPDATE: Mark order completed on delivery ──────────────────────────────────
-func complete_order(order_id: int) -> void:
-    db.query("""
+# ── UPDATE: Mark order completed after sewing is done ────────────────────────
+func finalize_order(order_id: int) -> void:
+    db.query_with_bindings(
+        "UPDATE \"Order\" SET Order_status = 'Completed' WHERE OrderID = ?;",
+        [order_id]
+    )
+    var price: float = calculate_order_price(order_id)
+    print("Database: Order %d finalized → Completed. Calculated price = %.2f coins." % [order_id, price])
+
+# ── UPDATE: Mark a completed order as Delivered and Paid ─────────────────────
+func deliver_order(order_id: int) -> void:
+    db.query_with_bindings("""
         UPDATE "Order"
-        SET Order_status   = 'Completed',
-            Payment_status = 'Paid'
-        WHERE OrderID = %d;
-    """ % order_id)
+        SET    Order_status   = 'Delivered',
+               Payment_status = 'Paid'
+        WHERE  OrderID      = ?
+          AND  Order_status = 'Completed';
+    """, [order_id])
 
 # ── UPDATE: Reward player with coins and XP ───────────────────────────────────
-func reward_player(player_id: int, coins: float, xp: int) -> void:
-    db.query("""
+func add_player_rewards(xp: int, coins: int) -> void:
+    db.query_with_bindings("""
         UPDATE Player
-        SET Coins      = Coins      + %f,
-            Current_xp = Current_xp + %d,
-            Level      = (Current_xp + %d) / 500 + 1
-        WHERE PlayerID = %d;
-    """ % [coins, xp, xp, player_id])
-
-# ── DELETE: Purge old failed orders ───────────────────────────────────────────
-func purge_failed_orders() -> void:
-    db.query("""
-        DELETE FROM "Order"
-        WHERE Order_status = 'Failed'
-          AND Order_date < DATE('now', '-30 days');
-    """)
+        SET Current_xp = Current_xp + ?,
+            Coins      = Coins      + ?
+        WHERE PlayerID = 1;
+    """, [xp, coins])
+    # trg_player_level_up fires automatically and recalculates Level
 ```
 
 ---
@@ -436,7 +513,8 @@ Customer    → CustomerID (PK), Name, House, Street, Sector, City,
               Collar_size, Chest, Shoulder, Sleeve_length, Trouser_length, Waist
 
 Order       → OrderID (PK), CustomerID (FK), Order_date, Receiving_date,
-              Payment_status, Order_status, Total_price
+              Payment_status, Order_status
+              ↳ Total_price — DERIVED via SUM(Unit_cost × Quantity_used) with VIP discount
 
 Dress       → DressID (PK), OrderID (FK), Dress_type
 
@@ -445,11 +523,6 @@ Fabric      → FabricID (PK), Fabric_type, Unit_cost, Stock_quantity
 ShopItems   → ItemID (PK), Item_name, Price, Unlock_Status, Use_Status
 
 Player      → PlayerID (PK), Username, Level, Coins, Current_xp
-
-WEAK ENTITY (existence depends on Dress)
-────────────────────────────────────────
-Dress_Parts → (DressID PK/FK, Part_name PK), FabricID (FK)
-              ↳ Quantity_used — DERIVED via COUNT(Part_name) GROUP BY FabricID
 
 MULTIVALUED ATTRIBUTES (extracted to separate tables)
 ──────────────────────────────────────────────────────
@@ -465,8 +538,8 @@ ShopItems ──ISA──> Machine (ItemID PK/FK, Type, Speed)
 M:N RELATIONSHIP RESOLVED
 ──────────────────────────
 Dress_Parts bridges Dress ↔ Fabric
-(a dress has many named parts; each part uses exactly one fabric;
- the same fabric can appear in many dress parts across many dresses)
+(a dress has many named parts; each part references exactly one fabric and
+ stores Quantity_used in metres, computed from the customer's measurements)
 ```
 
 ---
@@ -482,8 +555,8 @@ Dress_Parts bridges Dress ↔ Fabric
 | **1NF** | `PhoneNo` stored as a comma-separated list in `Customer` | Extracted to `Customer_Phone(CustomerID, PhoneNo)` |
 | **1NF** | `Color` stored as a multi-value string in `Dress` | Extracted to `Dress_Color(DressID, Color)` |
 | **2NF** | `Fabric_type` and `Unit_cost` stored inside a Dress-Fabric join table (depended only on `FabricID`, not the full composite key) | Moved to standalone `Fabric` table; join stores only the FK |
-| **3NF** | `Quantity_used` stored in `Dress_Parts` — it is transitively derivable from counting Part_name rows per FabricID | Made a **derived attribute** — computed via `COUNT()` at query time; not stored |
-| **BCNF** | `Dress_Parts` + `Dress_Fabric` were initially two separate tables that partially overlapped | Merged into a single `Dress_Parts(DressID, Part_name, FabricID)` as documented in Phase 3 |
+| **3NF** | `Total_price` in `Order` — transitively derivable from `Dress_Parts.Quantity_used × Fabric.Unit_cost` | Made a **derived attribute** — computed via `SUM()` at query time; not stored |
+| **BCNF** | `Dress_Parts` + `Dress_Fabric` were initially two separate tables that partially overlapped | Merged into a single `Dress_Parts(DressID, Part_name, FabricID, Quantity_used)` as documented in Phase 3 |
 
 **Result:** Every non-key attribute in the final schema depends on the **whole** primary key and **nothing but** the primary key — satisfying 3NF throughout.
 
@@ -499,12 +572,14 @@ Dress_Parts bridges Dress ↔ Fabric
 CustomerID               → Name, House, Street, Sector, City, Collar_size,
                            Chest, Shoulder, Sleeve_length, Trouser_length, Waist
 OrderID                  → CustomerID, Order_date, Receiving_date,
-                           Payment_status, Order_status, Total_price
+                           Payment_status, Order_status
+                           [Total_price is DERIVED, not stored]
 DressID                  → OrderID, Dress_type
 FabricID                 → Fabric_type, Unit_cost, Stock_quantity
 ItemID                   → Item_name, Price, Unlock_Status, Use_Status
 PlayerID                 → Username, Level, Coins, Current_xp
-(DressID, Part_name)     → FabricID       [composite PK in Dress_Parts]
+(DressID, Part_name,
+ FabricID)               → Quantity_used    [composite PK in Dress_Parts]
 (CustomerID, PhoneNo)    → (identifier only, no extra attributes)
 ```
 
@@ -525,70 +600,62 @@ PlayerID                 → Username, Level, Coins, Current_xp
 **In This Project (`database.gd`):**
 
 ```gdscript
-# INNER JOIN: Full order board — orders, customer names, dress type, colors
-func get_full_order_details() -> Array:
-    db.query("""
+# LEFT JOIN: Full dress breakdown for a given order (colors + fabrics per dress)
+func get_dresses_for_order(order_id: int) -> Array:
+    db.query_with_bindings("""
         SELECT
-            o.OrderID,
-            c.Name            AS Customer_Name,
-            c.City,
+            d.DressID,
             d.Dress_type,
-            GROUP_CONCAT(DISTINCT dc.Color) AS Colors,
-            o.Order_date,
-            o.Receiving_date,
-            o.Total_price,
-            o.Order_status,
-            o.Payment_status
-        FROM "Order" o
-        INNER JOIN Customer    c  ON o.CustomerID = c.CustomerID
-        INNER JOIN Dress        d  ON d.OrderID    = o.OrderID
-        LEFT  JOIN Dress_Color dc  ON dc.DressID   = d.DressID
-        WHERE o.Order_status IN ('Pending', 'In Progress')
-        GROUP BY o.OrderID
-        ORDER BY o.Receiving_date ASC;
-    """)
-    return db.query_result
+            GROUP_CONCAT(DISTINCT dc.Color)      AS Colors,
+            GROUP_CONCAT(DISTINCT f.Fabric_type) AS Fabrics,
+            COUNT(DISTINCT dp.Part_name)         AS Part_count
+        FROM Dress      d
+        LEFT JOIN Dress_Color  dc ON dc.DressID  = d.DressID
+        LEFT JOIN Dress_Parts  dp ON dp.DressID  = d.DressID
+        LEFT JOIN Fabric        f ON  f.FabricID = dp.FabricID
+        WHERE d.OrderID = ?
+        GROUP BY d.DressID, d.Dress_type
+        ORDER BY d.DressID ASC;
+    """, [order_id])
+    return db.query_result.duplicate()
 
-# JOIN with ISA: VIP orders — show discounted pricing
-func get_vip_orders() -> Array:
-    db.query("""
+# JOIN with ISA: Order summary including VIP discount and Rude delay
+func get_order_details(order_id: int) -> Dictionary:
+    db.query_with_bindings("SELECT * FROM v_order_summary WHERE OrderID = ?;", [order_id])
+    if db.query_result.is_empty(): return {}
+    return db.query_result[0].duplicate()
+
+# JOIN: Full dress cost breakdown with per-part fabric costs
+func get_dress_cost_breakdown(dress_id: int) -> Array:
+    db.query_with_bindings("SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;", [dress_id])
+    return db.query_result.duplicate()
+
+# JOIN: Top delivery areas — completed but undelivered orders, revenue derived from parts
+func get_top_delivery_areas(limit: int = 5) -> Array:
+    db.query_with_bindings("""
         SELECT
-            c.Name,
-            v.Discount_rate,
-            o.Total_price,
-            ROUND(o.Total_price * (1 - v.Discount_rate / 100.0), 2) AS Discounted_price,
-            o.Order_status
-        FROM Customer c
-        INNER JOIN VIP     v ON c.CustomerID = v.CustomerID
-        INNER JOIN "Order" o ON o.CustomerID = c.CustomerID
-        WHERE o.Order_status != 'Completed';
-    """)
-    return db.query_result
-
-# JOIN: Cutting table — dress parts with fabric details + derived Quantity_used
-func get_dress_parts_with_fabric(dress_id: int) -> Array:
-    db.query("""
-        SELECT
-            dp.Part_name,
-            f.Fabric_type,
-            f.Unit_cost,
-            COUNT(dp.Part_name) OVER (PARTITION BY dp.FabricID) AS Quantity_used
-        FROM Dress_Parts dp
-        JOIN Fabric f ON dp.FabricID = f.FabricID
-        WHERE dp.DressID = %d;
-    """ % dress_id)
-    return db.query_result
-
-# JOIN: Machines available for use in the 3D shop
-func get_active_machines() -> Array:
-    db.query("""
-        SELECT si.Item_name, si.Price, m.Type, m.Speed, si.Use_Status
-        FROM ShopItems si
-        JOIN Machine m ON si.ItemID = m.ItemID
-        WHERE si.Unlock_Status = 'Unlocked'
-        ORDER BY m.Speed DESC;
-    """)
-    return db.query_result
+            c.City,
+            COUNT(DISTINCT o.OrderID)  AS Pending_deliveries,
+            ROUND(COALESCE(SUM(
+                f.Unit_cost * dp.Quantity_used *
+                (1.0 - COALESCE(
+                    (SELECT v.Discount_rate / 100.0 FROM VIP v
+                     WHERE v.CustomerID = o.CustomerID),
+                    0.0
+                ))
+            ), 0.0), 2)                AS Area_revenue
+        FROM "Order"     o
+        JOIN Customer    c  ON c.CustomerID = o.CustomerID
+        JOIN Dress       d  ON d.OrderID    = o.OrderID
+        JOIN Dress_Parts dp ON dp.DressID   = d.DressID
+        JOIN Fabric      f  ON  f.FabricID  = dp.FabricID
+        WHERE o.Order_status   = 'Completed'
+          AND o.Payment_status = 'Unpaid'
+        GROUP BY c.City
+        ORDER BY Pending_deliveries DESC
+        LIMIT ?;
+    """, [limit])
+    return db.query_result.duplicate()
 ```
 
 ---
@@ -600,65 +667,69 @@ func get_active_machines() -> Array:
 **In This Project (`database.gd`):**
 
 ```gdscript
-# Subquery in WHERE: Customers with at least one completed order
-func get_returning_customers() -> Array:
-    db.query("""
-        SELECT Name, City FROM Customer
-        WHERE CustomerID IN (
-            SELECT DISTINCT CustomerID FROM "Order"
-            WHERE Order_status = 'Completed'
+# Correlated subquery in SELECT: VIP discount applied per order
+# (used inside calculate_order_price and all three views)
+SELECT ROUND(
+    COALESCE(SUM(f.Unit_cost * dp.Quantity_used), 0.0)
+    * (1.0 - COALESCE(
+        (SELECT v.Discount_rate / 100.0
+         FROM   VIP      v
+         JOIN   "Order"  o_v ON o_v.CustomerID = v.CustomerID
+         WHERE  o_v.OrderID = ?),
+        0.0
+    )),
+    2
+) AS price
+FROM  Dress       d
+JOIN  Dress_Parts dp ON dp.DressID  = d.DressID
+JOIN  Fabric       f ON  f.FabricID = dp.FabricID
+WHERE d.OrderID = ?;
+
+# Correlated subquery in SELECT: per-customer discount in v_customer_spending
+ROUND(COALESCE(SUM(
+    f.Unit_cost * dp.Quantity_used *
+    (1.0 - COALESCE(
+        (SELECT v2.Discount_rate / 100.0 FROM VIP v2
+         WHERE v2.CustomerID = c.CustomerID),
+        0.0
+    ))
+), 0.0), 2) AS Total_spent
+
+# Subquery in WHERE: Deliver all completed orders in a given city area
+func deliver_orders_for_area(city: String) -> Dictionary:
+    db.query_with_bindings("""
+        UPDATE "Order"
+        SET    Order_status   = 'Delivered',
+               Payment_status = 'Paid'
+        WHERE  OrderID IN (
+            SELECT o2.OrderID FROM "Order" o2
+            JOIN   Customer c2 ON c2.CustomerID = o2.CustomerID
+            WHERE c2.City = ?
+              AND  o2.Order_status   = 'Completed'
+              AND  o2.Payment_status = 'Unpaid'
         );
-    """)
-    return db.query_result
+    """, [city])
 
-# Subquery in WHERE: Fabrics with stock below average (low-stock alert)
-func get_low_stock_fabrics() -> Array:
-    db.query("""
-        SELECT FabricID, Fabric_type, Stock_quantity, Unit_cost
-        FROM Fabric
-        WHERE Stock_quantity < (
-            SELECT AVG(Stock_quantity) FROM Fabric
-        )
-        ORDER BY Stock_quantity ASC;
-    """)
-    return db.query_result
-
-# Correlated subquery: Most recent order per customer (history panel)
-func get_latest_order_per_customer() -> Array:
-    db.query("""
-        SELECT c.Name, o.OrderID, o.Order_date, o.Total_price, o.Order_status
-        FROM Customer c
-        JOIN "Order" o ON c.CustomerID = o.CustomerID
-        WHERE o.Order_date = (
-            SELECT MAX(o2.Order_date)
-            FROM "Order" o2
-            WHERE o2.CustomerID = c.CustomerID
-        );
-    """)
-    return db.query_result
-
-# Subquery in FROM: Dress type profitability vs overall average
-func get_dress_price_analysis() -> Array:
-    db.query("""
-        SELECT
-            dt.Dress_type,
-            dt.avg_price,
-            (SELECT AVG(Total_price) FROM "Order"
-             WHERE Order_status = 'Completed') AS overall_avg,
-            ROUND(dt.avg_price - (
-                SELECT AVG(Total_price) FROM "Order"
-                WHERE Order_status = 'Completed'
-            ), 2) AS difference
-        FROM (
-            SELECT d.Dress_type, AVG(o.Total_price) AS avg_price
-            FROM Dress d
-            JOIN "Order" o ON d.OrderID = o.OrderID
-            WHERE o.Order_status = 'Completed'
-            GROUP BY d.Dress_type
-        ) AS dt
-        ORDER BY dt.avg_price DESC;
-    """)
-    return db.query_result
+# Subquery in SELECT: Revenue aggregated before marking as delivered
+db.query_with_bindings("""
+    SELECT
+        COUNT(DISTINCT o.OrderID) AS order_count,
+        ROUND(COALESCE(SUM(
+            f.Unit_cost * dp.Quantity_used *
+            (1.0 - COALESCE(
+                (SELECT v.Discount_rate / 100.0 FROM VIP v WHERE v.CustomerID = o.CustomerID),
+                0.0
+            ))
+        ), 0.0), 2) AS total_revenue
+    FROM "Order"   o
+    JOIN Customer  c  ON c.CustomerID = o.CustomerID
+    JOIN Dress     d  ON d.OrderID    = o.OrderID
+    JOIN Dress_Parts dp ON dp.DressID = d.DressID
+    JOIN Fabric    f  ON  f.FabricID  = dp.FabricID
+    WHERE c.City = ?
+      AND o.Order_status   = 'Completed'
+      AND o.Payment_status = 'Unpaid';
+""", [city])
 ```
 
 ---
@@ -672,65 +743,34 @@ func get_dress_price_analysis() -> Array:
 ```gdscript
 func _create_triggers() -> void:
 
-    # TRIGGER: Deduct fabric stock when a dress part is cut
+    # TRIGGER: Auto-calculate player level whenever XP changes
+    db.query("""
+        CREATE TRIGGER IF NOT EXISTS trg_player_level_up
+        AFTER UPDATE OF Current_xp ON Player
+        FOR EACH ROW
+        BEGIN
+            UPDATE Player
+            SET    Level = MAX(1, (NEW.Current_xp / 500) + 1)
+            WHERE  PlayerID = NEW.PlayerID;
+        END;
+    """)
+
+    # TRIGGER: Deduct fabric stock when a dress part is inserted
     db.query("""
         CREATE TRIGGER IF NOT EXISTS trg_deduct_fabric_stock
         AFTER INSERT ON Dress_Parts
         FOR EACH ROW
         BEGIN
             UPDATE Fabric
-            SET Stock_quantity = Stock_quantity - 1
-            WHERE FabricID = NEW.FabricID;
-        END;
-    """)
-
-    # TRIGGER: Restore fabric stock if a dress part is removed
-    db.query("""
-        CREATE TRIGGER IF NOT EXISTS trg_restore_fabric_on_delete
-        AFTER DELETE ON Dress_Parts
-        FOR EACH ROW
-        BEGIN
-            UPDATE Fabric
-            SET Stock_quantity = Stock_quantity + 1
-            WHERE FabricID = OLD.FabricID;
-        END;
-    """)
-
-    # TRIGGER: Recalculate order Total_price when a new dress is added
-    db.query("""
-        CREATE TRIGGER IF NOT EXISTS trg_update_order_total
-        AFTER INSERT ON Dress
-        FOR EACH ROW
-        BEGIN
-            UPDATE "Order"
-            SET Total_price = (
-                SELECT COALESCE(SUM(f.Unit_cost), 0)
-                FROM Dress_Parts dp
-                JOIN Fabric f ON dp.FabricID = f.FabricID
-                WHERE dp.DressID = NEW.DressID
-            )
-            WHERE OrderID = NEW.OrderID;
-        END;
-    """)
-
-    # TRIGGER: Apply VIP discount automatically when a VIP customer places an order
-    db.query("""
-        CREATE TRIGGER IF NOT EXISTS trg_apply_vip_discount
-        AFTER INSERT ON "Order"
-        FOR EACH ROW
-        WHEN NEW.CustomerID IN (SELECT CustomerID FROM VIP)
-        BEGIN
-            UPDATE "Order"
-            SET Total_price = NEW.Total_price * (
-                1.0 - (SELECT Discount_rate FROM VIP
-                       WHERE CustomerID = NEW.CustomerID) / 100.0
-            )
-            WHERE OrderID = NEW.OrderID;
+            SET    Stock_quantity = Stock_quantity - NEW.Quantity_used
+            WHERE  FabricID = NEW.FabricID;
         END;
     """)
 ```
 
-**Gameplay Relevance:** Even if a GDScript bug bypasses the reward logic, fabric stock stays accurate and VIP discounts always apply — integrity is guaranteed at the SQL layer itself.
+**Gameplay Relevance:**
+- `trg_player_level_up` — every `add_player_rewards()` call automatically recalculates the player's level from their accumulated XP; the HUD always reflects the correct value without any extra GDScript logic.
+- `trg_deduct_fabric_stock` — every time a dress part is inserted into `Dress_Parts`, the corresponding fabric's stock is reduced by the exact `Quantity_used`. Stock accuracy is guaranteed at the database level even if application code has a bug.
 
 ---
 
@@ -743,79 +783,124 @@ func _create_triggers() -> void:
 ```gdscript
 func _create_views() -> void:
 
-    # VIEW: Full order board for the 3D shop's in-world display
+    # VIEW: Full order summary — customer type, colors, derived price with VIP discount
     db.query("""
-        CREATE VIEW IF NOT EXISTS v_order_board AS
+        CREATE VIEW IF NOT EXISTS v_order_summary AS
         SELECT
             o.OrderID,
-            c.Name              AS Customer_Name,
+            c.Name                              AS Customer_Name,
             c.City,
+            CASE
+                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+                ELSE                               'Normal'
+            END                                 AS Customer_Type,
+            COALESCE(v.Discount_rate, 0)        AS Discount_pct,
+            COALESCE(r.Time_delay,    0)        AS Delay_days,
             d.Dress_type,
-            GROUP_CONCAT(DISTINCT dc.Color) AS Colors,
+            GROUP_CONCAT(DISTINCT dc.Color)     AS Colors,
             o.Order_date,
             o.Receiving_date,
-            o.Total_price,
             o.Order_status,
             o.Payment_status,
-            CASE
-                WHEN o.Receiving_date < DATE('now')
-                     AND o.Order_status != 'Completed' THEN 'OVERDUE'
-                WHEN o.Receiving_date = DATE('now')    THEN 'DUE TODAY'
-                ELSE                                        'ON TIME'
-            END AS Urgency
-        FROM "Order" o
-        JOIN Customer   c  ON o.CustomerID = c.CustomerID
-        JOIN Dress      d  ON d.OrderID    = o.OrderID
-        LEFT JOIN Dress_Color dc ON dc.DressID = d.DressID
-        GROUP BY o.OrderID;
+            ROUND(
+                COALESCE((
+                    SELECT SUM(f2.Unit_cost * dp2.Quantity_used)
+                    FROM   Dress     d2
+                    JOIN   Dress_Parts dp2 ON dp2.DressID  = d2.DressID
+                    JOIN   Fabric     f2  ON  f2.FabricID  = dp2.FabricID
+                    WHERE  d2.OrderID = o.OrderID
+                ), 0.0)
+                * (1.0 - COALESCE(v.Discount_rate, 0.0) / 100.0),
+            2)                                  AS Calculated_price
+        FROM "Order"    o
+        JOIN  Customer  c  ON c.CustomerID = o.CustomerID
+        JOIN  Dress     d  ON d.OrderID    = o.OrderID
+        LEFT JOIN Dress_Color dc ON dc.DressID   = d.DressID
+        LEFT JOIN VIP   v  ON v.CustomerID = o.CustomerID
+        LEFT JOIN Rude  r  ON r.CustomerID = o.CustomerID
+        GROUP BY o.OrderID, d.DressID;
     """)
 
-    # VIEW: Player HUD — level, coins, XP bar values
+    # VIEW: Per-part cost breakdown for every dress
     db.query("""
-        CREATE VIEW IF NOT EXISTS v_player_hud AS
+        CREATE VIEW IF NOT EXISTS v_dress_cost_breakdown AS
         SELECT
-            Username,
-            Level,
-            Coins,
-            Current_xp,
-            Current_xp % 500                          AS XP_in_level,
-            500 - (Current_xp % 500)                  AS XP_to_next_level,
-            ROUND(Current_xp % 500 * 100.0 / 500, 1)  AS XP_percent
-        FROM Player
-        WHERE PlayerID = 1;
-    """)
-
-    # VIEW: Fabric inventory status for the shop management panel
-    db.query("""
-        CREATE VIEW IF NOT EXISTS v_inventory_status AS
-        SELECT
-            f.FabricID,
+            d.DressID,
+            d.Dress_type,
+            o.OrderID,
+            c.Name                                   AS Customer_Name,
+            dp.Part_name,
             f.Fabric_type,
             f.Unit_cost,
-            f.Stock_quantity,
-            CASE
-                WHEN f.Stock_quantity = 0  THEN 'OUT OF STOCK'
-                WHEN f.Stock_quantity <= 5 THEN 'LOW STOCK'
-                ELSE                            'IN STOCK'
-            END AS Stock_status
-        FROM Fabric f;
+            dp.Quantity_used,
+            ROUND(f.Unit_cost * dp.Quantity_used, 2) AS Part_cost
+        FROM Dress         d
+        JOIN "Order"       o  ON o.OrderID    = d.OrderID
+        JOIN Customer      c  ON c.CustomerID = o.CustomerID
+        JOIN Dress_Parts  dp  ON dp.DressID   = d.DressID
+        JOIN Fabric        f  ON  f.FabricID  = dp.FabricID;
     """)
+
+    # VIEW: Customer spending summary — total and average order value (completed/delivered only)
+    db.query("""
+        CREATE VIEW IF NOT EXISTS v_customer_spending AS
+        SELECT
+            c.CustomerID,
+            c.Name,
+            CASE
+                WHEN v.CustomerID IS NOT NULL THEN 'VIP'
+                WHEN r.CustomerID IS NOT NULL THEN 'Rude'
+                ELSE                               'Normal'
+            END                                                       AS Customer_Type,
+            COUNT(DISTINCT o.OrderID)                                 AS Total_orders,
+            ROUND(COALESCE(SUM(
+                f.Unit_cost * dp.Quantity_used *
+                (1.0 - COALESCE(
+                    (SELECT v2.Discount_rate / 100.0 FROM VIP v2
+                     WHERE v2.CustomerID = c.CustomerID),
+                    0.0
+                ))
+            ), 0.0), 2)                                               AS Total_spent,
+            ROUND(COALESCE(SUM(
+                f.Unit_cost * dp.Quantity_used *
+                (1.0 - COALESCE(
+                    (SELECT v2.Discount_rate / 100.0 FROM VIP v2
+                     WHERE v2.CustomerID = c.CustomerID),
+                    0.0
+                ))
+            ) / NULLIF(COUNT(DISTINCT o.OrderID), 0), 0.0), 2)       AS Avg_order_value
+        FROM Customer   c
+        JOIN "Order"    o  ON o.CustomerID  = c.CustomerID
+        JOIN Dress      d  ON d.OrderID     = o.OrderID
+        JOIN Dress_Parts dp ON dp.DressID   = d.DressID
+        JOIN Fabric     f  ON  f.FabricID   = dp.FabricID
+        LEFT JOIN VIP   v  ON  v.CustomerID = c.CustomerID
+        LEFT JOIN Rude  r  ON  r.CustomerID = c.CustomerID
+        WHERE o.Order_status IN ('Completed','Delivered')
+        GROUP BY c.CustomerID, c.Name;
+    """)
+    print("Database: Views created / verified.")
 ```
 
 **Querying views in GDScript — identical to querying a table:**
 
 ```gdscript
-func get_order_board() -> Array:
-    db.query("SELECT * FROM v_order_board WHERE Order_status != 'Completed';")
-    return db.query_result
+func get_order_details(order_id: int) -> Dictionary:
+    db.query_with_bindings("SELECT * FROM v_order_summary WHERE OrderID = ?;", [order_id])
+    if db.query_result.is_empty(): return {}
+    return db.query_result[0].duplicate()
 
-func get_player_hud() -> Dictionary:
-    db.query("SELECT * FROM v_player_hud;")
-    return db.query_result[0] if db.query_result.size() > 0 else {}
+func get_dress_cost_breakdown(dress_id: int) -> Array:
+    db.query_with_bindings("SELECT * FROM v_dress_cost_breakdown WHERE DressID = ?;", [dress_id])
+    return db.query_result.duplicate()
 
-func get_inventory_status() -> Array:
-    db.query("SELECT * FROM v_inventory_status ORDER BY Stock_quantity ASC;")
-    return db.query_result
+func get_top_customers(limit: int = 5) -> Array:
+    db.query_with_bindings(
+        "SELECT * FROM v_customer_spending ORDER BY Total_spent DESC LIMIT ?;",
+        [limit]
+    )
+    return db.query_result.duplicate()
 ```
 
 ---
@@ -825,7 +910,7 @@ func get_inventory_status() -> Array:
 ### Final Relational Schema (Phase 3 Output)
 
 ```
-Customer(CustomerID PK, Name, House, Street, Sector, City,
+Customer(CustomerID PK, Name UNIQUE, House, Street, Sector, City,
          Collar_size, Chest, Shoulder, Sleeve_length, Trouser_length, Waist)
 
 Customer_Phone(CustomerID FK→Customer, PhoneNo)              -- multivalued attr
@@ -834,19 +919,20 @@ VIP(CustomerID PK/FK→Customer, Discount_rate)               -- ISA specializat
 Rude(CustomerID PK/FK→Customer, Time_delay)                 -- ISA specialization
 
 Order(OrderID PK, CustomerID FK→Customer, Order_date,
-      Receiving_date, Payment_status, Order_status, Total_price)
+      Receiving_date, Payment_status, Order_status)
+      ↳ Total_price : DERIVED — SUM(Unit_cost × Quantity_used) × (1 − Discount_rate)
 
 Dress(DressID PK, OrderID FK→Order, Dress_type)
 
 Dress_Color(DressID FK→Dress, Color)                        -- multivalued attr
 
-Dress_Parts(DressID PK/FK→Dress, Part_name PK,              -- weak entity + M:N bridge
-            FabricID FK→Fabric)
-            ↳ Quantity_used : DERIVED — COUNT(Part_name) GROUP BY FabricID
+Dress_Parts(DressID PK/FK→Dress, Part_name PK,              -- M:N bridge
+            FabricID PK/FK→Fabric, Quantity_used REAL)
+            ↳ Quantity_used stored in metres, derived per customer measurements
 
-Fabric(FabricID PK, Fabric_type, Unit_cost, Stock_quantity)
+Fabric(FabricID PK, Fabric_type UNIQUE, Unit_cost, Stock_quantity)
 
-ShopItems(ItemID PK, Item_name, Price, Unlock_Status, Use_Status)
+ShopItems(ItemID PK, Item_name UNIQUE, Price, Unlock_Status, Use_Status)
 
 Machine(ItemID PK/FK→ShopItems, Type, Speed)                -- ISA specialization
 
@@ -863,10 +949,10 @@ Customer ───────────────────────�
    ├── VIP   (ISA)                                 Dress_Parts ──────> Fabric
    └── Rude  (ISA)                                     ↑
                                                Quantity_used
-ShopItems                                      (DERIVED attr)
+ShopItems                                      (stored, computed from measurements)
    └── Machine (ISA)
 
-Player (standalone — tracks progression)
+Player (standalone — tracks progression; Level derived via trigger from Current_xp)
 ```
 
 ### Constraint Summary
@@ -877,14 +963,14 @@ Player (standalone — tracks progression)
 | `Customer_Phone` | `(CustomerID, PhoneNo)` | `CustomerID → Customer` | Multivalued attr |
 | `VIP` | `CustomerID` | `→ Customer` | ISA — one row per VIP |
 | `Rude` | `CustomerID` | `→ Customer` | ISA — one row per Rude |
-| `Order` | `OrderID` | `CustomerID → Customer` | Core transaction table |
+| `Order` | `OrderID` | `CustomerID → Customer` | Status: `Pending`/`Completed`/`Delivered` |
 | `Dress` | `DressID` | `OrderID → Order` | CASCADE on delete |
 | `Dress_Color` | `(DressID, Color)` | `DressID → Dress` | Multivalued attr |
-| `Dress_Parts` | `(DressID, Part_name)` | `DressID → Dress`, `FabricID → Fabric` | Weak entity + M:N bridge |
-| `Fabric` | `FabricID` | — | Independent; managed by triggers |
+| `Dress_Parts` | `(DressID, Part_name, FabricID)` | `DressID → Dress`, `FabricID → Fabric` | M:N bridge; stock deducted by trigger |
+| `Fabric` | `FabricID` | — | Independent; stock managed by trigger |
 | `ShopItems` | `ItemID` | — | Superclass |
 | `Machine` | `ItemID` | `→ ShopItems` | ISA specialization |
-| `Player` | `PlayerID` | — | Singleton game record |
+| `Player` | `PlayerID` | — | Singleton game record; Level set by trigger |
 
 ---
 
@@ -912,10 +998,11 @@ Player (standalone — tracks progression)
 │                                   │       database.gd         │   │
 │                                   │  (Autoload Singleton)    │   │
 │                                   │                          │   │
+│                                   │  _open_db()              │   │
 │                                   │  _create_tables()        │   │
-│                                   │  _create_triggers()      │   │
-│                                   │  _create_views()         │   │
-│                                   │  _create_indexes()       │   │
+│                                   │  _drop/create_triggers() │   │
+│                                   │  _drop/create_views()    │   │
+│                                   │  _prefill_data()         │   │
 │                                   │  + all CRUD functions    │   │
 │                                   └─────────────┬────────────┘   │
 │                                                 │                 │
@@ -923,14 +1010,14 @@ Player (standalone — tracks progression)
                                                   │ SQL via godot-sqlite
                                                   ▼
                                    ┌──────────────────────────┐
-                                   │       silai.db           │
+                                   │    silai_simulator.db    │
                                    │   (SQLite Database)      │
                                    │                          │
                                    │  Customer / VIP / Rude   │
                                    │  Customer_Phone          │
                                    │  Order                   │
                                    │  Dress / Dress_Color     │
-                                   │  Dress_Parts (+ derived) │
+                                   │  Dress_Parts             │
                                    │  Fabric                  │
                                    │  ShopItems / Machine     │
                                    │  Player                  │
@@ -954,85 +1041,101 @@ Player (standalone — tracks progression)
 ```
 STEP 1 — CUSTOMER ARRIVES
 ═══════════════════════════
-CustomerManager.gd spawns a 3D character, generates measurements.
+CustomerManager.gd spawns a 3D character, calls get_or_create_customer().
 
-  Database.add_customer("Ayesha Malik", "Rawalpindi", 38.0, 32.0, 14.5, 17.0, 26.0, 40.0)
-  → INSERT INTO Customer (Name, City, Chest, Waist, ...) VALUES (...)
-  → Returns: CustomerID = 7
+  Database.get_or_create_customer("Ayesha")
+  → SELECT * FROM Customer WHERE Name = 'Ayesha'   (not found → create)
+  → INSERT INTO Customer (Name, House, Street, Sector, City,
+        Collar_size, Chest, Shoulder, Sleeve_length, Trouser_length, Waist)
+        VALUES (...)
+  → Returns: CustomerID = 7, customer_type = "VIP"
 
-  If VIP:  INSERT INTO VIP  (CustomerID, Discount_rate) VALUES (7, 15.0)
-  If Rude: INSERT INTO Rude (CustomerID, Time_delay)    VALUES (7, 10)
+  Because "Ayesha" is in VIP_NAMES:
+  → INSERT OR IGNORE INTO VIP (CustomerID, Discount_rate) VALUES (7, 18.0)
 
 ────────────────────────────────────────────────────────────────────
 STEP 2 — ORDER PLACED AT THE COUNTER
 ═══════════════════════════════════════
-Customer reaches the 3D counter. Order is generated and saved.
+generate_random_dress_order() builds the order dict; create_order_record() saves it.
 
-  Database.create_order(7, "2026-05-25", 0.0)
-  → INSERT INTO "Order" (CustomerID, Receiving_date, Total_price) VALUES (...)
+  Database.create_order_record(7)
+  → INSERT INTO "Order" (CustomerID, Order_date, Receiving_date,
+        Payment_status, Order_status) VALUES (7, '2026-05-10T...', '2026-05-13', 'Unpaid', 'Pending')
   → Returns: OrderID = 42
+    (Receiving_date = today + BASE_RECEIVING_DAYS; no delay for VIP)
 
-  Database.create_dress(42, "Shalwar Kameez")
-  → INSERT INTO Dress (OrderID, Dress_type) VALUES (42, 'Shalwar Kameez')
-  → Returns: DressID = 18
-
-  INSERT INTO Dress_Color (DressID, Color) VALUES (18, 'Navy Blue')
-
-  ★ Trigger: trg_apply_vip_discount fires → Total_price auto-discounted
-
-────────────────────────────────────────────────────────────────────
-STEP 3 — PLAYER AT THE CUTTING TABLE
-═══════════════════════════════════════
-Player navigates to the 3D cutting table and selects fabric for each part.
-
-  Database.add_dress_part(18, 'Body',    3)   → Fabric: Cotton
-  Database.add_dress_part(18, 'Collar',  3)   → Fabric: Cotton
-  Database.add_dress_part(18, 'Sleeves', 5)   → Fabric: Silk
-
-  ★ Trigger: trg_deduct_fabric_stock fires for each insert:
-    UPDATE Fabric SET Stock_quantity = Stock_quantity - 1 WHERE FabricID = 3  (×2)
-    UPDATE Fabric SET Stock_quantity = Stock_quantity - 1 WHERE FabricID = 5
-
-  Quantity_used (derived, shown in cutting table UI):
-  SELECT COUNT(Part_name) ... GROUP BY FabricID
-  → Cotton: 2 parts,  Silk: 1 part
+  Database.attach_all_dresses_to_order(42, order_data)
+  → INSERT INTO Dress (OrderID, Dress_type) VALUES (42, 'Frock')
+    → DressID = 18
+  → INSERT OR IGNORE INTO Dress_Color (DressID, Color) VALUES (18, 'Crimson Red')
+  → INSERT OR IGNORE INTO Dress_Parts (DressID, Part_name, FabricID, Quantity_used)
+        VALUES (18, 'Bodice', 3, 0.25), (18, 'Skirt', 6, 1.65), ...
+    ★ trg_deduct_fabric_stock fires on each Dress_Parts INSERT:
+      UPDATE Fabric SET Stock_quantity = Stock_quantity - <Quantity_used>
+      WHERE FabricID = <FabricID>
 
 ────────────────────────────────────────────────────────────────────
-STEP 4 — SEWING MACHINE OPERATION
-════════════════════════════════════
-Player interacts with a 3D sewing machine. Machine must be unlocked.
+STEP 3 — PRICE SHOWN TO PLAYER
+════════════════════════════════
+Called right after attach_all_dresses_to_order() to display price on the accept screen.
 
-  SELECT si.Item_name, m.Speed FROM ShopItems si JOIN Machine m ON si.ItemID = m.ItemID
-  WHERE si.Unlock_Status = 'Unlocked' AND si.Use_Status = 'Active'
-
-  UPDATE "Order" SET Order_status = 'In Progress' WHERE OrderID = 42
+  Database.calculate_order_price(42)
+  → SUM(Unit_cost × Quantity_used) × (1 − 0.18)   [VIP 18% discount]
+  → Returns: 198.45
 
 ────────────────────────────────────────────────────────────────────
-STEP 5 — DELIVERY & REWARDS
+STEP 4 — PLAYER AT THE CUTTING TABLE / SEWING MACHINE
+═══════════════════════════════════════════════════════
+Player navigates to the 3D workstations. Pending order is loaded for display.
+
+  Database.get_pending_orders()
+  → Returns all orders WHERE Order_status = 'Pending'
+
+  Database.get_dresses_for_order(42)
+  → Returns dress rows with Colors and Fabrics for the order board
+
+────────────────────────────────────────────────────────────────────
+STEP 5 — ORDER COMPLETED
+══════════════════════════
+Player finishes sewing. finalize_order() advances status to Completed.
+
+  Database.finalize_order(42)
+  → UPDATE "Order" SET Order_status = 'Completed' WHERE OrderID = 42
+  → calculate_order_price(42) called internally for the print log
+
+────────────────────────────────────────────────────────────────────
+STEP 6 — DELIVERY & REWARDS
 ══════════════════════════════
-Player delivers the completed dress at the counter.
+Player delivers at the counter. deliver_order() or deliver_orders_for_area() is called.
 
-  Database.complete_order(42)
-  → UPDATE "Order" SET Order_status='Completed', Payment_status='Paid' WHERE OrderID=42
+  Database.deliver_order(42)
+  → UPDATE "Order" SET Order_status = 'Delivered', Payment_status = 'Paid'
+    WHERE OrderID = 42 AND Order_status = 'Completed'
 
-  Database.reward_player(1, 150.0, 75)
-  → UPDATE Player SET Coins=Coins+150, Current_xp=Current_xp+75,
-                      Level=(Current_xp+75)/500+1 WHERE PlayerID=1
+  Database.add_player_rewards(xp, coins)
+  → UPDATE Player SET Current_xp = Current_xp + xp, Coins = Coins + coins
+    WHERE PlayerID = 1
+  ★ trg_player_level_up fires:
+    UPDATE Player SET Level = MAX(1, (NEW.Current_xp / 500) + 1)
+    WHERE PlayerID = NEW.PlayerID
 
 ────────────────────────────────────────────────────────────────────
-STEP 6 — HUD UPDATES IN REAL TIME
+STEP 7 — HUD UPDATES IN REAL TIME
 ════════════════════════════════════
-HUD.gd queries the view each frame cycle:
+HUD.gd queries player data each cycle:
 
-  SELECT * FROM v_player_hud
-  → { Level:3, Coins:850.0, XP_in_level:225, XP_to_next_level:275, XP_percent:45.0 }
+  Database.get_player_data()
+  → SELECT PlayerID, Username, Level, Coins, Current_xp,
+           (Level * 500) - Current_xp AS xp_to_next_level
+    FROM Player WHERE PlayerID = 1
+  → { Level:3, Coins:850, Current_xp:1225, xp_to_next_level:275 }
 
   3D HUD overlay updates: level badge, coin counter, XP progress bar.
 
 ────────────────────────────────────────────────────────────────────
-STEP 7 — SESSION ENDS
+STEP 8 — SESSION ENDS
 ═══════════════════════
-SQLite commits all changes to silai.db on disk.
+SQLite commits all changes to silai_simulator.db on disk.
 Next launch: database.gd opens the same file.
 Every customer, order, fabric level, and coin is exactly as left.
 ```
@@ -1045,7 +1148,7 @@ Every customer, order, fabric level, and coin is exactly as left.
 Silai-Simulator/
 │
 ├── project.godot                      # Godot 4 project configuration
-├── silai.db                           # SQLite database (auto-created at user://)
+├── silai_simulator.db                 # SQLite database (auto-created on first launch)
 │
 ├── addons/
 │   └── godot-sqlite/                  # GDExtension SQLite plugin
@@ -1054,8 +1157,10 @@ Silai-Simulator/
 │
 ├── autoloads/
 │   └── database.gd                    # ★ Singleton — ALL SQL lives here
-│                                      #   _create_tables(), _create_triggers(),
-│                                      #   _create_views(), _create_indexes(),
+│                                      #   _open_db(), _create_tables(),
+│                                      #   _drop/create_triggers(),
+│                                      #   _drop/create_views(),
+│                                      #   _prefill_data(),
 │                                      #   + all public CRUD functions
 │
 ├── scenes/
@@ -1067,14 +1172,14 @@ Silai-Simulator/
 │   │   └── CustomerManager.gd        # Customer generation + DB insert
 │   ├── workstations/
 │   │   ├── CuttingTable.tscn         # 3D cutting table
-│   │   ├── CuttingTable.gd           # Dress_Parts insert + derived qty display
+│   │   ├── CuttingTable.gd           # Dress_Parts insert, fabric deduction
 │   │   ├── SewingMachine.tscn        # 3D sewing machine
 │   │   └── SewingMachine.gd          # Machine unlock check, order progress
 │   ├── ui/
 │   │   ├── OrderBoard.tscn           # 3D in-world order board
-│   │   ├── OrderBoard.gd             # Queries v_order_board view
+│   │   ├── OrderBoard.gd             # Queries get_pending_orders()
 │   │   ├── HUD.tscn                  # Coins, XP, Level overlay
-│   │   └── HUD.gd                    # Queries v_player_hud view
+│   │   └── HUD.gd                    # Queries get_player_data()
 │   └── main_menu/
 │       ├── MainMenu.tscn
 │       └── MainMenu.gd
@@ -1099,54 +1204,95 @@ Silai-Simulator/
 ### Aggregate Functions
 
 ```gdscript
-# Total revenue from all completed orders
-func get_total_revenue() -> float:
+# Total earnings from all completed and delivered orders (derived from parts)
+func get_total_earnings() -> float:
     db.query("""
-        SELECT COALESCE(SUM(Total_price), 0) AS Revenue
-        FROM "Order" WHERE Order_status = 'Completed';
+        SELECT ROUND(COALESCE(SUM(
+            f.Unit_cost * dp.Quantity_used *
+            (1.0 - COALESCE(
+                (SELECT v.Discount_rate / 100.0 FROM VIP v WHERE v.CustomerID = o.CustomerID),
+                0.0
+            ))
+        ), 0.0), 2) AS earnings
+        FROM "Order"     o
+        JOIN Dress       d  ON d.OrderID    = o.OrderID
+        JOIN Dress_Parts dp ON dp.DressID   = d.DressID
+        JOIN Fabric      f  ON  f.FabricID  = dp.FabricID
+        WHERE o.Order_status IN ('Completed','Delivered');
     """)
-    return db.query_result[0]["Revenue"]
+    return float(db.query_result[0]["earnings"])
 
-# Most-ordered dress type
-func get_most_popular_dress() -> String:
-    db.query("""
-        SELECT Dress_type, COUNT(*) AS cnt
-        FROM Dress GROUP BY Dress_type
-        ORDER BY cnt DESC LIMIT 1;
-    """)
-    return db.query_result[0]["Dress_type"] if db.query_result.size() > 0 else "None"
+# Top 5 customers by total amount spent
+func get_top_customers(limit: int = 5) -> Array:
+    db.query_with_bindings(
+        "SELECT * FROM v_customer_spending ORDER BY Total_spent DESC LIMIT ?;",
+        [limit]
+    )
+    return db.query_result.duplicate()
 
-# Average order value split by customer type (Regular / VIP / Rude)
-func get_avg_order_by_customer_type() -> Array:
+# Top delivery areas: cities with most completed-but-undelivered orders
+func get_top_delivery_areas(limit: int = 5) -> Array:
+    db.query_with_bindings("""
+        SELECT
+            c.City,
+            COUNT(DISTINCT o.OrderID)  AS Pending_deliveries,
+            ROUND(COALESCE(SUM(
+                f.Unit_cost * dp.Quantity_used *
+                (1.0 - COALESCE(
+                    (SELECT v.Discount_rate / 100.0 FROM VIP v
+                     WHERE v.CustomerID = o.CustomerID),
+                    0.0
+                ))
+            ), 0.0), 2)                AS Area_revenue
+        FROM "Order"     o
+        JOIN Customer    c  ON c.CustomerID = o.CustomerID
+        JOIN Dress       d  ON d.OrderID    = o.OrderID
+        JOIN Dress_Parts dp ON dp.DressID   = d.DressID
+        JOIN Fabric      f  ON  f.FabricID  = dp.FabricID
+        WHERE o.Order_status   = 'Completed'
+          AND o.Payment_status = 'Unpaid'
+        GROUP BY c.City
+        ORDER BY Pending_deliveries DESC
+        LIMIT ?;
+    """, [limit])
+    return db.query_result.duplicate()
+
+# Player stats including XP needed to reach the next level
+func get_player_data() -> Dictionary:
     db.query("""
         SELECT
-            CASE
-                WHEN c.CustomerID IN (SELECT CustomerID FROM VIP)  THEN 'VIP'
-                WHEN c.CustomerID IN (SELECT CustomerID FROM Rude) THEN 'Rude'
-                ELSE 'Regular'
-            END                          AS Customer_type,
-            ROUND(AVG(o.Total_price), 2) AS Avg_order_value,
-            COUNT(o.OrderID)             AS Total_orders
-        FROM Customer c
-        JOIN "Order" o ON c.CustomerID = o.CustomerID
-        GROUP BY Customer_type
-        ORDER BY Avg_order_value DESC;
+            PlayerID, Username, Level, Coins, Current_xp,
+            (Level * 500) - Current_xp AS xp_to_next_level
+        FROM Player
+        WHERE PlayerID = 1;
     """)
-    return db.query_result
+    if db.query_result.is_empty():
+        return {}
+    return db.query_result[0].duplicate()
 ```
 
-### Index Creation for Query Optimization
+### Fabric Stock Management
 
 ```gdscript
-func _create_indexes() -> void:
-    db.query("CREATE INDEX IF NOT EXISTS idx_order_status   ON \"Order\"(Order_status);")
-    db.query("CREATE INDEX IF NOT EXISTS idx_order_customer ON \"Order\"(CustomerID);")
-    db.query("CREATE INDEX IF NOT EXISTS idx_order_deadline ON \"Order\"(Receiving_date);")
-    db.query("CREATE INDEX IF NOT EXISTS idx_parts_fabric   ON Dress_Parts(FabricID);")
-    db.query("CREATE INDEX IF NOT EXISTS idx_parts_dress    ON Dress_Parts(DressID);")
-```
+# Fabric stock is reduced automatically by trg_deduct_fabric_stock.
+# VIP discount is fetched inline when needed:
+func get_vip_discount(customer_id: int) -> float:
+    db.query_with_bindings(
+        "SELECT Discount_rate FROM VIP WHERE CustomerID = ?;",
+        [customer_id]
+    )
+    if db.query_result.is_empty(): return 0.0
+    return float(db.query_result[0]["Discount_rate"])
 
-These indexes accelerate the most frequent gameplay queries — pending order lookups, join operations on `Dress_Parts`, and deadline sorting — with no overhead to the player experience.
+# Rude customer delay added to BASE_RECEIVING_DAYS when computing Receiving_date:
+func get_rude_delay(customer_id: int) -> int:
+    db.query_with_bindings(
+        "SELECT Time_delay FROM Rude WHERE CustomerID = ?;",
+        [customer_id]
+    )
+    if db.query_result.is_empty(): return 0
+    return int(db.query_result[0]["Time_delay"])
+```
 
 ---
 
@@ -1161,8 +1307,8 @@ Each game system is a self-contained script with a single clear responsibility:
 | `database.gd` | All SQL: schema, triggers, views, CRUD | No scene logic, no game math |
 | `OrderSystem.gd` | Order state machine transitions | No SQL, no rendering |
 | `RewardSystem.gd` | Calculates coin/XP values | No DB calls, no UI updates |
-| `HUD.gd` | Reads view data, updates labels | No business logic |
-| `CuttingTable.gd` | Inserts Dress_Parts rows | No view rendering |
+| `HUD.gd` | Reads `get_player_data()`, updates labels | No business logic |
+| `CuttingTable.gd` | Inserts `Dress_Parts` rows | No view rendering |
 
 ### Separation of Frontend and Backend
 
@@ -1174,7 +1320,7 @@ Animate 3D customer characters           Generate customer data and measurements
 Display order cards and urgency flags    Execute all database queries
 Handle player movement and input         Calculate rewards, apply VIP discounts
 Show fabric stock levels visually        Enforce stock accuracy via triggers
-Update XP bar and level badge            Maintain schema, views, indexes
+Update XP bar and level badge            Maintain schema, views, triggers
 ```
 
 No frontend script contains SQL. No backend script touches scene nodes. All communication flows through function return values and Godot signals.
@@ -1183,40 +1329,12 @@ No frontend script contains SQL. No backend script touches scene nodes. All comm
 
 | Future Requirement | How the Architecture Handles It |
 |---|---|
-| Add a new dress type | `INSERT` a row into `Dress` — no code change needed |
+| Add a new dress type | Add a new `match` branch in `get_dress_parts()` — no schema change needed |
 | Add a new fabric | `INSERT` into `Fabric` — triggers and views adapt automatically |
-| New customer subclass (e.g. Regular → Loyal) | New ISA table with FK to `Customer` — existing queries unaffected |
+| New customer subclass (e.g. Loyal) | New ISA table with FK to `Customer` — existing queries unaffected |
 | Multiple save slots | Add `SaveSlot INTEGER` to `Player`, filter all queries by slot |
 | Leaderboard / multiplayer | `Player.Username UNIQUE` already exists — extend with a sync layer |
 | New machine category | Add to `ShopItems` + `Machine` — unlock system inherits it immediately |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Godot Engine 4.x](https://godotengine.org/download)
-- [DB Browser for SQLite](https://sqlitebrowser.org/) *(optional — inspect `silai.db` during development)*
-
-### Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/SolitaryRehman/Silai-Simulator.git
-cd Silai-Simulator
-
-# 2. Open Godot Engine
-#    File → Import → select project.godot
-
-# 3. Enable the plugin
-#    Project → Project Settings → Plugins → godot-sqlite → Enable
-
-# 4. Run the game
-#    Press F5 or click ▶ Play
-```
-
-The database `silai.db` is created automatically on first launch. All tables, triggers, views, and indexes are initialized by `database.gd` before any gameplay begins — no manual database setup required.
 
 ---
 
